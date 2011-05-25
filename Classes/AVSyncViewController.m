@@ -47,7 +47,7 @@
   NSAssert(self.fastButton, @"fastButton not set in NIB");
 }
 
-- (void) loadAnimatorView
+- (void) loadAnimatorView:(BOOL)isSlow
 {
   // The UIWindow the movie controls will be loaded into can't be null at this point
   UIWindow *window = self.view.window;
@@ -63,12 +63,22 @@
   // Extract FILENAME.mvid from FILENAME.mvid.7z attached as app resource. The compressed .mvid
   // is smaller than a compressed .mov and smaller than a compressed .apng for this video content.
   
-  NSString *resourcePrefix = @"LS_C_Major_Open_4ths";
-  NSString *videoResourceArchiveName = [NSString stringWithFormat:@"%@.mvid.7z", resourcePrefix];
-  NSString *videoResourceEntryName = [NSString stringWithFormat:@"%@.mvid", resourcePrefix];
-  NSString *resourceTail = [resourcePrefix lastPathComponent];
+  NSString *videoResourcePrefix = @"LS_C_Major_Open_4ths";
+  NSString *videoResourceArchiveName = [NSString stringWithFormat:@"%@.mvid.7z", videoResourcePrefix];
+  NSString *videoResourceEntryName = [NSString stringWithFormat:@"%@.mvid", videoResourcePrefix];
+  NSString *resourceTail = [videoResourcePrefix lastPathComponent];
   NSString *videoResourceOutName = [NSString stringWithFormat:@"%@.mvid", resourceTail];
   NSString *videoResourceOutPath = [AVFileUtil getTmpDirPath:videoResourceOutName];
+  
+  NSString *audioResourcePrefixSlow = @"LS_Back_C_45BPM.caf";
+  NSString *audioResourcePrefixFast = @"LS_Back_C_70BPM.caf";
+  
+  NSString *audioResourceFilename;
+  if (isSlow) {
+    audioResourceFilename = audioResourcePrefixSlow;
+  } else {
+    audioResourceFilename = audioResourcePrefixFast;
+  }
 
   AVAnimatorMedia *media = [AVAnimatorMedia aVAnimatorMedia];
   
@@ -76,6 +86,7 @@
   resLoader.archiveFilename = videoResourceArchiveName;
   resLoader.movieFilename = videoResourceEntryName;
   resLoader.outPath = videoResourceOutPath;    
+  resLoader.audioFilename = audioResourceFilename;
   
   media.resourceLoader = resLoader;  
   
@@ -142,13 +153,13 @@
 
 - (IBAction) doSlowButton:(id)target
 {
-  [self loadAnimatorView];
+  [self loadAnimatorView:TRUE];
   return;
 }
 
 - (IBAction) doFastButton:(id)target
 {
-  [self loadAnimatorView];
+  [self loadAnimatorView:FALSE];
   return;
 }
 
