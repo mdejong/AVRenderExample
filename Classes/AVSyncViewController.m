@@ -51,42 +51,16 @@
 
 
 - (void) loadIntoMovieControls:(AVAnimatorMedia*)media
+                        window:(UIWindow*)window
 {
-  // Create Movie Controls and let it manage the AVAnimatorView
-  
-	self.movieControlsViewController = [MovieControlsViewController movieControlsViewController:self.animatorView];
-  
-  // A MovieControlsViewController can only be placed inside a toplevel window!
-  // Unlike a normal controller, you can't invoke [window addSubview:movieControlsViewController.view]
-  // to place a MovieControlsViewController in a window. Just set the mainWindow property instead.
-  
-  self.movieControlsViewController.mainWindow = self.view.window;
-  
-  self.movieControlsAdaptor = [MovieControlsAdaptor movieControlsAdaptor];
-  self.movieControlsAdaptor.animatorView = self.animatorView;
-  self.movieControlsAdaptor.movieControlsViewController = self.movieControlsViewController;
-  
-  // Media needs to be attached to the view after the view
-  // has been added to the window system.
-  
-  [self.animatorView attachMedia:media];
-  
-  // This object needs to listen for the AVAnimatorDoneNotification to update the GUI
-  // after movie loops are finished playing.
-  
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(animatorDoneNotification:) 
-                                               name:AVAnimatorDoneNotification
-                                             object:self.animatorView.media];  
-  
-  [self.movieControlsAdaptor startAnimator];
-  
-  return;  
 }
 
 - (void) loadAnimatorView
 {
+  UIWindow *window = self.view.window;
+  
   [self.container removeFromSuperview];
+  [self.view removeFromSuperview];
   
   CGRect frame = CGRectMake(0, 0, 480, 320);
   self.animatorView = [AVAnimatorView aVAnimatorViewWithFrame:frame];
@@ -111,10 +85,39 @@
   media.resourceLoader = resLoader;  
   
   media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
-    
-  [self loadIntoMovieControls:media];
   
-  [media startAnimator];  
+  // Create Movie Controls and let it manage the AVAnimatorView
+  
+  NSAssert(self.animatorView, @"animatorView");
+  
+	self.movieControlsViewController = [MovieControlsViewController movieControlsViewController:self.animatorView];
+  
+  // A MovieControlsViewController can only be placed inside a toplevel window!
+  // Unlike a normal controller, you can't invoke [window addSubview:movieControlsViewController.view]
+  // to place a MovieControlsViewController in a window. Just set the mainWindow property instead.
+  
+  self.movieControlsViewController.mainWindow = window;
+  
+  self.movieControlsAdaptor = [MovieControlsAdaptor movieControlsAdaptor];
+  self.movieControlsAdaptor.animatorView = self.animatorView;
+  self.movieControlsAdaptor.movieControlsViewController = self.movieControlsViewController;
+  
+  // Media needs to be attached to the view after the view
+  // has been added to the window system.
+  
+  //  [window addSubview:self.movieControlsViewController.view];
+  
+  [self.animatorView attachMedia:media];
+  
+  // This object needs to listen for the AVAnimatorDoneNotification to update the GUI
+  // after movie loops are finished playing.
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(animatorDoneNotification:) 
+                                               name:AVAnimatorDoneNotification
+                                             object:self.animatorView.media];  
+  
+  [self.movieControlsAdaptor startAnimator];
 }
 
 - (IBAction) doSlowButton:(id)target
