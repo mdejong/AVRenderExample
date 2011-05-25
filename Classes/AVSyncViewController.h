@@ -13,7 +13,7 @@
 @class MovieControlsAdaptor;
 
 @interface AVSyncViewController : UIViewController {
-  UIView *m_container;
+  UIWindow *m_window;
   UIButton *m_slowButton;
   UIButton *m_fastButton;
   AVAnimatorView *m_animatorView;
@@ -21,7 +21,7 @@
   MovieControlsAdaptor *m_movieControlsAdaptor;
 }
 
-@property(nonatomic, retain) IBOutlet UIView *container;
+@property(nonatomic, retain) UIWindow *window;
 @property(nonatomic, retain) IBOutlet UIButton *slowButton;
 @property(nonatomic, retain) IBOutlet UIButton *fastButton;
 @property (nonatomic, retain) AVAnimatorView *animatorView;

@@ -22,16 +22,16 @@
 	};
 	28D7ACF60DDB3853001CB0EB /* AVSyncViewController.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {934, 576}}";
-			sepNavSelRange = "{860, 0}";
-			sepNavVisRange = "{44, 975}";
+			sepNavIntBoundsRect = "{{0, 0}, {1282, 726}}";
+			sepNavSelRange = "{535, 46}";
+			sepNavVisRange = "{0, 1008}";
 		};
 	};
 	28D7ACF70DDB3853001CB0EB /* AVSyncViewController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {934, 2256}}";
-			sepNavSelRange = "{1554, 1}";
-			sepNavVisRange = "{1267, 1403}";
+			sepNavIntBoundsRect = "{{0, 0}, {996, 2144}}";
+			sepNavSelRange = "{3940, 24}";
+			sepNavVisRange = "{2019, 1399}";
 			sepNavWindowFrame = "{{15, 0}, {1341, 877}}";
 		};
 	};
@@ -117,8 +117,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 328040184;
-			PBXWorkspaceStateSaveDate = 328040184;
+			PBXPerProjectTemplateStateSaveDate = 328042973;
+			PBXWorkspaceStateSaveDate = 328042973;
 		};
 		perUserProjectItems = {
 			CD143D811382364F00963BBE /* PlistBookmark */ = CD143D811382364F00963BBE /* PlistBookmark */;
@@ -133,9 +133,10 @@
 			CD143EB51382D95600963BBE /* PBXTextBookmark */ = CD143EB51382D95600963BBE /* PBXTextBookmark */;
 			CD32FC561385EED100362BF9 /* PBXTextBookmark */ = CD32FC561385EED100362BF9 /* PBXTextBookmark */;
 			CD32FCB91385F30500362BF9 /* PBXTextBookmark */ = CD32FCB91385F30500362BF9 /* PBXTextBookmark */;
-			CD37492C138D831700C54D0B /* PBXTextBookmark */ = CD37492C138D831700C54D0B /* PBXTextBookmark */;
+			CD39E45D138D8B8200E492BC /* PBXTextBookmark */ = CD39E45D138D8B8200E492BC /* PBXTextBookmark */;
+			CD39E48C138D8C6400E492BC /* PBXTextBookmark */ = CD39E48C138D8C6400E492BC /* PBXTextBookmark */;
+			CD39E4AB138D8CF900E492BC /* PBXTextBookmark */ = CD39E4AB138D8CF900E492BC /* PBXTextBookmark */;
 			CD8D4471138D79A00084B9BC /* PBXTextBookmark */ = CD8D4471138D79A00084B9BC /* PBXTextBookmark */;
-			CD8D447D138D79C20084B9BC /* PBXTextBookmark */ = CD8D447D138D79C20084B9BC /* PBXTextBookmark */;
 			CDCC53BD1386077A002E51AB /* PBXTextBookmark */ = CDCC53BD1386077A002E51AB /* PBXTextBookmark */;
 			CDCC53CB13860852002E51AB /* PBXTextBookmark */ = CDCC53CB13860852002E51AB /* PBXTextBookmark */;
 		};
@@ -195,6 +196,13 @@
 			sepNavSelRange = "{1356, 0}";
 			sepNavVisRange = "{713, 1097}";
 			sepNavWindowFrame = "{{15, 0}, {1341, 877}}";
+		};
+	};
+	CD143BC1138235F100963BBE /* AVAnimatorMedia.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {934, 22976}}";
+			sepNavSelRange = "{26476, 0}";
+			sepNavVisRange = "{26191, 959}";
 		};
 	};
 	CD143BC5138235F100963BBE /* AVAnimatorView.m */ = {
@@ -398,15 +406,32 @@
 		vrLen = 1097;
 		vrLoc = 713;
 	};
-	CD37492C138D831700C54D0B /* PBXTextBookmark */ = {
+	CD39E45D138D8B8200E492BC /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 28D7ACF70DDB3853001CB0EB /* AVSyncViewController.m */;
-		name = "AVSyncViewController.m: 65";
-		rLen = 1;
-		rLoc = 1554;
+		rLen = 24;
+		rLoc = 3940;
 		rType = 0;
-		vrLen = 1403;
-		vrLoc = 1267;
+	};
+	CD39E48C138D8C6400E492BC /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CD143BC1138235F100963BBE /* AVAnimatorMedia.m */;
+		name = "AVAnimatorMedia.m: 820";
+		rLen = 0;
+		rLoc = 26476;
+		rType = 0;
+		vrLen = 959;
+		vrLoc = 26191;
+	};
+	CD39E4AB138D8CF900E492BC /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28D7ACF70DDB3853001CB0EB /* AVSyncViewController.m */;
+		name = "AVSyncViewController.m: 132";
+		rLen = 0;
+		rLoc = 4624;
+		rType = 0;
+		vrLen = 632;
+		vrLoc = 4389;
 	};
 	CD8D4471138D79A00084B9BC /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
@@ -418,22 +443,12 @@
 		vrLen = 729;
 		vrLoc = 27882;
 	};
-	CD8D447D138D79C20084B9BC /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 28D7ACF70DDB3853001CB0EB /* AVSyncViewController.m */;
-		name = "AVSyncViewController.m: 66";
-		rLen = 0;
-		rLoc = 1375;
-		rType = 0;
-		vrLen = 1491;
-		vrLoc = 1373;
-	};
 	CDCC53BD1386077A002E51AB /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 28D7ACF60DDB3853001CB0EB /* AVSyncViewController.h */;
 		name = "AVSyncViewController.h: 28";
 		rLen = 0;
-		rLoc = 860;
+		rLoc = 849;
 		rType = 0;
 		vrLen = 975;
 		vrLoc = 44;

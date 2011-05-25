@@ -23,16 +23,15 @@
 
 @implementation AVSyncViewController
 
-@synthesize container = m_container;
+@synthesize window = m_window;
 @synthesize slowButton = m_slowButton;
 @synthesize fastButton = m_fastButton;
-
 @synthesize animatorView = m_animatorView;
 @synthesize movieControlsViewController = m_movieControlsViewController;
 @synthesize movieControlsAdaptor = m_movieControlsAdaptor;
 
 - (void)dealloc {
-  self.container = nil;
+  self.window = nil;
   self.slowButton = nil;
   self.fastButton = nil;
   self.animatorView = nil;
@@ -44,22 +43,18 @@
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
   [super viewDidLoad];
-  NSAssert(self.container, @"container not set in NIB");
   NSAssert(self.slowButton, @"slowButton not set in NIB");
   NSAssert(self.fastButton, @"fastButton not set in NIB");
 }
 
-
-- (void) loadIntoMovieControls:(AVAnimatorMedia*)media
-                        window:(UIWindow*)window
-{
-}
-
 - (void) loadAnimatorView
 {
+  // The UIWindow the movie controls will be loaded into can't be null at this point
   UIWindow *window = self.view.window;
-  
-  [self.container removeFromSuperview];
+  NSAssert(window != nil, @"window is nil");
+  self.window = window;
+
+  // Don't use this view and view controller, make the movie controllers the primary view
   [self.view removeFromSuperview];
   
   CGRect frame = CGRectMake(0, 0, 480, 320);
@@ -102,10 +97,7 @@
   self.movieControlsAdaptor.animatorView = self.animatorView;
   self.movieControlsAdaptor.movieControlsViewController = self.movieControlsViewController;
   
-  // Media needs to be attached to the view after the view
-  // has been added to the window system.
-  
-  //  [window addSubview:self.movieControlsViewController.view];
+  // Associate Media with the view that it will be rendered into
   
   [self.animatorView attachMedia:media];
   
@@ -118,6 +110,34 @@
                                              object:self.animatorView.media];  
   
   [self.movieControlsAdaptor startAnimator];
+}
+
+- (void) stopAnimator
+{
+  if (self.movieControlsAdaptor != nil) {
+    [self.movieControlsAdaptor stopAnimator];
+    self.movieControlsAdaptor = nil;
+    self.movieControlsViewController.mainWindow = nil;
+  }
+  
+  [self.animatorView removeFromSuperview];    
+	self.animatorView = nil;
+  
+	self.movieControlsViewController = nil;
+  
+	[self.window addSubview:self.view];  
+}
+
+// Notification indicates that all animations in a loop are now finished
+
+- (void)animatorDoneNotification:(NSNotification*)notification {
+  NSLog( @"animatorDoneNotification" );
+  
+  // Unlink all notifications
+  
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  
+	[self stopAnimator];  
 }
 
 - (IBAction) doSlowButton:(id)target
