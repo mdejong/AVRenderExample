@@ -92,6 +92,16 @@
   
   media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
   
+  // The "fast" rate uses the frame rate defined in the movie file,
+  // which is 15 FPS for 70 BPM audio track. When using the "slow"
+  // track, calculate the actual frame rate based on 70 BPM rate.
+  
+  if (isSlow) {
+    float target_bpm = 45.0;
+    float actual_fps = (70.0 / 60.0) * (60.0 / target_bpm) * (1.0 / 15.0);  
+    media.animatorFrameDuration = actual_fps;
+  }
+    
   // Create Movie Controls and let it manage the AVAnimatorView
   
   NSAssert(self.animatorView, @"animatorView");

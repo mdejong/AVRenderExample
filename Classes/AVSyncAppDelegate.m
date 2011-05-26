@@ -14,20 +14,35 @@
 @synthesize window;
 @synthesize viewController;
 
-
 #pragma mark -
 #pragma mark Application lifecycle
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
-    
-    // Override point for customization after application launch.
+// Override point for customization after app launch    
 
+- (void)applicationDidFinishLaunching:(UIApplication *)application
+{
 	// Set the view controller as the window's root view controller and display.
-    self.window.rootViewController = self.viewController;
-    [self.window makeKeyAndVisible];
-
-    return YES;
+  self.window.rootViewController = self.viewController;
+  [self.window makeKeyAndVisible];
+  
+  return;  
 }
+
+/*
+
+- (BOOL)application:(UIApplication *)application
+  didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  // Override point for customization after application launch.
+  
+	// Set the view controller as the window's root view controller and display.
+  self.window.rootViewController = self.viewController;
+  [self.window makeKeyAndVisible];
+  
+  return YES;
+}
+ 
+*/
 
 
 - (void)applicationWillResignActive:(UIApplication *)application {

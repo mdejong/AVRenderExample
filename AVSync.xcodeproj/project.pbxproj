@@ -33,10 +33,10 @@
 		CD143BF3138235F100963BBE /* AVResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143BD6138235F100963BBE /* AVResourceLoader.m */; };
 		CD143BF4138235F100963BBE /* CGFrameBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143BD8138235F100963BBE /* CGFrameBuffer.m */; };
 		CD143BF5138235F100963BBE /* libapng.c in Sources */ = {isa = PBXBuildFile; fileRef = CD143BD9138235F100963BBE /* libapng.c */; };
-		CD143BF6138235F100963BBE /* maxvid_decode.c in Sources */ = {isa = PBXBuildFile; fileRef = CD143BDB138235F100963BBE /* maxvid_decode.c */; };
+		CD143BF6138235F100963BBE /* maxvid_decode.c in Sources */ = {isa = PBXBuildFile; fileRef = CD143BDB138235F100963BBE /* maxvid_decode.c */; settings = {COMPILER_FLAGS = "-mno-thumb"; }; };
 		CD143BF7138235F100963BBE /* maxvid_encode.c in Sources */ = {isa = PBXBuildFile; fileRef = CD143BDD138235F100963BBE /* maxvid_encode.c */; };
 		CD143BF8138235F100963BBE /* maxvid_file.c in Sources */ = {isa = PBXBuildFile; fileRef = CD143BDF138235F100963BBE /* maxvid_file.c */; };
-		CD143BF9138235F100963BBE /* movdata.c in Sources */ = {isa = PBXBuildFile; fileRef = CD143BE1138235F100963BBE /* movdata.c */; };
+		CD143BF9138235F100963BBE /* movdata.c in Sources */ = {isa = PBXBuildFile; fileRef = CD143BE1138235F100963BBE /* movdata.c */; settings = {COMPILER_FLAGS = "-mno-thumb"; }; };
 		CD143BFA138235F100963BBE /* movdata_convert_maxvid.c in Sources */ = {isa = PBXBuildFile; fileRef = CD143BE3138235F100963BBE /* movdata_convert_maxvid.c */; };
 		CD143C21138235FC00963BBE /* 7zBuf.c in Sources */ = {isa = PBXBuildFile; fileRef = CD143BFD138235FC00963BBE /* 7zBuf.c */; };
 		CD143C22138235FC00963BBE /* 7zBuf2.c in Sources */ = {isa = PBXBuildFile; fileRef = CD143BFF138235FC00963BBE /* 7zBuf2.c */; };
@@ -600,7 +600,8 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
+				OTHER_CFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = iphoneos;
 			};
