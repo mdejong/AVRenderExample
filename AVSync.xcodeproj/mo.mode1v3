@@ -197,7 +197,48 @@
 	<key>Notifications</key>
 	<array/>
 	<key>OpenEditors</key>
-	<array/>
+	<array>
+		<dict>
+			<key>Content</key>
+			<dict>
+				<key>PBXProjectModuleGUID</key>
+				<string>CD2637CA1390247400E18F0C</string>
+				<key>PBXProjectModuleLabel</key>
+				<string>AVSyncAppDelegate.m</string>
+				<key>PBXSplitModuleInNavigatorKey</key>
+				<dict>
+					<key>Split0</key>
+					<dict>
+						<key>PBXProjectModuleGUID</key>
+						<string>CD2637CB1390247400E18F0C</string>
+						<key>PBXProjectModuleLabel</key>
+						<string>AVSyncAppDelegate.m</string>
+						<key>_historyCapacity</key>
+						<integer>0</integer>
+						<key>bookmark</key>
+						<string>CD2637F1139026C100E18F0C</string>
+						<key>history</key>
+						<array>
+							<string>CD2637BE1390243C00E18F0C</string>
+						</array>
+					</dict>
+					<key>SplitCount</key>
+					<string>1</string>
+				</dict>
+				<key>StatusBarVisibility</key>
+				<true/>
+			</dict>
+			<key>Geometry</key>
+			<dict>
+				<key>Frame</key>
+				<string>{{0, 20}, {1341, 780}}</string>
+				<key>PBXModuleWindowStatusBarHidden2</key>
+				<false/>
+				<key>RubberWindowFrame</key>
+				<string>15 56 1341 821 0 0 1440 878 </string>
+			</dict>
+		</dict>
+	</array>
 	<key>PerspectiveWidths</key>
 	<array>
 		<integer>-1</integer>
@@ -229,6 +270,8 @@
 			<key>Layout</key>
 			<array>
 				<dict>
+					<key>BecomeActive</key>
+					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -281,7 +324,7 @@
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 725}, {339, 764}}</string>
+							<string>{{0, 664}, {339, 764}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -311,8 +354,6 @@
 					<key>Dock</key>
 					<array>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -330,7 +371,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>CD540C46138DCABA00644E99</string>
+										<string>CD2637F0139026C100E18F0C</string>
 										<key>history</key>
 										<array>
 											<string>CD143E16138257C700963BBE</string>
@@ -353,7 +394,8 @@
 											<string>CD540C09138DC61800644E99</string>
 											<string>CD540C0A138DC61800644E99</string>
 											<string>CD540C0B138DC61800644E99</string>
-											<string>CD540C45138DCABA00644E99</string>
+											<string>CD2637DF139025BB00E18F0C</string>
+											<string>CD2637E0139025BB00E18F0C</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -365,14 +407,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {995, 553}}</string>
+								<string>{{0, 0}, {995, 547}}</string>
 								<key>RubberWindowFrame</key>
 								<string>22 55 1356 823 0 0 1440 878 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>553pt</string>
+							<string>547pt</string>
 						</dict>
 						<dict>
 							<key>ContentConfiguration</key>
@@ -385,14 +427,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 558}, {995, 224}}</string>
+								<string>{{0, 552}, {995, 230}}</string>
 								<key>RubberWindowFrame</key>
 								<string>22 55 1356 823 0 0 1440 878 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
 							<key>Proportion</key>
-							<string>224pt</string>
+							<string>230pt</string>
 						</dict>
 					</array>
 					<key>Proportion</key>
@@ -411,9 +453,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>CD540C0E138DC61800644E99</string>
+				<string>CD2637C81390247400E18F0C</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>CD540C0F138DC61800644E99</string>
+				<string>CD2637C91390247400E18F0C</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -551,13 +593,13 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>1C530D57069F1CE1000CFCEE</string>
-		<string>CD540C11138DC61800644E99</string>
-		<string>CD540C12138DC61800644E99</string>
+		<string>CD2637E3139025BB00E18F0C</string>
+		<string>CD2637E4139025BB00E18F0C</string>
 		<string>1CD10A99069EF8BA00B06720</string>
 		<string>CD143B9E1382345C00963BBE</string>
-		<string>/Users/mo/Development/QTAnimationiPhone/AVSync/AVSync.xcodeproj</string>
+		<string>CD2637CA1390247400E18F0C</string>
 		<string>1C78EAAD065D492600B07095</string>
+		<string>/Users/mo/Development/QTAnimationiPhone/AVSync/AVSync.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
 	<string>22 55 1356 823 0 0 1440 878 </string>
@@ -598,8 +640,6 @@
 							<string>437pt</string>
 						</dict>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -639,7 +679,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>CD143B9E1382345C00963BBE</string>
-				<string>CD540BF1138DC58D00644E99</string>
+				<string>CD2637CD1390247400E18F0C</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -761,13 +801,13 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1CD10A99069EF8BA00B06720</string>
-				<string>CD540BF2138DC58D00644E99</string>
+				<string>CD2637CE1390247400E18F0C</string>
 				<string>1C162984064C10D400B95A72</string>
-				<string>CD540BF3138DC58D00644E99</string>
-				<string>CD540BF4138DC58D00644E99</string>
-				<string>CD540BF5138DC58D00644E99</string>
-				<string>CD540BF6138DC58D00644E99</string>
-				<string>CD540BF7138DC58D00644E99</string>
+				<string>CD2637CF1390247400E18F0C</string>
+				<string>CD2637D01390247400E18F0C</string>
+				<string>CD2637D11390247400E18F0C</string>
+				<string>CD2637D21390247400E18F0C</string>
+				<string>CD2637D31390247400E18F0C</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debugV3</string>
@@ -923,7 +963,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C78EAAD065D492600B07095</string>
-				<string>CD540BF8138DC58D00644E99</string>
+				<string>CD2637DC1390259F00E18F0C</string>
 				<string>1C78EAAC065D492600B07095</string>
 			</array>
 			<key>ToolbarConfiguration</key>

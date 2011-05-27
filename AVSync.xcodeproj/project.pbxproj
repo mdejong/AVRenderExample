@@ -75,6 +75,7 @@
 		CD143E0A1382577800963BBE /* VolumeLeftTall.png in Resources */ = {isa = PBXBuildFile; fileRef = CD143E011382577800963BBE /* VolumeLeftTall.png */; };
 		CD143E0B1382577800963BBE /* VolumeRightTall.png in Resources */ = {isa = PBXBuildFile; fileRef = CD143E021382577800963BBE /* VolumeRightTall.png */; };
 		CD143E1D138257E100963BBE /* MovieControlsAdaptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143E1C138257E100963BBE /* MovieControlsAdaptor.m */; };
+		CD2637D81390254400E18F0C /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = CD2637D71390254400E18F0C /* Icon.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -198,6 +199,7 @@
 		CD143E021382577800963BBE /* VolumeRightTall.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = VolumeRightTall.png; sourceTree = "<group>"; };
 		CD143E1B138257E100963BBE /* MovieControlsAdaptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MovieControlsAdaptor.h; sourceTree = "<group>"; };
 		CD143E1C138257E100963BBE /* MovieControlsAdaptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MovieControlsAdaptor.m; sourceTree = "<group>"; };
+		CD2637D71390254400E18F0C /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -271,6 +273,7 @@
 			isa = PBXGroup;
 			children = (
 				CD143BAC1382351F00963BBE /* note_256.png */,
+				CD2637D71390254400E18F0C /* Icon.png */,
 				CD143B79138231BA00963BBE /* LS_Back_C_45BPM.caf */,
 				CD143B7A138231BA00963BBE /* LS_Back_C_70BPM.caf */,
 				CD143B7B138231BA00963BBE /* LS_C_Major_Open_4ths.mvid.7z */,
@@ -488,6 +491,7 @@
 				CD143E091382577800963BBE /* prevtrack.png in Resources */,
 				CD143E0A1382577800963BBE /* VolumeLeftTall.png in Resources */,
 				CD143E0B1382577800963BBE /* VolumeRightTall.png in Resources */,
+				CD2637D81390254400E18F0C /* Icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

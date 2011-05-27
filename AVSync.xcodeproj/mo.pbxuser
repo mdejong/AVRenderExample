@@ -9,9 +9,10 @@
 	};
 	1D3623250D0F684500981E51 /* AVSyncAppDelegate.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1965, 1616}}";
-			sepNavSelRange = "{1026, 0}";
-			sepNavVisRange = "{343, 1197}";
+			sepNavIntBoundsRect = "{{0, 0}, {1965, 1296}}";
+			sepNavSelRange = "{751, 0}";
+			sepNavVisRange = "{242, 1957}";
+			sepNavWindowFrame = "{{15, 0}, {1341, 877}}";
 		};
 	};
 	1D6058900D05DD3D006BFB54 /* AVSync */ = {
@@ -118,8 +119,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 328057809;
-			PBXWorkspaceStateSaveDate = 328057809;
+			PBXPerProjectTemplateStateSaveDate = 328213509;
+			PBXWorkspaceStateSaveDate = 328213509;
 		};
 		perUserProjectItems = {
 			CD143E16138257C700963BBE /* PBXTextBookmark */ = CD143E16138257C700963BBE /* PBXTextBookmark */;
@@ -130,6 +131,11 @@
 			CD143EB21382D95600963BBE /* PBXTextBookmark */ = CD143EB21382D95600963BBE /* PBXTextBookmark */;
 			CD143EB41382D95600963BBE /* PBXTextBookmark */ = CD143EB41382D95600963BBE /* PBXTextBookmark */;
 			CD143EB51382D95600963BBE /* PBXTextBookmark */ = CD143EB51382D95600963BBE /* PBXTextBookmark */;
+			CD2637BE1390243C00E18F0C /* PBXBookmark */ = CD2637BE1390243C00E18F0C /* PBXBookmark */;
+			CD2637DF139025BB00E18F0C /* PBXBookmark */ = CD2637DF139025BB00E18F0C /* PBXBookmark */;
+			CD2637E0139025BB00E18F0C /* PBXTextBookmark */ = CD2637E0139025BB00E18F0C /* PBXTextBookmark */;
+			CD2637F0139026C100E18F0C /* PBXTextBookmark */ = CD2637F0139026C100E18F0C /* PBXTextBookmark */;
+			CD2637F1139026C100E18F0C /* PBXTextBookmark */ = CD2637F1139026C100E18F0C /* PBXTextBookmark */;
 			CD32FC561385EED100362BF9 /* PBXTextBookmark */ = CD32FC561385EED100362BF9 /* PBXTextBookmark */;
 			CD32FCB91385F30500362BF9 /* PBXTextBookmark */ = CD32FCB91385F30500362BF9 /* PBXTextBookmark */;
 			CD3A2E5D138DC31C00F54CF0 /* PBXTextBookmark */ = CD3A2E5D138DC31C00F54CF0 /* PBXTextBookmark */;
@@ -139,8 +145,6 @@
 			CD540C09138DC61800644E99 /* PBXTextBookmark */ = CD540C09138DC61800644E99 /* PBXTextBookmark */;
 			CD540C0A138DC61800644E99 /* PBXTextBookmark */ = CD540C0A138DC61800644E99 /* PBXTextBookmark */;
 			CD540C0B138DC61800644E99 /* PlistBookmark */ = CD540C0B138DC61800644E99 /* PlistBookmark */;
-			CD540C45138DCABA00644E99 /* XCBuildMessageTextBookmark */ = CD540C45138DCABA00644E99 /* XCBuildMessageTextBookmark */;
-			CD540C46138DCABA00644E99 /* PBXTextBookmark */ = CD540C46138DCABA00644E99 /* PBXTextBookmark */;
 			CD8D4471138D79A00084B9BC /* PBXTextBookmark */ = CD8D4471138D79A00084B9BC /* PBXTextBookmark */;
 			CDCC53BD1386077A002E51AB /* PBXTextBookmark */ = CDCC53BD1386077A002E51AB /* PBXTextBookmark */;
 			CDCC53CB13860852002E51AB /* PBXTextBookmark */ = CDCC53CB13860852002E51AB /* PBXTextBookmark */;
@@ -397,6 +401,44 @@
 		path = /Users/mo/Development/QTAnimationiPhone/QTFileParserApp/Classes/AVAnimator/AVAnimatorView.m;
 		sourceTree = "<absolute>";
 	};
+	CD2637BE1390243C00E18F0C /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 1D3623250D0F684500981E51 /* AVSyncAppDelegate.m */;
+	};
+	CD2637DF139025BB00E18F0C /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CD143BAC1382351F00963BBE /* note_256.png */;
+	};
+	CD2637E0139025BB00E18F0C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* AVSyncAppDelegate.m */;
+		name = "AVSyncAppDelegate.m: 32";
+		rLen = 0;
+		rLoc = 751;
+		rType = 0;
+		vrLen = 1444;
+		vrLoc = 243;
+	};
+	CD2637F0139026C100E18F0C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* AVSyncAppDelegate.m */;
+		name = "AVSyncAppDelegate.m: 31";
+		rLen = 0;
+		rLoc = 750;
+		rType = 0;
+		vrLen = 1445;
+		vrLoc = 242;
+	};
+	CD2637F1139026C100E18F0C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* AVSyncAppDelegate.m */;
+		name = "AVSyncAppDelegate.m: 32";
+		rLen = 0;
+		rLoc = 751;
+		rType = 0;
+		vrLen = 1957;
+		vrLoc = 242;
+	};
 	CD32FC561385EED100362BF9 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = CD143EBD1382E38000963BBE /* AVAnimatorView.m */;
@@ -486,26 +528,7 @@
 		);
 		name = "/Users/mo/Development/QTAnimationiPhone/AVSync/AVSync-Info.plist";
 		rLen = 0;
-		rLoc = 9223372036854775807;
-	};
-	CD540C45138DCABA00644E99 /* XCBuildMessageTextBookmark */ = {
-		isa = PBXTextBookmark;
-		comments = "Stray '@' in program";
-		fRef = 1D3623250D0F684500981E51 /* AVSyncAppDelegate.m */;
-		fallbackIsa = XCBuildMessageTextBookmark;
-		rLen = 1;
-		rLoc = 11;
-		rType = 1;
-	};
-	CD540C46138DCABA00644E99 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 1D3623250D0F684500981E51 /* AVSyncAppDelegate.m */;
-		name = "AVSyncAppDelegate.m: 21";
-		rLen = 0;
-		rLoc = 400;
-		rType = 0;
-		vrLen = 793;
-		vrLoc = 243;
+		rLoc = 9223372036854775808;
 	};
 	CD8D4471138D79A00084B9BC /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
