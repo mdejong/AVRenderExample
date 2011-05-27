@@ -59,10 +59,7 @@
   char *apngPathCstr = (char*) [phonyOutPath UTF8String];
   char *phonyOutPath2Cstr = (char*) [phonyOutPath2 UTF8String];
   
-  int result = strcmp(apngPathCstr, phonyOutPath2Cstr);
-  if (result != 0) {
-    assert(result < 0 || result > 0);
-  }
+  assert(strcmp(apngPathCstr, phonyOutPath2Cstr) != 0);
   
 #ifdef LOGGING
   NSLog(@"done 7zip extraction %@, start encode", archiveEntry);
