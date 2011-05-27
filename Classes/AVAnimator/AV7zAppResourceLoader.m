@@ -12,7 +12,7 @@
 
 #import "LZMAExtractor.h"
 
-#define LOGGING
+//#define LOGGING
 
 @implementation AV7zAppResourceLoader
 
