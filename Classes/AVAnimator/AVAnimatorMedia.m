@@ -553,6 +553,11 @@
 		return;
 	}
   
+  // Implicitly rewind before playing, this basically just deallocates any previous
+  // play resources in the frame decoder.
+  
+  [self rewind];  
+  
 	// Can only transition from PAUSED to ANIMATING via unpause
   
 	assert(self.state != PAUSED);
@@ -560,7 +565,7 @@
 	assert(self.state == READY || self.state == STOPPED);
   
 	self.state = ANIMATING;
-  
+    
 	// Animation is broken up into two stages. Assume there are two frames that
 	// should be displayed at times T1 and T2. At time T1 + animatorFrameDuration/4
 	// check the audio clock offset and use that time to schedule a callback to
@@ -663,13 +668,10 @@
     self.avAudioPlayer.currentTime = 0.0;
   }
   
-  self.currentFrame = -1;
 	self.repeatedFrameCount = 0;
   
 	self.prevFrame = nil;
 	self.nextFrame = nil;
-  
-	[self.frameDecoder rewind];
   
 	// Reset idle timer
 	
@@ -680,6 +682,9 @@
   
 	[[NSNotificationCenter defaultCenter] postNotificationName:AVAnimatorDidStopNotification
                                                       object:self];
+  
+  // Note that invoking stopAnimator leaves the current frame at the same value,
+  // the frame and frame decoder do not automatically rewind.
   
 	return;
 }
@@ -808,7 +813,8 @@
 - (void) rewind
 {
 	[self stopAnimator];
-  [self startAnimator];
+  self.currentFrame = -1;
+  [self.frameDecoder rewind];
 }
 
 - (void) doneAnimator
@@ -926,8 +932,11 @@
           @"\tcurrentTime: ", currentTime);
 	}
 #endif	
+    
+  float aboutHalf = (self.animatorFrameDuration / 2.0);
+  aboutHalf -= aboutHalf / 20.0f;
   
-	if (currentTime < (self.animatorFrameDuration / 2.0)) {
+	if (currentTime < aboutHalf) {
 		// Ignore reported times until they are at least half way to the
 		// first frame time. The audio could take a moment to start and it
 		// could report a number of zero or less than zero times. Keep
@@ -1219,6 +1228,10 @@
 #endif
 	[self stopAnimator];
 	
+  // Done displaying frames, explicitly set self.currentFrame to the last frame
+
+  self.currentFrame = self.animatorNumFrames - 1;    
+  
 	// Continue to loop animator until loop counter reaches 0
   
 	if (self.animatorRepeatCount > 0) {
@@ -1410,19 +1423,41 @@
   // If media is ready, then display initial keyframe
   
   if (self.isReadyToAnimate) {
+    [self.renderer mediaDidLoad];
+    
     [self showFrame:0];
   }
 }
 
-
-- (void) detachFromRenderer:(id<AVAnimatorMediaRendererProtocol>)renderer
+- (void) detachFromRenderer:(id<AVAnimatorMediaRendererProtocol>)renderer copyFinalFrame:(BOOL)copyFinalFrame
 {
   NSAssert(renderer, @"renderer can't be nil");
+
+  [self stopAnimator];
+
+  // If copyFinalFrame is true, then the media object is being detached and it will not be
+  // replaced with another media object right away. The OS might be putting the app into
+  // the background and the view will need to retain the same visual data so that the
+  // animations will look correct. Make a copy of the buffer to ensure that the original
+  // frame buffer is released. Note that copyCurrentFrame could return nil.
+
+  if (copyFinalFrame) {
+    UIImage *finalFrameCopy = [self.frameDecoder copyCurrentFrame];
+    self.renderer.image = finalFrameCopy;
+  } else {
+    self.renderer.image = nil;
+  }
+  
   self.renderer = nil;
   
-  [self stopAnimator];
+  self.prevFrame = nil;
+  self.nextFrame = nil;
   
-  // Tell decoder it is now resource constrained
+  // implicitly rewind the state of this media object after it is detached from the renderer.
+
+  [self rewind];
+  
+  // The view and the media objects should have dropped all references to frame buffer objects now.
   
   [self.frameDecoder resourceUsageLimit:TRUE];
 }

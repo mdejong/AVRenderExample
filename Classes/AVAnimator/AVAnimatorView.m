@@ -34,9 +34,10 @@
   
 	self.image = nil;
   
+  // Detach but don't bother making a copy of the final image
+  
   if (self.mediaObj) {
-    [self.mediaObj detachFromRenderer:self];
-    self.mediaObj = nil;
+    [self.mediaObj detachFromRenderer:self copyFinalFrame:FALSE];
   }
   
   [super dealloc];
@@ -136,10 +137,9 @@
   return;
 }
 
-// This method is invoked once resources have been loaded by the media
-
-- (void) mediaDidLoad
+- (void) _setOpaqueFromDecoder
 {
+  NSAssert(self->mediaDidLoad, @"mediaDidLoad must be TRUE");
   NSAssert(self.media, @"media is nil");
   NSAssert(self.media.frameDecoder, @"frameDecoder is nil");
   
@@ -151,9 +151,56 @@
     self.opaque = FALSE;
   } else {
     self.opaque = TRUE;
-  }
+  }  
+}
+
+// This method is invoked once resources have been loaded by the media.
+// This method can be invoked at a time after the media is associated with
+// the layer.
+
+- (void) mediaDidLoad
+{
+  NSAssert(self.media, @"media is nil");
+
+  self->mediaDidLoad = TRUE;
+  
+  [self _setOpaqueFromDecoder];
   
 	return;
+}
+
+//- (void) setOpaque:(BOOL)newValue
+//{
+//  [super setOpaque:newValue];
+//}
+
+//- (BOOL) isOpaque
+//{
+//  return [super isOpaque];
+//}
+
+// This method is invoked as part of the AVAnimatorMediaRendererProtocol,
+// the property is defined by the UIImageView class, but that class seems
+// to implicitly set the opaque property to FALSE each time the image
+// property is changed. The result of this implementation is sub-optimal
+// rendering because the view does not know that all pixels are rendered.
+
+- (void) setImage:(UIImage*)image
+{
+  if (image == nil) {
+    [super setImage:image];
+  } else {
+    BOOL opaqueBefore = [super isOpaque];
+    [super setImage:image];
+    // Explicitly set the opaque property only when we know the media was loaded.
+    // This makes it possible to set the image to a resource image while waiting
+    // for the media to load.
+    if (self->mediaDidLoad) {
+      [self _setOpaqueFromDecoder];
+      BOOL opaqueAfter = [super isOpaque];
+      NSAssert(opaqueBefore == opaqueAfter, @"opaque");
+    }    
+  }
 }
 
 - (void) rotateToPortrait
@@ -221,10 +268,12 @@
   }
   
   if (inMedia == nil) {
-    // Detach case
+    // Detach case, not attaching another media object so copy
+    // the last rendered frame.
     
-    [self.mediaObj detachFromRenderer:self];
+    [self.mediaObj detachFromRenderer:self copyFinalFrame:TRUE];
     self.mediaObj = nil;
+    self->mediaDidLoad = FALSE;
     return;
   }
   
@@ -232,7 +281,9 @@
   
   NSAssert(self.window, @"AVAnimatorView must have been added to a window before media can be attached");
 
-  [self.mediaObj detachFromRenderer:self];
+  self->mediaDidLoad = FALSE;
+  
+  [self.mediaObj detachFromRenderer:self copyFinalFrame:FALSE];
   self.mediaObj = inMedia;
   [self.mediaObj attachToRenderer:self];
 }
@@ -242,6 +293,19 @@
 - (AVAnimatorMedia*) media
 {
   return self->m_mediaObj;
+}
+
+// Implement these methods to raise an error if they are accidently invoked by the user of this class.
+// These methods should not be used since they are part of the UIImageView animation logic.
+
+- (void) startAnimation
+{
+  NSAssert(FALSE, @"should invoke startAnimation on media object instead");
+}
+
+- (void) stopAnimation
+{
+  NSAssert(FALSE, @"should invoke stopAnimator on media object instead");
 }
 
 @end

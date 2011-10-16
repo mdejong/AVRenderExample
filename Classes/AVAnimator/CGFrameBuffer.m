@@ -465,6 +465,31 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
   [self osCopyImpl:anotherFrameBufferPixelsPtr];
 }
 
+// Explicitly memcopy pixels instead of an OS level page copy,
+// this is useful only when we want to deallocate the mapped
+// memory and an os copy would keep that memory mapped.
+
+- (void) memcopyPixels:(CGFrameBuffer *)anotherFrameBuffer
+{
+  assert(self.numBytes == anotherFrameBuffer.numBytes);
+  assert(self.zeroCopyMappedData == nil);
+  
+  void *anotherFrameBufferPixelsPtr = anotherFrameBuffer.zeroCopyPixels;
+  
+  if (anotherFrameBufferPixelsPtr) {
+    // other framebuffer has a zero copy pixel buffer, this happes when a keyframe
+    // is followed by a delta frame. Use the original zero copy pointer as the
+    // source for a OS level page copy operation, but don't modify the state of
+    // the other frame buffer in any way since it could be used by the graphics
+    // subsystem currently.
+  } else {
+    // copy bytes from other framebuffer
+    anotherFrameBufferPixelsPtr = anotherFrameBuffer.pixels;
+  }
+  
+  memcpy(self.pixels, anotherFrameBufferPixelsPtr, anotherFrameBuffer.numBytes);
+}
+
 // Copy the contents of the zero copy buffer to the allocated framebuffer and
 // release the zero copy bytes.
 

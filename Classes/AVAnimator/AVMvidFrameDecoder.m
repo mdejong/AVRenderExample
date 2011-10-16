@@ -89,7 +89,8 @@
 	int renderHeight = [self height];
   
   NSAssert(renderWidth > 0 && renderHeight > 0, @"renderWidth or renderHeight is zero");
-  
+
+  NSAssert(m_mvFile, @"m_mvFile");  
   int bitsPerPixel = m_mvFile->header.bpp;
   
 	CGFrameBuffer *cgFrameBuffer1 = [CGFrameBuffer cGFrameBufferWithBppDimensions:bitsPerPixel width:renderWidth height:renderHeight];
@@ -113,6 +114,7 @@
 
 - (void) _freeFrameBuffers
 {
+  self.currentFrameBuffer = nil;
   self.cgFrameBuffers = nil;
 }
 
@@ -143,6 +145,8 @@
 
 - (void) _mapFile {
   if (self.mappedData == nil) {
+    // Might need to map a very large mvid file in terms of 24 Meg chunks,
+    // would want to write it that way?
     self.mappedData = [NSData dataWithContentsOfMappedFile:self.filePath];
     NSAssert(self.mappedData, @"could not map file");
     self->m_resourceUsageLimit = FALSE;
@@ -193,7 +197,7 @@
   }
   
 	frameIndex = -1;
-  self.currentFrameBuffer = nil;  
+  self.currentFrameBuffer = nil;
 }
 
 - (UIImage*) advanceToFrame:(NSUInteger)newFrameIndex
@@ -387,6 +391,36 @@
   }
 }
 
+- (UIImage*) copyCurrentFrame
+{
+  if (self.currentFrameBuffer == nil) {
+    return nil;
+  }
+  
+  // Create an in-memory copy of the current frame buffer and return a new image wrapped around the copy
+  
+  CGFrameBuffer *cgFrameBuffer = [CGFrameBuffer cGFrameBufferWithBppDimensions:self.currentFrameBuffer.bitsPerPixel
+                                                                         width:self.currentFrameBuffer.width
+                                                                        height:self.currentFrameBuffer.height];
+  
+  // Using the OS level copy means that a small portion of the mapped memory will stay around, only the copied part.
+  // Might be more efficient, unknown.
+  
+  //[cgFrameBuffer copyPixels:self.currentFrameBuffer];
+  [cgFrameBuffer memcopyPixels:self.currentFrameBuffer];
+  
+  CGImageRef imgRef = [cgFrameBuffer createCGImageRef];
+  NSAssert(imgRef, @"CGImageRef returned by createCGImageRef is NULL");
+  
+  UIImage *uiImage = [UIImage imageWithCGImage:imgRef];
+  CGImageRelease(imgRef);
+  
+  NSAssert(cgFrameBuffer.isLockedByDataProvider, @"image buffer should be locked by frame UIImage");
+  
+  NSAssert(uiImage, @"uiImage is nil");
+  return uiImage;  
+}
+
 // Limit resouce usage by letting go of framebuffers and an optional input buffer.
 // Note that we keep the file open and the parsed data in memory, because reloading
 // that data would be expensive.
@@ -397,11 +431,8 @@
   
   if (enabled) {
     [self _freeFrameBuffers];
-  } else {
-  }
-  
-  if (enabled) {
     [self _unmapFile];
+  } else {
   }
 }
 
@@ -459,6 +490,8 @@
 
 - (BOOL) hasAlphaChannel
 {
+  // Ensure that media file is mapped, then query BPP
+  [self _mapFile];
   NSAssert(self->m_mvFile, @"m_mvFile");
   uint32_t bpp = self->m_mvFile->header.bpp;
   if (bpp == 16 || bpp == 24) {
