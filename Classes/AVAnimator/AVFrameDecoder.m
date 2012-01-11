@@ -38,7 +38,13 @@
 	return FALSE;
 }
 
-- (void) resourceUsageLimit:(BOOL)enabled
+- (BOOL) allocateDecodeResources
+{
+  [self doesNotRecognizeSelector:_cmd];
+	return FALSE;
+}
+
+- (void) releaseDecodeResources
 {
   [self doesNotRecognizeSelector:_cmd];
 	return;
@@ -50,7 +56,7 @@
 	return FALSE;
 }
 
-- (UIImage*) copyCurrentFrame
+- (UIImage*) duplicateCurrentFrame
 {
   [self doesNotRecognizeSelector:_cmd];
 	return nil;

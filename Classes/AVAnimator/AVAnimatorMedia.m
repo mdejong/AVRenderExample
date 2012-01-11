@@ -153,9 +153,15 @@
 	self.resourceLoader = nil;
   self.frameDecoder = nil;
   
-	self.animatorPrepTimer = nil;
+  // FIXME: better to just use AutoTimer here
+  
+  [self.animatorPrepTimer invalidate];
+  self.animatorPrepTimer = nil;
+  [self.animatorReadyTimer invalidate];
   self.animatorReadyTimer = nil;
+  [self.animatorDecodeTimer invalidate];
   self.animatorDecodeTimer = nil;
+  [self.animatorDisplayTimer invalidate];
   self.animatorDisplayTimer = nil;
   
 	// Reset the delegate state for the audio player object
@@ -184,16 +190,6 @@
   AVAnimatorMedia *obj = [[AVAnimatorMedia alloc] init];
   [obj autorelease];
   return obj;
-}
-
-// FIXME: Remove this static ctor that accepts a renderer, should use attach
-
-+ (AVAnimatorMedia*) aVAnimatorMedia:(id<AVAnimatorMediaRendererProtocol>)renderer
-{
-  AVAnimatorMedia *obj = [[AVAnimatorMedia alloc] init];
-  [obj autorelease];
-  obj.renderer = renderer;
-  return obj;  
 }
 
 - (id) init
@@ -310,10 +306,15 @@
   
   NSAssert(self.frameDecoder, @"frameDecoder");
 
-	NSLog(@"%@", [NSString stringWithFormat:@"frameDecoder openForReading \"%@\"", [videoPath lastPathComponent]]);
+  NSLog(@"%@", [NSString stringWithFormat:@"frameDecoder openForReading \"%@\"", [videoPath lastPathComponent]]);
   
-	BOOL worked = [self.frameDecoder openForReading:videoPath];
-	NSAssert(worked, @"frameDecoder openForReading failed");
+  BOOL worked = [self.frameDecoder openForReading:videoPath];
+  
+  if (!worked) {
+    NSLog(@"frameDecoder openForReading failed");
+    self.state = FAILED;
+    return TRUE;
+  }
     
   // Read frame duration from movie by default. If user explicitly indicated a frame duration
   // the use it instead of what appears in the movie.
@@ -330,19 +331,9 @@
 	self.animatorNumFrames = [self.frameDecoder numFrames];
 	assert(self.animatorNumFrames >= 2);
   
-  // Tell the renderer that this media had been loaded
-  
   NSAssert(self.currentFrame == -1, @"currentFrame");
-  
-  if (self.renderer) {
-    [self.renderer mediaDidLoad];
-
-    [self showFrame:0];
     
-    NSAssert(self.currentFrame == 0, @"currentFrame");
-  }
-  
-	// Create AVAudioPlayer that plays audio from the file on disk
+	// Set url that will be the source for audio played in the app
   
   if (audioPath) {
     NSURL *url = [NSURL fileURLWithPath:audioPath];
@@ -385,23 +376,53 @@
   // Test to see if the all resources have been loaded. If they have, then
   // stop invoking the load callback and get ready to play.
   
-	BOOL ready = [self _loadResources];
+  BOOL ready = [self _loadResources];
   if (!ready) {
-    // Note that the prep timer is not invalidated in this case
+    // Not ready yet, continue with callbacks. Note that we don't cancel
+    // the prep timer, so this method is invoked again after a delay.
     return;
   }
-  
+    
 	// Finish up init state
   
 	[self.animatorPrepTimer invalidate];
 	self.animatorPrepTimer = nil;  
   
+  // If loading failed at this point, then the file data must be invalid.
+  
+  if (self.state == FAILED) {
+    [[NSNotificationCenter defaultCenter] postNotificationName:AVAnimatorFailedToLoadNotification
+                                                        object:self];
+    
+    return;
+  }
+  
+  // Media should now be ready to attach to the video renderer. If there is no renderer at this
+  // point then it could still be attached later.
+  
+	self.state = READY;
+	self.isReadyToAnimate = TRUE;
+  
+  if (self.renderer) {
+    
+    BOOL worked = [self attachToRenderer:self.renderer];
+
+    if (worked == FALSE) {
+      // If attaching to the renderer failed, then the whole loading process fails
+      
+      self.state = FAILED;
+      self.isReadyToAnimate = FALSE;
+      
+      [[NSNotificationCenter defaultCenter] postNotificationName:AVAnimatorFailedToLoadNotification
+                                                          object:self];
+      
+      return;
+    }
+  }
+  
 	// Init audio data
 	
 	[self _createAudioPlayer];
-      
-	self.state = READY;
-	self.isReadyToAnimate = TRUE;
   
   // Send out a notification that indicates that the movie is now fully loaded
   // and is ready to play.
@@ -431,6 +452,8 @@
 		return;
 	} else if (self.state == PREPPING) {
 		return;
+	} else if (self.state == FAILED) {
+		return;
 	} else if (self.state == STOPPED && !self.isReadyToAnimate) {
 		// Edge case where an earlier prepare was canceled and
 		// the animator never became ready to animate.
@@ -454,6 +477,8 @@
 //  }
   
 	// Schedule a callback that will do the prep operation
+  
+	NSAssert(self.animatorPrepTimer == nil, @"animatorPrepTimer");
   
 	self.animatorPrepTimer = [NSTimer timerWithTimeInterval: 0.10
                                                     target: self
@@ -541,8 +566,10 @@
   
 	// If still preparing, just set a flag so that the animator
 	// will start when the prep operation is finished.
-  
-	if (self.state < READY) {
+
+	if (self.state == FAILED) {
+		return;
+	} else if (self.state < READY) {
 		self.startAnimatorWhenReady = TRUE;
 		return;
 	}
@@ -644,6 +671,8 @@
 
 	if (self.state == STOPPED) {
 		// When already stopped, don't generate another AVAnimatorDidStopNotification
+		return;
+	} else if (self.state == FAILED) {
 		return;
 	}
   
@@ -774,7 +803,7 @@
     // and a display operation, so a pending display needs to be done ASAP. If there was no pending
     // display, then the display operation will do nothing.
     
-    NSAssert(self.animatorDisplayTimer == nil, @"animatorDecodeTimer not nil");
+    NSAssert(self.animatorDisplayTimer == nil, @"animatorDisplayTimer not nil");
     
     NSTimeInterval displayDelta = 0.001;
     
@@ -1409,24 +1438,50 @@
 // A media item can only be attached to a renderer that has been
 // added to the window system and is ready to animate. So, as
 // soon as a renderer is attached, the media item should display
-// the initial keyframe.
+// the initial keyframe. This attach method is invoked from
+// a render module or from this module.
 
-- (void) attachToRenderer:(id<AVAnimatorMediaRendererProtocol>)renderer
+- (BOOL) attachToRenderer:(id<AVAnimatorMediaRendererProtocol>)renderer
 {
   NSAssert(renderer, @"renderer can't be nil");
   self.renderer = renderer;
-
-  // Tell decoder that it is no longer resource constrained
   
-  [self.frameDecoder resourceUsageLimit:FALSE];
+  // If media load failed previously, then a renderer can't be attached now
   
-  // If media is ready, then display initial keyframe
-  
-  if (self.isReadyToAnimate) {
-    [self.renderer mediaDidLoad];
-    
-    [self showFrame:0];
+  if (self.state == FAILED) {
+    [self.renderer mediaAttached:FALSE];
+    self.renderer = nil;
+    return FALSE;
   }
+  
+  // If the media is still loading, then we are not ready to attach
+  // to the renderer just yet. This method will be invoked again
+  // when the loading process is complete.
+  
+  if (self.isReadyToAnimate == FALSE) {
+    return TRUE;
+  }
+  
+  // Attempt to allocate decode resources, if these resources
+  // can't be allocated then the attach will not be successful.
+  
+  BOOL worked = [self.frameDecoder allocateDecodeResources];
+  
+  if (worked) {
+    // Allocated resources and ready to begin playback, signal the
+    // renderer that the media was loaded successfully. In the
+    // case where attach is called while loading, the loading process
+    // will fail if this attach fails.
+    
+    [self.renderer mediaAttached:TRUE];
+    [self showFrame:0];
+    NSAssert(self.currentFrame == 0, @"currentFrame");
+  } else {
+    [self.renderer mediaAttached:FALSE];
+    self.renderer = nil;
+  }
+  
+  return worked;
 }
 
 - (void) detachFromRenderer:(id<AVAnimatorMediaRendererProtocol>)renderer copyFinalFrame:(BOOL)copyFinalFrame
@@ -1439,10 +1494,13 @@
   // replaced with another media object right away. The OS might be putting the app into
   // the background and the view will need to retain the same visual data so that the
   // animations will look correct. Make a copy of the buffer to ensure that the original
-  // frame buffer is released. Note that copyCurrentFrame could return nil.
+  // frame buffer is released. In the case where the original frame buffer is part of
+  // a large memory mapped region, this logic will make sure that the large memory map
+  // will be released while the app is in the background.
+  // Note that duplicateCurrentFrame could return nil.
 
   if (copyFinalFrame) {
-    UIImage *finalFrameCopy = [self.frameDecoder copyCurrentFrame];
+    UIImage *finalFrameCopy = [self.frameDecoder duplicateCurrentFrame];
     self.renderer.image = finalFrameCopy;
   } else {
     self.renderer.image = nil;
@@ -1459,7 +1517,7 @@
   
   // The view and the media objects should have dropped all references to frame buffer objects now.
   
-  [self.frameDecoder resourceUsageLimit:TRUE];
+  [self.frameDecoder releaseDecodeResources];
 }
 
 @end

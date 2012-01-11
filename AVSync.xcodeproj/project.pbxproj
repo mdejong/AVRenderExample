@@ -76,6 +76,7 @@
 		CD143E0B1382577800963BBE /* VolumeRightTall.png in Resources */ = {isa = PBXBuildFile; fileRef = CD143E021382577800963BBE /* VolumeRightTall.png */; };
 		CD143E1D138257E100963BBE /* MovieControlsAdaptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143E1C138257E100963BBE /* MovieControlsAdaptor.m */; };
 		CD2637D81390254400E18F0C /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = CD2637D71390254400E18F0C /* Icon.png */; };
+		CDE77AF014BDFFAE0012DA1A /* maxvid_decode_arm.s in Sources */ = {isa = PBXBuildFile; fileRef = CDE77AEF14BDFFAE0012DA1A /* maxvid_decode_arm.s */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -200,6 +201,7 @@
 		CD143E1B138257E100963BBE /* MovieControlsAdaptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MovieControlsAdaptor.h; sourceTree = "<group>"; };
 		CD143E1C138257E100963BBE /* MovieControlsAdaptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MovieControlsAdaptor.m; sourceTree = "<group>"; };
 		CD2637D71390254400E18F0C /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		CDE77AEF14BDFFAE0012DA1A /* maxvid_decode_arm.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = maxvid_decode_arm.s; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -340,6 +342,7 @@
 				CD143BD9138235F100963BBE /* libapng.c */,
 				CD143BDA138235F100963BBE /* libapng.h */,
 				CD143BDB138235F100963BBE /* maxvid_decode.c */,
+				CDE77AEF14BDFFAE0012DA1A /* maxvid_decode_arm.s */,
 				CD143BDC138235F100963BBE /* maxvid_decode.h */,
 				CD143BDD138235F100963BBE /* maxvid_encode.c */,
 				CD143BDE138235F100963BBE /* maxvid_encode.h */,
@@ -549,6 +552,7 @@
 				CD143E031382577800963BBE /* MovieControlsView.m in Sources */,
 				CD143E041382577800963BBE /* MovieControlsViewController.m in Sources */,
 				CD143E1D138257E100963BBE /* MovieControlsAdaptor.m in Sources */,
+				CDE77AF014BDFFAE0012DA1A /* maxvid_decode_arm.s in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

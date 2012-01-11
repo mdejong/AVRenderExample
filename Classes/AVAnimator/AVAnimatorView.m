@@ -13,8 +13,13 @@
 
 #import "AVAnimatorMedia.h"
 
+#import "AutoPropertyRelease.h"
+
 // private properties declaration for AVAnimatorView class
 #include "AVAnimatorViewPrivate.h"
+
+// private method in Media class
+#include "AVAnimatorMediaPrivate.h"
 
 // AVAnimatorView class
 
@@ -40,6 +45,7 @@
     [self.mediaObj detachFromRenderer:self copyFinalFrame:FALSE];
   }
   
+  [AutoPropertyRelease releaseProperties:self thisClass:AVAnimatorView.class];
   [super dealloc];
 }
 
@@ -154,17 +160,19 @@
   }  
 }
 
-// This method is invoked once resources have been loaded by the media.
-// This method can be invoked at a time after the media is associated with
-// the layer.
+// Invoked with TRUE argument once renderer has been attached to loaded media,
+// otherwise FALSE is passed to indicate the renderer could not be attached
 
-- (void) mediaDidLoad
+- (void) mediaAttached:(BOOL)worked
 {
-  NSAssert(self.media, @"media is nil");
-
-  self->mediaDidLoad = TRUE;
-  
-  [self _setOpaqueFromDecoder];
+  if (worked) {
+    NSAssert(self.media, @"media is nil");
+    self->mediaDidLoad = TRUE;
+    [self _setOpaqueFromDecoder];
+  } else {
+    self.mediaObj = nil;
+    self->mediaDidLoad = FALSE;
+  }
   
 	return;
 }
@@ -280,11 +288,10 @@
   // Attach case
   
   NSAssert(self.window, @"AVAnimatorView must have been added to a window before media can be attached");
-
-  self->mediaDidLoad = FALSE;
   
   [self.mediaObj detachFromRenderer:self copyFinalFrame:FALSE];
   self.mediaObj = inMedia;
+  self->mediaDidLoad = FALSE;
   [self.mediaObj attachToRenderer:self];
 }
 

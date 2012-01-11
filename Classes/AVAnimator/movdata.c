@@ -21,9 +21,10 @@
 
 #include "movdata.h"
 
-// Generate a compile time error if compiled in Thumb mode. This module executes
-// significantly faster in ARM mode because conditional instructions can be generated.
-// The whole project need not be compiled in ARM mode, just this module.
+// Don't bother generating a compile time error if -mno-thumb is not specified for this
+// specific module. There is a performance improvement if -mno-thumb is set, but it
+// is not worth the trouble of setting target specific flags in newer versions of xcode.
+// Older versions that build with gcc will continue to generate the error.
 
 #if defined(__arm__)
 # define COMPILE_ARM 1
@@ -34,7 +35,11 @@
 # endif
 #endif
 
-#if defined(COMPILE_ARM_THUMB_ASM)
+#if defined(__clang__)
+#  define COMPILE_CLANG 1
+#endif // defined(__clang__)
+
+#if defined(COMPILE_ARM_THUMB_ASM) && !defined(COMPILE_CLANG)
 #error "Module should not be compiled in Thumb mode, enable ARM mode by adding -mno-thumb to file specific target flags"
 #endif
 
@@ -476,8 +481,7 @@ process_atoms(FILE *movFile, MovData *movData, uint32_t maxOffset)
       if (width == 0.0 && height == 0.0) {
         movData->errCode = ERR_INVALID_FIELD;
         snprintf(movData->errMsg, sizeof(movData->errMsg),
-                 "invalid track width/height of zero, mov can only contain a single video track",
-                 width, height);
+                 "invalid track width/height of zero, mov can only contain a single video track");
         return 1;
       }      
       
@@ -1459,6 +1463,7 @@ process_sample_tables(FILE *movFile, MovData *movData) {
     assert(num_samples == movData->sampleSizeTableNumEntries);
   }
   
+  assert(num_samples > 0);
   movData->samples = malloc(sizeof(MovSample) * num_samples);
   bzero(movData->samples, sizeof(MovSample) * num_samples);
   movData->numSamples = num_samples;

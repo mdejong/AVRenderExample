@@ -132,7 +132,7 @@
   return img;
 }
 
-- (UIImage*) copyCurrentFrame
+- (UIImage*) duplicateCurrentFrame
 {
   return self.currentFrame;
 }
@@ -140,6 +140,17 @@
 - (void) resourceUsageLimit:(BOOL)enabled
 {
   self->m_resourceUsageLimit = enabled;
+}
+
+- (BOOL) allocateDecodeResources
+{
+  [self resourceUsageLimit:FALSE];
+  return TRUE;
+}
+
+- (void) releaseDecodeResources
+{
+  [self resourceUsageLimit:TRUE];
 }
 
 - (BOOL) isResourceUsageLimit
