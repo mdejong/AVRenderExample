@@ -1,25 +1,38 @@
 //
 //  AVMvidFrameDecoder.h
-//  QTFileParserApp
 //
-//  Created by Moses DeJong on 4/23/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Created by Moses DeJong on 1/4/11.
 //
+//  License terms defined in License.txt.
 
 #import <Foundation/Foundation.h>
 
 #import "AVFrameDecoder.h"
 #import "maxvid_file.h"
 
+// If USE_SEGMENTED_MMAP is defined, then each frame will be contained in a separate
+// mmap segment. Otherwise, a single memory map will be used for the entire mvid file.
+
+#define USE_SEGMENTED_MMAP
+
+#if defined(USE_SEGMENTED_MMAP)
+@class SegmentedMappedData;
+#endif // USE_SEGMENTED_MMAP
+
 @interface AVMvidFrameDecoder : AVFrameDecoder {
   NSString *m_filePath;
   MVFileHeader m_mvHeader;
-  MVFile *m_mvFile;
+  MVFrame *m_mvFrames;
   BOOL m_isOpen;
+  
+#if defined(USE_SEGMENTED_MMAP)
+  SegmentedMappedData *m_mappedData;
+#else
   NSData *m_mappedData;
+#endif // USE_SEGMENTED_MMAP
   
   CGFrameBuffer *m_currentFrameBuffer;  
-	NSArray *m_cgFrameBuffers;
+  NSArray *m_cgFrameBuffers;
   
   int frameIndex;
   BOOL m_resourceUsageLimit;
@@ -30,9 +43,14 @@
 }
 
 @property (nonatomic, copy) NSString *filePath;
-@property (nonatomic, copy) NSData *mappedData;
 @property (nonatomic, retain) CGFrameBuffer *currentFrameBuffer;
 @property (nonatomic, copy) NSArray *cgFrameBuffers;
+
+#if defined(USE_SEGMENTED_MMAP)
+@property (nonatomic, retain) SegmentedMappedData *mappedData;
+#else
+@property (nonatomic, copy) NSData *mappedData;
+#endif // REGRESSION_TESTS
 
 #if defined(REGRESSION_TESTS)
 @property (nonatomic, assign) BOOL simulateMemoryMapFailure;

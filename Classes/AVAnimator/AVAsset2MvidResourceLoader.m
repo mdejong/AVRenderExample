@@ -1,34 +1,31 @@
 //
-//  AV7zAppResourceLoader.m
+//  AVAsset2MvidResourceLoader.m
 //
-//  Created by Moses DeJong on 4/22/11.
-//
-//  License terms defined in License.txt.
+//  Created by Moses DeJong on 2/24/12.
 //
 
-#import "AV7zAppResourceLoader.h"
+#import "AVAsset2MvidResourceLoader.h"
 
 #import "AVFileUtil.h"
 
-#import "LZMAExtractor.h"
+#import "AVAssetReaderConvertMaxvid.h"
 
 #define LOGGING
 
-@implementation AV7zAppResourceLoader
+@implementation AVAsset2MvidResourceLoader
 
-@synthesize archiveFilename = m_archiveFilename;
 @synthesize outPath = m_outPath;
+@synthesize alwaysGenerateAdler = m_alwaysGenerateAdler;
+
++ (AVAsset2MvidResourceLoader*) aVAsset2MvidResourceLoader
+{
+  return [[[AVAsset2MvidResourceLoader alloc] init] autorelease];
+}
 
 - (void) dealloc
 {
-  self.archiveFilename = nil;
   self.outPath = nil;
   [super dealloc];
-}
-
-+ (AV7zAppResourceLoader*) aV7zAppResourceLoader
-{
-  return [[[AV7zAppResourceLoader alloc] init] autorelease];
 }
 
 // This method is invoked in the secondary thread to decode the contents of the archive entry
@@ -39,39 +36,48 @@
   
   NSAssert([arr count] == 5, @"arr count");
   
-  // Pass 5 arguments : ARCHIVE_PATH ARCHIVE_ENTRY_NAME PHONY_PATH TMP_PATH SERIAL
+  // Pass 5 arguments : ASSET_PATH PHONY_PATH TMP_PATH SERIAL ADLER
   
-  NSString *archivePath = [arr objectAtIndex:0];
-  NSString *archiveEntry = [arr objectAtIndex:1];
-  NSString *phonyOutPath = [arr objectAtIndex:2];
-  NSString *outPath = [arr objectAtIndex:3];
-  NSNumber *serialLoadingNum = [arr objectAtIndex:4];
+  NSString *assetPath = [arr objectAtIndex:0];
+  NSString *phonyOutPath = [arr objectAtIndex:1];
+  NSString *outPath = [arr objectAtIndex:2];
+  NSNumber *serialLoadingNum = [arr objectAtIndex:3];
+  NSNumber *alwaysGenerateAdler = [arr objectAtIndex:4];
   
   if ([serialLoadingNum boolValue]) {
     [self grabSerialResourceLoaderLock];
   }
-
+  
   // Check to see if the output file already exists. If the resource exists at this
   // point, then there is no reason to kick off another decode operation. For example,
   // in the serial loading case, a previous load could have loaded the resource.
-
+  
   BOOL fileExists = [AVFileUtil fileExists:outPath];
   
   if (fileExists) {
 #ifdef LOGGING
-    NSLog(@"no 7zip extraction needed for %@", archiveEntry);
+    NSLog(@"no asset decompression needed for %@", [assetPath lastPathComponent]);
 #endif // LOGGING
   } else {
 #ifdef LOGGING
-    NSLog(@"start 7zip extraction %@", archiveEntry);
+    NSLog(@"start asset decompression %@", [assetPath lastPathComponent]);
 #endif // LOGGING  
     
     BOOL worked;
-    worked = [LZMAExtractor extractArchiveEntry:archivePath archiveEntry:archiveEntry outPath:phonyOutPath];
-    NSAssert(worked, @"extractArchiveEntry failed");
     
+    AVAssetReaderConvertMaxvid *obj = [AVAssetReaderConvertMaxvid aVAssetReaderConvertMaxvid];
+    obj.assetURL = [NSURL fileURLWithPath:assetPath];
+    obj.mvidPath = phonyOutPath;
+    
+    if ([alwaysGenerateAdler intValue]) {
+      obj.genAdler = TRUE;
+    }
+    
+    worked = [obj decodeAssetURL];
+    NSAssert(worked, @"decodeAssetURL");
+
 #ifdef LOGGING
-    NSLog(@"done 7zip extraction %@", archiveEntry);
+    NSLog(@"done asset decompression %@", [assetPath lastPathComponent]);
 #endif // LOGGING
     
     // Move phony tmp filename to the expected filename once writes are complete
@@ -90,14 +96,17 @@
   [pool drain];
 }
 
-- (void) _detachNewThread:(NSString*)archivePath
-            archiveEntry:(NSString*)archiveEntry
-            phonyOutPath:(NSString*)phonyOutPath
-                 outPath:(NSString*)outPath
+- (void) _detachNewThread:(NSString*)assetPath
+             phonyOutPath:(NSString*)phonyOutPath
+                  outPath:(NSString*)outPath
 {
   NSNumber *serialLoadingNum = [NSNumber numberWithBool:self.serialLoading];
   
-  NSArray *arr = [NSArray arrayWithObjects:archivePath, archiveEntry, phonyOutPath, outPath, serialLoadingNum, nil];
+  uint32_t genAdler = self.alwaysGenerateAdler;
+  NSNumber *genAdlerNum = [NSNumber numberWithInt:genAdler];
+  NSAssert(genAdlerNum != nil, @"genAdlerNum");
+  
+  NSArray *arr = [NSArray arrayWithObjects:assetPath, phonyOutPath, outPath, serialLoadingNum, genAdlerNum, nil];
   NSAssert([arr count] == 5, @"arr count");
   
   [NSThread detachNewThreadSelector:@selector(decodeThreadEntryPoint:) toTarget:self.class withObject:arr];  
@@ -112,26 +121,25 @@
   if (startedLoading) {
     return;
   } else {
-    self->startedLoading = TRUE;    
+    startedLoading = TRUE;
   }
-
+  
   // Superclass load method asserts that self.movieFilename is not nil
   [super load];
-
-  NSString *qualPath = [AVFileUtil getQualifiedFilenameOrResource:self.archiveFilename];
+  
+  NSString *qualPath = [AVFileUtil getQualifiedFilenameOrResource:self.movieFilename];
   NSAssert(qualPath, @"qualPath");
-
-  NSString *archiveEntry = self.movieFilename;
+  
   NSString *outPath = self.outPath;
   NSAssert(outPath, @"outPath not defined");
-
+  
   // Generate phony tmp path that data will be written to as it is extracted.
   // This avoids thread race conditions and partial writes. Note that the filename is
   // generated in this method, and this method should only be invoked from the main thread.
-
+  
   NSString *phonyOutPath = [AVFileUtil generateUniqueTmpPath];
-
-  [self _detachNewThread:qualPath archiveEntry:archiveEntry phonyOutPath:phonyOutPath outPath:outPath];
+  
+  [self _detachNewThread:qualPath phonyOutPath:phonyOutPath outPath:outPath];
   
   return;
 }
@@ -140,7 +148,7 @@
 
 - (NSString*) _getMoviePath
 {
- return self.outPath;
+  return self.outPath;
 }
 
 @end

@@ -131,7 +131,7 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 		return nil;
   }
 
-  if (self = [super init]) {
+  if ((self = [super init])) {
     self->m_bitsPerPixel = bitsPerPixel;
     self->m_bytesPerPixel = bytesPerPixel;
     self->m_pixels = buffer;
@@ -296,6 +296,48 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 	CGContextRelease(bitmapContext);
 	
 	return TRUE;
+}
+
+- (CGContextRef) createBitmapContext
+{
+  [self doneZeroCopyPixels];
+	
+  size_t bitsPerComponent;
+  size_t numComponents;
+  size_t bitsPerPixel;
+  size_t bytesPerRow;
+  
+  if (self.bitsPerPixel == 16) {
+    bitsPerComponent = 5;
+    //    numComponents = 3;
+    bitsPerPixel = 16;
+    bytesPerRow = self.width * (bitsPerPixel / 8);    
+  } else if (self.bitsPerPixel == 24 || self.bitsPerPixel == 32) {
+    bitsPerComponent = 8;
+    numComponents = 4;
+    bitsPerPixel = bitsPerComponent * numComponents;
+    bytesPerRow = self.width * (bitsPerPixel / 8);
+  } else {
+    NSAssert(FALSE, @"unmatched bitsPerPixel");
+  }
+  
+	CGBitmapInfo bitmapInfo = [self getBitmapInfo];
+	
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+  
+	NSAssert(self.pixels != NULL, @"pixels must not be NULL");
+	NSAssert(self.isLockedByDataProvider == FALSE, @"renderCGImage: pixel buffer locked by data provider");
+  
+	CGContextRef bitmapContext =
+    CGBitmapContextCreate(self.pixels, self.width, self.height, bitsPerComponent, bytesPerRow, colorSpace, bitmapInfo);
+	
+	CGColorSpaceRelease(colorSpace);
+	
+	if (bitmapContext == NULL) {
+		return NULL;
+	}
+	
+	return bitmapContext;
 }
 
 - (CGImageRef) createCGImageRef
@@ -542,6 +584,12 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
   NSAssert(self.isLockedByDataProvider == FALSE, @"isLockedByDataProvider");
   self->m_zeroCopyPixels = NULL;
   self.zeroCopyMappedData = nil;
+}
+
+- (NSString*) description
+{
+  return [NSString stringWithFormat:@"CGFrameBuffer %p, pixels %p, %d x %d, %d BPP, isLocked %d", self, self.pixels,
+          self.width, self.height, self.bitsPerPixel, (int)self.isLockedByDataProvider];
 }
 
 @end

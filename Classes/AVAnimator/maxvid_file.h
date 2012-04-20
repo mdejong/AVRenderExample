@@ -38,13 +38,6 @@ typedef struct {
     uint32_t adler; // adler32 checksum of the decoded framebuffer
 } MVFrame;
 
-// A MVFile points to the start of the file, the header and frames can be accessed directly.
-
-typedef struct {
-  MVFileHeader header;
-  MVFrame frames[0];
-} MVFile;
-
 static inline
 void maxvid_frame_setkeyframe(MVFrame *mvFrame) {
   mvFrame->lengthAndFlags |= MV_FRAME_IS_KEYFRAME;
@@ -98,36 +91,27 @@ uint32_t maxvid_file_emit_nopframe() {
   return 0;
 }
 
-// "open" a memory mapped buffer that contains a completely
-// written .mvid file. The magic number is validated to
-// verify that the file was not partially written, but no
-// other validation is done. The mapped data must not
-// be unmapped while this ref is being used.
+// Verify the contents of the header for a MVID file.
+// The magic number is validated to verify that the file was not
+// partially written. In addition the bpp values are verified.
 
 static inline
-MVFile* maxvid_file_map_open(void *buffer) {
+void maxvid_file_map_verify(void *buffer) {
   assert(sizeof(MVFileHeader) == 16*4);
   assert(sizeof(MVFrame) == 3*4);
-  
-  MVFile *mvFilePtr = (MVFile *)buffer;
-  uint32_t magic = mvFilePtr->header.magic;
+
+  assert(buffer);
+  MVFileHeader *mvFileHeaderPtr = (MVFileHeader *)buffer;
+  uint32_t magic = mvFileHeaderPtr->magic;
   assert(magic == MV_FILE_MAGIC);
-  assert(mvFilePtr->header.bpp == 16 || mvFilePtr->header.bpp == 24 || mvFilePtr->header.bpp == 32);
-  return mvFilePtr;
-}
-
-// "close" is actually a no-op.
-
-static inline
-void maxvid_file_map_close(MVFile *mvFile) {
-  return;
+  assert(mvFileHeaderPtr->bpp == 16 || mvFileHeaderPtr->bpp == 24 || mvFileHeaderPtr->bpp == 32);
 }
 
 // Get the MVFrame* that corresponds to the frame at the given index.
 
 static inline
-MVFrame* maxvid_file_frame(MVFile *mvFile, uint32_t index) {
-  return &(mvFile->frames[index]);
+MVFrame* maxvid_file_frame(MVFrame *mvFrames, uint32_t index) {
+  return &(mvFrames[index]);
 }
 
 // Return non-zero if the indicated FILE* is ready to be processed,
@@ -181,11 +165,11 @@ uint32_t maxvid_file_padding_before_keyframe(FILE *outFile, uint32_t offset) {
     wordsToBound--;
   }
   
-  offset = ftell(outFile);
+  uint32_t offsetAfter = ftell(outFile);
 
-  assert(UINTMOD(offset, boundSize) == 0);
+  assert(UINTMOD(offsetAfter, boundSize) == 0);
   
-  return offset;
+  return offsetAfter;
 }
 
 // Emit zero length words up to the next page bound after the keyframe data.
@@ -196,6 +180,8 @@ static inline
 uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   return maxvid_file_padding_before_keyframe(outFile, offset);
 }
+
+// adler32 calculation method
 
 uint32_t maxvid_adler32(
                         uint32_t adler,

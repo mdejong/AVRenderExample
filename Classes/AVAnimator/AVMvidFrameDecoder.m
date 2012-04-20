@@ -1,16 +1,19 @@
 //
-//  AVMvidFrameDecoder.m
-//  QTFileParserApp
+//  AVMvidFrameDecoder.h
 //
-//  Created by Moses DeJong on 4/23/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Created by Moses DeJong on 1/4/11.
 //
+//  License terms defined in License.txt.
 
 #import "AVMvidFrameDecoder.h"
 
 #import "CGFrameBuffer.h"
 
 #import "maxvid_file.h"
+
+#if defined(USE_SEGMENTED_MMAP)
+#import "SegmentedMappedData.h"
+#endif // USE_SEGMENTED_MMAP
 
 #ifndef __OPTIMIZE__
 // Automatically define EXTRA_CHECKS when not optimizing (in debug mode)
@@ -35,6 +38,10 @@
 {
   [self close];
 
+  if (self->m_mvFrames) {
+    free(self->m_mvFrames);
+  }
+  
   self.filePath = nil;
   self.mappedData = nil;
   self.currentFrameBuffer = nil;
@@ -64,16 +71,16 @@
 
   self.cgFrameBuffers = nil;
   
-	[super dealloc];
+  [super dealloc];
 }
 
 - (id) init
 {
-	if ((self = [super init]) != nil) {
+  if ((self = [super init]) != nil) {
     self->frameIndex = -1;
     self->m_resourceUsageLimit = TRUE;
   }
-	return self;
+  return self;
 }
 
 + (AVMvidFrameDecoder*) aVMvidFrameDecoder
@@ -89,26 +96,25 @@
 
 - (void) _allocFrameBuffers
 {
-	// create buffers used for loading image data
+  // create buffers used for loading image data
   
   if (self.cgFrameBuffers != nil) {
     // Already allocated the frame buffers
     return;
   }
   
-	int renderWidth = [self width];
-	int renderHeight = [self height];
+  int renderWidth = [self width];
+  int renderHeight = [self height];
   
   NSAssert(renderWidth > 0 && renderHeight > 0, @"renderWidth or renderHeight is zero");
 
-  NSAssert(m_mvFile, @"m_mvFile");
   uint32_t bitsPerPixel = [self _getHeader]->bpp;
   
-	CGFrameBuffer *cgFrameBuffer1 = [CGFrameBuffer cGFrameBufferWithBppDimensions:bitsPerPixel width:renderWidth height:renderHeight];
+  CGFrameBuffer *cgFrameBuffer1 = [CGFrameBuffer cGFrameBufferWithBppDimensions:bitsPerPixel width:renderWidth height:renderHeight];
   CGFrameBuffer *cgFrameBuffer2 = [CGFrameBuffer cGFrameBufferWithBppDimensions:bitsPerPixel width:renderWidth height:renderHeight];
   CGFrameBuffer *cgFrameBuffer3 = [CGFrameBuffer cGFrameBufferWithBppDimensions:bitsPerPixel width:renderWidth height:renderHeight];
   
-	self.cgFrameBuffers = [NSArray arrayWithObjects:cgFrameBuffer1, cgFrameBuffer2, cgFrameBuffer3, nil];
+  self.cgFrameBuffers = [NSArray arrayWithObjects:cgFrameBuffer1, cgFrameBuffer2, cgFrameBuffer3, nil];
   
   // Double check size assumptions
   
@@ -131,24 +137,25 @@
 
 - (CGFrameBuffer*) _getNextFramebuffer
 {
-	[self _allocFrameBuffers];
+  [self _allocFrameBuffers];
   
-	CGFrameBuffer *cgFrameBuffer = nil;
-	for (CGFrameBuffer *aBuffer in self.cgFrameBuffers) {
+  CGFrameBuffer *cgFrameBuffer = nil;
+  for (CGFrameBuffer *aBuffer in self.cgFrameBuffers) {
     if (aBuffer == self.currentFrameBuffer) {
       // When a framebuffer is the "current" one, it contains
       // the decoded output from a previous frame. Need to
       // ignore it and select the next available one.
+
       continue;
     }    
-		if (!aBuffer.isLockedByDataProvider) {
-			cgFrameBuffer = aBuffer;
-			break;
-		}
-	}
-	if (cgFrameBuffer == nil) {
-		NSAssert(FALSE, @"no cgFrameBuffer is available");
-	}
+    if (!aBuffer.isLockedByDataProvider) {
+      cgFrameBuffer = aBuffer;
+      break;
+    }
+  }
+  if (cgFrameBuffer == nil) {
+    NSAssert(FALSE, @"no cgFrameBuffer is available");
+  }
   return cgFrameBuffer;
 }
 
@@ -160,7 +167,7 @@
 // to cache the contents of the header and then map and unmap
 // the whole file as needed without worry of an invalid cache.
 
-- (BOOL) _openAndCopyHeader
+- (BOOL) _openAndCopyHeaders
 {
   MVFileHeader *hPtr = &self->m_mvHeader;
 
@@ -203,6 +210,28 @@
     }
   }
   
+  if (worked) {
+    // Read array of MVFrame objects into dynamically allocated array.
+    
+    NSUInteger numFrames = hPtr->numFrames;
+    NSAssert(numFrames > 1, @"numFrames");
+    int numBytes = sizeof(MVFrame) * numFrames;
+    self->m_mvFrames = malloc(numBytes);
+    
+    if (self->m_mvFrames == NULL) {
+      // Malloc failed
+      worked = FALSE;
+    }
+    
+    if (worked) {
+      int numRead = fread(self->m_mvFrames, numBytes, 1, fp);
+      if (numRead != 1) {
+        // Could not read frames from file
+        worked = FALSE;
+      }      
+    }    
+  }
+  
   fclose(fp);
   return worked;
 }
@@ -224,7 +253,53 @@
     }
 #endif // REGRESSION_TESTS
 
-    if (memoryMapFailed == FALSE) {    
+#if defined(USE_SEGMENTED_MMAP)
+    if (memoryMapFailed == FALSE) {
+      self.mappedData = [SegmentedMappedData segmentedMappedData:self.filePath];
+      
+      if (self.mappedData == nil) {
+        memoryMapFailed = TRUE;
+      }
+
+      if (memoryMapFailed == FALSE) {
+        // Map just the first page just to make sure mapping is actually working
+        
+        BOOL worked;
+        
+        NSRange range;
+        range.location = 0;
+        range.length = MV_PAGESIZE;
+        
+        SegmentedMappedData *seg0 = [self.mappedData subdataWithRange:range];
+        if (seg0) {
+          worked = TRUE;
+        } else {
+          worked = FALSE;
+        }        
+        if (worked) {
+          worked = [seg0 mapSegment];
+        }
+        if (worked == FALSE) {
+          self.mappedData = nil;
+          memoryMapFailed = TRUE;
+        } else {
+          // Mapping the first page was successful, double check the contents
+          // of the first page with maxvid_file_map_open().
+          
+          void *segPtr = (void*) [seg0 bytes];
+          maxvid_file_map_verify(segPtr);
+        }
+        
+        [seg0 unmapSegment];
+      }
+    }
+    
+    if (memoryMapFailed == TRUE) {
+      return FALSE;
+    }
+    
+#else // USE_SEGMENTED_MMAP
+    if (memoryMapFailed == FALSE) {
       self.mappedData = [NSData dataWithContentsOfMappedFile:self.filePath];
       if (self.mappedData == nil) {
         memoryMapFailed = TRUE;
@@ -235,26 +310,24 @@
       return FALSE;
     }
     
-    self->m_resourceUsageLimit = FALSE;
     void *mappedPtr = (void*)[self.mappedData bytes];
-    self->m_mvFile = maxvid_file_map_open(mappedPtr);
-  }
+    maxvid_file_map_verify(mappedPtr);
+#endif // USE_SEGMENTED_MMAP
   
+    self->m_resourceUsageLimit = FALSE;
+  } // end if (self.mappedData == nil)
+    
   return TRUE;
 }
 
 - (void) _unmapFile {
-  if (m_mvFile != NULL) {
-    maxvid_file_map_close(m_mvFile);
-    self->m_mvFile = NULL;
-  }  
   self.mappedData = nil;
 }
 
 - (BOOL) openForReading:(NSString*)moviePath
 {
-	if (self->m_isOpen) {
-		return FALSE;
+  if (self->m_isOpen) {
+    return FALSE;
   }
   
   if (![[moviePath pathExtension] isEqualToString:@"mvid"]) {
@@ -269,14 +342,14 @@
   // into memory at this point. It is possible that many files could be open but the file
   // need not be mapped into memory until it is actually used.  
   
-  BOOL worked = [self _openAndCopyHeader];
+  BOOL worked = [self _openAndCopyHeaders];
   if (!worked) {
     self.filePath = nil;
     return FALSE;
   }
 
-	self->m_isOpen = TRUE;
-	return TRUE;
+  self->m_isOpen = TRUE;
+  return TRUE;
 }
 
 // Close resource opened earlier
@@ -285,7 +358,7 @@
 {
   [self _unmapFile];
   
-	frameIndex = -1;
+  frameIndex = -1;
   self.currentFrameBuffer = nil;
   
   self->m_isOpen = FALSE;  
@@ -293,11 +366,11 @@
 
 - (void) rewind
 {
-	if (!self->m_isOpen) {
-		return;
+  if (!self->m_isOpen) {
+    return;
   }
   
-	frameIndex = -1;
+  frameIndex = -1;
   self.currentFrameBuffer = nil;
 }
 
@@ -318,35 +391,38 @@
   
   // Advance to same frame is a no-op
   
-	if ((frameIndex != -1) && (newFrameIndex == frameIndex)) {
+  if ((frameIndex != -1) && (newFrameIndex == frameIndex)) {
     return nil;
-	} else if ((frameIndex != -1) && (newFrameIndex < frameIndex)) {
+  } else if ((frameIndex != -1) && (newFrameIndex < frameIndex)) {
     // movie frame index can only go forward via advanceToFrame
-		NSString *msg = [NSString stringWithFormat:@"%@: %d -> %d",
+    NSString *msg = [NSString stringWithFormat:@"%@: %d -> %d",
                      @"can't advance to frame before current frameIndex",
                      frameIndex,
                      newFrameIndex];
-		NSAssert(FALSE, msg);
+    NSAssert(FALSE, msg);
   }
   
-	// Get the number of frames directly from the header
-	// instead of invoking method to query self.numFrames.
+  // Get the number of frames directly from the header
+  // instead of invoking method to query self.numFrames.
   
   int numFrames = [self numFrames];
   
-	if (newFrameIndex >= numFrames) {
-		NSString *msg = [NSString stringWithFormat:@"%@: %d",
+  if (newFrameIndex >= numFrames) {
+    NSString *msg = [NSString stringWithFormat:@"%@: %d",
                      @"can't advance past last frame",
                      newFrameIndex];
-		NSAssert(FALSE, msg);
-	}
+    NSAssert(FALSE, msg);
+  }
   
-	BOOL changeFrameData = FALSE;
-	const int newFrameIndexSigned = (int) newFrameIndex;
+  BOOL changeFrameData = FALSE;
+  const int newFrameIndexSigned = (int) newFrameIndex;
   
+#if defined(USE_SEGMENTED_MMAP)
+#else
   char *mappedPtr = (char*) [self.mappedData bytes];
   NSAssert(mappedPtr, @"mappedPtr");
-  
+#endif // USE_SEGMENTED_MMAP
+
   void *frameBuffer = (void*)nextFrameBuffer.pixels;
   uint32_t frameBufferSize = [self width] * [self height];
   uint32_t bpp = [self _getHeader]->bpp;
@@ -368,7 +444,7 @@
     
     for ( int i = frameIndex ; i < newFrameIndexSigned; i++) {
       int actualFrameIndex = i + 1;
-      MVFrame *frame = maxvid_file_frame(self->m_mvFile, actualFrameIndex);
+      MVFrame *frame = maxvid_file_frame(self->m_mvFrames, actualFrameIndex);
       
       if (maxvid_frame_isnopframe(frame)) {
         // This frame is a no-op, since it duplicates data from the previous frame.
@@ -384,7 +460,7 @@
       
 #ifdef EXTRA_CHECKS
       int actualFrameIndex = frameIndex + 1;
-      MVFrame *frame = maxvid_file_frame(self->m_mvFile, actualFrameIndex);
+      MVFrame *frame = maxvid_file_frame(self->m_mvFrames, actualFrameIndex);
       NSAssert(maxvid_frame_iskeyframe(frame) == 1, @"frame must be a keyframe");
 #endif // EXTRA_CHECKS      
     }
@@ -392,9 +468,13 @@
   
   // loop from current frame to target frame, applying deltas as we go.
   
-	for ( ; frameIndex < newFrameIndexSigned; frameIndex++) {
+  int inputMemoryMapped = TRUE;
+  
+  for ( ; inputMemoryMapped && (frameIndex < newFrameIndexSigned); frameIndex++) {
+    NSAutoreleasePool *loop_pool = [[NSAutoreleasePool alloc] init];
+    
     int actualFrameIndex = frameIndex + 1;
-    MVFrame *frame = maxvid_file_frame(self->m_mvFile, actualFrameIndex);
+    MVFrame *frame = maxvid_file_frame(self->m_mvFrames, actualFrameIndex);
 
 #ifdef EXTRA_CHECKS
     if (actualFrameIndex == 0) {
@@ -408,29 +488,104 @@
       //      fprintf(stdout, "Frame %d NOP\n", actualFrameIndex);
     } else {
       //      fprintf(stdout, "Frame %d [Size %d Offset %d Keyframe %d]\n", actualFrameIndex, frame->offset, movsample_length(frame), movsample_iskeyframe(frame));
-			changeFrameData = TRUE;
+      
+      int isDeltaFrame = !maxvid_frame_iskeyframe(frame);
       
       if (self.currentFrameBuffer != nextFrameBuffer) {
         // Copy the previous frame buffer unless there was not one, or current is a keyframe
         
-        if (self.currentFrameBuffer != nil && !maxvid_frame_iskeyframe(frame)) {
+        if (isDeltaFrame && (self.currentFrameBuffer != nil)) {
           [nextFrameBuffer copyPixels:self.currentFrameBuffer];
         }
         self.currentFrameBuffer = nextFrameBuffer;
       } else {
         // In the case where the current cgframebuffer contains is a zero copy pointer, need to
-        // explicitly copy the data from the zero copy buffer to the framebuffer.
-        if (self.currentFrameBuffer.zeroCopyPixels != NULL) {
+        // explicitly copy the data from the zero copy buffer to the framebuffer so that we
+        // have a writable memory region that a delta can be applied over.
+        
+        if (isDeltaFrame && (self.currentFrameBuffer.zeroCopyPixels != NULL)) {
           [self.currentFrameBuffer zeroCopyToPixels];
         }
       }
+
+#if defined(USE_SEGMENTED_MMAP)
+      // Create a mapped segment using the frame offset and length for this frame.
+
+      uint32_t *inputBuffer32 = NULL;
+      uint32_t inputBuffer32NumBytes = maxvid_frame_length(frame);
       
-      uint32_t status;
+      NSRange range;
+      range.location = maxvid_frame_offset(frame);
+      range.length = inputBuffer32NumBytes;
+  
+      SegmentedMappedData *mappedSeg = [self.mappedData subdataWithRange:range];
       
+      if (mappedSeg == nil) {
+        inputMemoryMapped = FALSE;
+      } else {
+        
+#if defined(REGRESSION_TESTS)
+        if (self.simulateMemoryMapFailure) {
+          inputMemoryMapped = FALSE;
+        } else
+#endif // REGRESSION_TESTS
+        
+        if ([mappedSeg mapSegment] == FALSE) {
+          inputMemoryMapped = FALSE;
+          
+          NSLog(@"mapSegment failed for %@", [mappedSeg description]);
+        } else {
+          //NSLog(@"__mapSegment obj %p : %@", mappedSeg, [mappedSeg description]);
+          
+          inputBuffer32 = (uint32_t*) [mappedSeg bytes];
+        }        
+      }
+      
+      NSData *mappedDataObj = mappedSeg;
+#else
       uint32_t *inputBuffer32 = (uint32_t*) (mappedPtr + maxvid_frame_offset(frame));
       uint32_t inputBuffer32NumBytes = maxvid_frame_length(frame);
+      NSData *mappedDataObj = self.mappedData;
+#endif // USE_SEGMENTED_MMAP
+      
+      if (inputMemoryMapped == FALSE) {
+        // When input memory can't be mapped, it is likely the system is running low
+        // on real memory. This logic can't assert when memory gets low, so deal
+        // with this by indicating that there was no change or return the most
+        // recent frame that was successfully decoded.
+        
+        frameIndex -= 1;
+      } else if (isDeltaFrame) {        
+        // Apply delta from input buffer over the existing framebuffer
 
-      if (maxvid_frame_iskeyframe(frame)) {
+        changeFrameData = TRUE;
+        
+#ifdef EXTRA_CHECKS
+        NSAssert(((uint32_t)inputBuffer32 % sizeof(uint32_t)) == 0, @"inputBuffer32 alignment");
+        NSAssert((inputBuffer32NumBytes % sizeof(uint32_t)) == 0, @"inputBuffer32NumBytes");
+        NSAssert(*inputBuffer32 == 0 || *inputBuffer32 != 0, @"access input buffer");
+#endif // EXTRA_CHECKS        
+        uint32_t inputBuffer32NumWords = inputBuffer32NumBytes >> 2;
+        uint32_t status;
+        if (bpp == 16) {
+          status = maxvid_decode_c4_sample16(frameBuffer, inputBuffer32, inputBuffer32NumWords, frameBufferSize);
+        } else {
+          status = maxvid_decode_c4_sample32(frameBuffer, inputBuffer32, inputBuffer32NumWords, frameBufferSize);
+        }
+        NSAssert(status == 0, @"status");
+        
+#if defined(EXTRA_CHECKS) || defined(ALWAYS_CHECK_ADLER)
+        // If mvid file has adler checksum for frame, verify that it matches the decoded framebuffer contents    
+        if (frame->adler != 0) {
+          uint32_t frameAdler = maxvid_adler32(0, (unsigned char*)frameBuffer, frameBufferNumBytes);
+          NSAssert(frame->adler == frameAdler, @"frameAdler");
+        }        
+#endif // EXTRA_CHECKS
+      } else {
+        // Input buffer contains a complete keyframe, use zero copy optimization
+        
+        changeFrameData = TRUE;
+        
 #ifdef EXTRA_CHECKS
         // FIXME: use zero copy of pointer into mapped file, impl OS page copy in util class
         if (bpp == 16) {
@@ -450,30 +605,12 @@
         }        
 #endif // EXTRA_CHECKS
   
-        [nextFrameBuffer zeroCopyPixels:inputBuffer32 mappedData:self.mappedData];
-      } else {
-#ifdef EXTRA_CHECKS
-        NSAssert(((uint32_t)inputBuffer32 % sizeof(uint32_t)) == 0, @"inputBuffer32 alignment");
-        NSAssert((inputBuffer32NumBytes % sizeof(uint32_t)) == 0, @"inputBuffer32NumBytes");
-#endif // EXTRA_CHECKS        
-        uint32_t inputBuffer32NumWords = inputBuffer32NumBytes >> 2;
-        if (bpp == 16) {
-          status = maxvid_decode_c4_sample16(frameBuffer, inputBuffer32, inputBuffer32NumWords, frameBufferSize);
-        } else {
-          status = maxvid_decode_c4_sample32(frameBuffer, inputBuffer32, inputBuffer32NumWords, frameBufferSize);
-        }
-        NSAssert(status == 0, @"status");
-        
-#if defined(EXTRA_CHECKS) || defined(ALWAYS_CHECK_ADLER)
-        // If mvid file has adler checksum for frame, verify that it matches the decoded framebuffer contents    
-        if (frame->adler != 0) {
-          uint32_t frameAdler = maxvid_adler32(0, (unsigned char*)frameBuffer, frameBufferNumBytes);
-          NSAssert(frame->adler == frameAdler, @"frameAdler");
-        }        
-#endif // EXTRA_CHECKS
+        [nextFrameBuffer zeroCopyPixels:inputBuffer32 mappedData:mappedDataObj];
       }
-    }
-	}
+    } // end for loop over indexes
+    
+    [loop_pool drain];
+  }
   
   if (!changeFrameData) {
     return nil;
