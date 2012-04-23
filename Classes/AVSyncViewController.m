@@ -21,6 +21,8 @@
 
 #import "AVFileUtil.h"
 
+#import "AVOfflineComposition.h"
+
 @implementation AVSyncViewController
 
 @synthesize window = m_window;
@@ -29,6 +31,7 @@
 @synthesize animatorView = m_animatorView;
 @synthesize movieControlsViewController = m_movieControlsViewController;
 @synthesize movieControlsAdaptor = m_movieControlsAdaptor;
+@synthesize composition = m_composition;
 
 - (void)dealloc {
   self.window = nil;
@@ -37,6 +40,7 @@
   self.animatorView = nil;
   self.movieControlsViewController = nil;
   self.movieControlsAdaptor = nil;
+  self.composition = nil;
   [super dealloc];
 }
 
@@ -63,74 +67,30 @@
   // Extract FILENAME.mvid from FILENAME.mvid.7z attached as app resource. The compressed .mvid
   // is smaller than a compressed .mov and smaller than a compressed .apng for this video content.
   
-  NSString *videoResourcePrefix = @"LS_C_Major_Open_4ths";
-  NSString *videoResourceArchiveName = [NSString stringWithFormat:@"%@.mvid.7z", videoResourcePrefix];
-  NSString *videoResourceEntryName = [NSString stringWithFormat:@"%@.mvid", videoResourcePrefix];
-  NSString *resourceTail = [videoResourcePrefix lastPathComponent];
-  NSString *videoResourceOutName = [NSString stringWithFormat:@"%@.mvid", resourceTail];
-  NSString *videoResourceOutPath = [AVFileUtil getTmpDirPath:videoResourceOutName];
+  NSString *backgroundVideoResourceFilename = @"v1.mp4";
+  NSString *foregroundVideoResourceFilename = @"v2.mp4";
   
-  NSString *audioResourcePrefixSlow = @"LS_Back_C_45BPM.caf";
-  NSString *audioResourcePrefixFast = @"LS_Back_C_70BPM.caf";
-  
-  NSString *audioResourceFilename;
-  if (isSlow) {
-    audioResourceFilename = audioResourcePrefixSlow;
-  } else {
-    audioResourceFilename = audioResourcePrefixFast;
-  }
+  NSString *backgroundVideoResourcePath = [AVFileUtil getTmpDirPath:backgroundVideoResourceFilename];
+  NSString *foregroundVideoResourcePath = [AVFileUtil getTmpDirPath:foregroundVideoResourceFilename];
 
-  AVAnimatorMedia *media = [AVAnimatorMedia aVAnimatorMedia];
+  NSLog(@"backgroundVideoResourcePath %@", backgroundVideoResourcePath);
+  NSLog(@"foregroundVideoResourcePath %@", foregroundVideoResourcePath);
+
+  // Create Render Object
   
-  AV7zAppResourceLoader *resLoader = [AV7zAppResourceLoader aV7zAppResourceLoader];
-  resLoader.archiveFilename = videoResourceArchiveName;
-  resLoader.movieFilename = videoResourceEntryName;
-  resLoader.outPath = videoResourceOutPath;    
-  resLoader.audioFilename = audioResourceFilename;
+  NSString *resFilename = @"Comp.plist";
   
-  media.resourceLoader = resLoader;  
+  NSDictionary *plistDict = (NSDictionary*) [AVOfflineComposition readPlist:resFilename];
   
-  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  AVOfflineComposition *comp = [AVOfflineComposition aVOfflineComposition];
   
-  // The "fast" rate uses the frame rate defined in the movie file,
-  // which is 15 FPS for 70 BPM audio track. When using the "slow"
-  // track, calculate the actual frame rate based on 70 BPM rate.
+  self.composition = comp;
   
-  if (isSlow) {
-    float target_bpm = 45.0;
-    float actual_fps = (70.0 / 60.0) * (60.0 / target_bpm) * (1.0 / 15.0);  
-    media.animatorFrameDuration = actual_fps;
-  }
-    
-  // Create Movie Controls and let it manage the AVAnimatorView
+  [self setupNotification];
   
-  NSAssert(self.animatorView, @"animatorView");
-  
-	self.movieControlsViewController = [MovieControlsViewController movieControlsViewController:self.animatorView];
-  
-  // A MovieControlsViewController can only be placed inside a toplevel window!
-  // Unlike a normal controller, you can't invoke [window addSubview:movieControlsViewController.view]
-  // to place a MovieControlsViewController in a window. Just set the mainWindow property instead.
-  
-  self.movieControlsViewController.mainWindow = window;
-  
-  self.movieControlsAdaptor = [MovieControlsAdaptor movieControlsAdaptor];
-  self.movieControlsAdaptor.animatorView = self.animatorView;
-  self.movieControlsAdaptor.movieControlsViewController = self.movieControlsViewController;
-  
-  // Associate Media with the view that it will be rendered into
-  
-  [self.animatorView attachMedia:media];
-  
-  // This object needs to listen for the AVAnimatorDoneNotification to update the GUI
-  // after movie loops are finished playing.
-  
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(animatorDoneNotification:) 
-                                               name:AVAnimatorDoneNotification
-                                             object:self.animatorView.media];  
-  
-  [self.movieControlsAdaptor startAnimator];
+  [comp compose:plistDict];
+
+  return;
 }
 
 - (void) stopAnimator
@@ -171,6 +131,76 @@
 {
   [self loadAnimatorView:FALSE];
   return;
+}
+
+- (void) setupNotification
+{
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(finishedLoadNotification:) 
+                                               name:AVOfflineCompositionCompletedNotification
+                                             object:self.composition];
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(failedToLoadNotification:) 
+                                               name:AVOfflineCompositionFailedNotification
+                                             object:self.composition];  
+}
+
+- (void) finishedLoadNotification:(NSNotification*)notification
+{
+  NSLog(@"finishedLoadNotification");
+  
+  NSString *filename = self.composition.destination;
+  
+  AVAnimatorMedia *media = [AVAnimatorMedia aVAnimatorMedia];
+  
+  // Create res loader
+  
+  AVAppResourceLoader *resLoader = [AVAppResourceLoader aVAppResourceLoader];
+  resLoader.movieFilename = filename; // Phony resource name, becomes no-op
+	media.resourceLoader = resLoader;    
+  
+  media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+    
+  AVMvidFrameDecoder *frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+  
+  BOOL worked;
+  worked = [frameDecoder openForReading:filename];
+	NSAssert(worked, @"frameDecoder openForReading failed");
+
+  
+	self.movieControlsViewController = [MovieControlsViewController movieControlsViewController:self.animatorView];
+  
+  // A MovieControlsViewController can only be placed inside a toplevel window!
+  // Unlike a normal controller, you can't invoke [window addSubview:movieControlsViewController.view]
+  // to place a MovieControlsViewController in a window. Just set the mainWindow property instead.
+  
+  self.movieControlsViewController.mainWindow = self.window;
+  
+  self.movieControlsAdaptor = [MovieControlsAdaptor movieControlsAdaptor];
+  self.movieControlsAdaptor.animatorView = self.animatorView;
+  self.movieControlsAdaptor.movieControlsViewController = self.movieControlsViewController;
+  
+  // Associate Media with the view that it will be rendered into
+  
+  [self.animatorView attachMedia:media];
+  
+  // This object needs to listen for the AVAnimatorDoneNotification to update the GUI
+  // after movie loops are finished playing.
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(animatorDoneNotification:) 
+                                               name:AVAnimatorDoneNotification
+                                             object:self.animatorView.media];  
+  
+  [self.movieControlsAdaptor startAnimator];
+  
+  return;
+}
+
+- (void) failedToLoadNotification:(NSNotification*)notification
+{
+  NSLog(@"failedToLoadNotification");
 }
 
 @end

@@ -126,11 +126,14 @@
 
   float numFramesFloat = duration / self.frameDuration;
   int numFrames = round( numFramesFloat );
+  float remainder = numFramesFloat - (numFrames * self.frameDuration);
   
 #ifdef LOGGING
   NSLog(@"frame rate = %0.2f FPS", nominalFrameRate);
+  NSLog(@"frame duration = %0.4f FPS", self.frameDuration);
   NSLog(@"duration = %0.2f S", duration);
   NSLog(@"numFrames = %0.4f -> %d", numFramesFloat, numFrames);
+  NSLog(@"remainder = %0.4f", remainder);
 #endif // LOGGING
   
   self.totalNumFrames = numFrames;

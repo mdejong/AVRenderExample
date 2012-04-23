@@ -190,7 +190,9 @@
 {
   offset = maxvid_file_padding_before_keyframe(maxvidOutFile, offset);
  
-  NSAssert(frameNum < self.totalNumFrames, @"totalNumFrames");
+  if ((frameNum < self.totalNumFrames) == FALSE) {
+    NSAssert(FALSE, @"totalNumFrames");
+  }
   
   MVFrame *mvFrame = &mvFramesArray[frameNum];
   

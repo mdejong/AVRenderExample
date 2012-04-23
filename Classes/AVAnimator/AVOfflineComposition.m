@@ -90,8 +90,6 @@ typedef enum
 
 @property (nonatomic, copy) NSString *source;
 
-@property (nonatomic, copy) NSString *destination;
-
 @property (nonatomic, copy) NSArray *compClips;
 
 @property (nonatomic, assign) float compDuration;

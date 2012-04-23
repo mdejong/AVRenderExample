@@ -11,6 +11,7 @@
 @class AVAnimatorView;
 @class MovieControlsViewController;
 @class MovieControlsAdaptor;
+@class AVOfflineComposition;
 
 @interface AVSyncViewController : UIViewController {
   UIWindow *m_window;
@@ -19,6 +20,7 @@
   AVAnimatorView *m_animatorView;
   MovieControlsViewController *m_movieControlsViewController;
   MovieControlsAdaptor *m_movieControlsAdaptor;
+  AVOfflineComposition *m_composition;
 }
 
 @property(nonatomic, retain) UIWindow *window;
@@ -27,9 +29,12 @@
 @property (nonatomic, retain) AVAnimatorView *animatorView;
 @property (nonatomic, retain) MovieControlsViewController *movieControlsViewController;
 @property (nonatomic, retain) MovieControlsAdaptor *movieControlsAdaptor;
+@property (nonatomic, retain) AVOfflineComposition *composition;
 
 - (IBAction) doSlowButton:(id)target;
 - (IBAction) doFastButton:(id)target;
+
+- (void) setupNotification;
 
 @end
 

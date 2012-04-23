@@ -12,9 +12,6 @@
 		2899E5220DE3E06400AC0155 /* AVSyncViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* AVSyncViewController.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* AVSyncViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* AVSyncViewController.m */; };
-		CD143B7C138231BA00963BBE /* LS_Back_C_45BPM.caf in Resources */ = {isa = PBXBuildFile; fileRef = CD143B79138231BA00963BBE /* LS_Back_C_45BPM.caf */; };
-		CD143B7D138231BA00963BBE /* LS_Back_C_70BPM.caf in Resources */ = {isa = PBXBuildFile; fileRef = CD143B7A138231BA00963BBE /* LS_Back_C_70BPM.caf */; };
-		CD143B7E138231BA00963BBE /* LS_C_Major_Open_4ths.mvid.7z in Resources */ = {isa = PBXBuildFile; fileRef = CD143B7B138231BA00963BBE /* LS_C_Major_Open_4ths.mvid.7z */; };
 		CD143BAD1382351F00963BBE /* note_256.png in Resources */ = {isa = PBXBuildFile; fileRef = CD143BAC1382351F00963BBE /* note_256.png */; };
 		CD143BE6138235F100963BBE /* AV7zApng2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143BB8138235F100963BBE /* AV7zApng2MvidResourceLoader.m */; };
 		CD143BE7138235F100963BBE /* AV7zAppResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143BBA138235F100963BBE /* AV7zAppResourceLoader.m */; };
@@ -83,6 +80,9 @@
 		CDD324381538C4E800B8E213 /* AVOfflineComposition.m in Sources */ = {isa = PBXBuildFile; fileRef = CDD3242F1538C4E800B8E213 /* AVOfflineComposition.m */; };
 		CDD324391538C4E800B8E213 /* MovdataConvertMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = CDD324311538C4E800B8E213 /* MovdataConvertMaxvid.m */; };
 		CDD3243A1538C4E800B8E213 /* SegmentedMappedData.m in Sources */ = {isa = PBXBuildFile; fileRef = CDD324331538C4E800B8E213 /* SegmentedMappedData.m */; };
+		CDE2675915411E2E00774B59 /* v1.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = CDE2675715411E2E00774B59 /* v1.mp4 */; };
+		CDE2675A15411E2E00774B59 /* v2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = CDE2675815411E2E00774B59 /* v2.mp4 */; };
+		CDE268271541224800774B59 /* Comp.plist in Resources */ = {isa = PBXBuildFile; fileRef = CDE268261541224800774B59 /* Comp.plist */; };
 		CDE77AF014BDFFAE0012DA1A /* maxvid_decode_arm.s in Sources */ = {isa = PBXBuildFile; fileRef = CDE77AEF14BDFFAE0012DA1A /* maxvid_decode_arm.s */; };
 /* End PBXBuildFile section */
 
@@ -97,9 +97,6 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* AVSync_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVSync_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* AVSync-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AVSync-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
-		CD143B79138231BA00963BBE /* LS_Back_C_45BPM.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = LS_Back_C_45BPM.caf; sourceTree = "<group>"; };
-		CD143B7A138231BA00963BBE /* LS_Back_C_70BPM.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = LS_Back_C_70BPM.caf; sourceTree = "<group>"; };
-		CD143B7B138231BA00963BBE /* LS_C_Major_Open_4ths.mvid.7z */ = {isa = PBXFileReference; lastKnownFileType = file; path = LS_C_Major_Open_4ths.mvid.7z; sourceTree = "<group>"; };
 		CD143BAC1382351F00963BBE /* note_256.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = note_256.png; sourceTree = "<group>"; };
 		CD143BB7138235F100963BBE /* AV7zApng2MvidResourceLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AV7zApng2MvidResourceLoader.h; sourceTree = "<group>"; };
 		CD143BB8138235F100963BBE /* AV7zApng2MvidResourceLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AV7zApng2MvidResourceLoader.m; sourceTree = "<group>"; };
@@ -220,6 +217,9 @@
 		CDD324311538C4E800B8E213 /* MovdataConvertMaxvid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MovdataConvertMaxvid.m; sourceTree = "<group>"; };
 		CDD324321538C4E800B8E213 /* SegmentedMappedData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SegmentedMappedData.h; sourceTree = "<group>"; };
 		CDD324331538C4E800B8E213 /* SegmentedMappedData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SegmentedMappedData.m; sourceTree = "<group>"; };
+		CDE2675715411E2E00774B59 /* v1.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = v1.mp4; sourceTree = "<group>"; };
+		CDE2675815411E2E00774B59 /* v2.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = v2.mp4; sourceTree = "<group>"; };
+		CDE268261541224800774B59 /* Comp.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Comp.plist; sourceTree = "<group>"; };
 		CDE77AEF14BDFFAE0012DA1A /* maxvid_decode_arm.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = maxvid_decode_arm.s; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -297,9 +297,9 @@
 			children = (
 				CD143BAC1382351F00963BBE /* note_256.png */,
 				CD2637D71390254400E18F0C /* Icon.png */,
-				CD143B79138231BA00963BBE /* LS_Back_C_45BPM.caf */,
-				CD143B7A138231BA00963BBE /* LS_Back_C_70BPM.caf */,
-				CD143B7B138231BA00963BBE /* LS_C_Major_Open_4ths.mvid.7z */,
+				CDE2675715411E2E00774B59 /* v1.mp4 */,
+				CDE2675815411E2E00774B59 /* v2.mp4 */,
+				CDE268261541224800774B59 /* Comp.plist */,
 				2899E5210DE3E06400AC0155 /* AVSyncViewController.xib */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* AVSync-Info.plist */,
@@ -519,9 +519,6 @@
 			files = (
 				28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */,
 				2899E5220DE3E06400AC0155 /* AVSyncViewController.xib in Resources */,
-				CD143B7C138231BA00963BBE /* LS_Back_C_45BPM.caf in Resources */,
-				CD143B7D138231BA00963BBE /* LS_Back_C_70BPM.caf in Resources */,
-				CD143B7E138231BA00963BBE /* LS_C_Major_Open_4ths.mvid.7z in Resources */,
 				CD143BAD1382351F00963BBE /* note_256.png in Resources */,
 				CD143E051382577800963BBE /* MovieTransportBackground.png in Resources */,
 				CD143E061382577800963BBE /* nexttrack.png in Resources */,
@@ -531,6 +528,9 @@
 				CD143E0A1382577800963BBE /* VolumeLeftTall.png in Resources */,
 				CD143E0B1382577800963BBE /* VolumeRightTall.png in Resources */,
 				CD2637D81390254400E18F0C /* Icon.png in Resources */,
+				CDE2675915411E2E00774B59 /* v1.mp4 in Resources */,
+				CDE2675A15411E2E00774B59 /* v2.mp4 in Resources */,
+				CDE268271541224800774B59 /* Comp.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
