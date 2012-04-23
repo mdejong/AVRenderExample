@@ -64,18 +64,6 @@
   CGRect frame = CGRectMake(0, 0, 480, 320);
   self.animatorView = [AVAnimatorView aVAnimatorViewWithFrame:frame];
   
-  // Extract FILENAME.mvid from FILENAME.mvid.7z attached as app resource. The compressed .mvid
-  // is smaller than a compressed .mov and smaller than a compressed .apng for this video content.
-  
-  NSString *backgroundVideoResourceFilename = @"v1.mp4";
-  NSString *foregroundVideoResourceFilename = @"v2.mp4";
-  
-  NSString *backgroundVideoResourcePath = [AVFileUtil getTmpDirPath:backgroundVideoResourceFilename];
-  NSString *foregroundVideoResourcePath = [AVFileUtil getTmpDirPath:foregroundVideoResourceFilename];
-
-  NSLog(@"backgroundVideoResourcePath %@", backgroundVideoResourcePath);
-  NSLog(@"foregroundVideoResourcePath %@", foregroundVideoResourcePath);
-
   // Create Render Object
   
   NSString *resFilename = @"Comp.plist";
