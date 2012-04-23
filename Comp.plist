@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ABOUT</key>
+	<string>H264 video, 640x480, 2 frames at 30FPS</string>
+	<key>Source</key>
+	<string>Comp.plist</string>
+	<key>Destination</key>
+	<string>Comp.mvid</string>
+	<key>CompDurationSeconds</key>
+	<real>29.96</real>
+	<key>CompFramesPerSecond</key>
+	<integer>30</integer>
+	<key>CompWidth</key>
+	<integer>640</integer>
+	<key>CompHeight</key>
+	<integer>480</integer>
+	<key>CompClips</key>
+	<array>
+		<dict>
+			<key>ClipSource</key>
+			<string>v1.mp4</string>
+			<key>ClipType</key>
+			<string>h264</string>
+			<key>ClipX</key>
+			<integer>0</integer>
+			<key>ClipY</key>
+			<integer>0</integer>
+			<key>ClipWidth</key>
+			<integer>640</integer>
+			<key>ClipHeight</key>
+			<integer>480</integer>
+			<key>ClipStartSeconds</key>
+			<integer>0</integer>
+			<key>ClipEndSeconds</key>
+			<real>29.96</real>
+		</dict>
+		<dict>
+			<key>ClipSource</key>
+			<string>v2.mp4</string>
+			<key>ClipType</key>
+			<string>h264</string>
+			<key>ClipX</key>
+			<integer>330</integer>
+			<key>ClipY</key>
+			<integer>152</integer>
+			<key>ClipWidth</key>
+			<integer>280</integer>
+			<key>ClipHeight</key>
+			<integer>162</integer>
+			<key>ClipStartSeconds</key>
+			<integer>18</integer>
+			<key>ClipEndSeconds</key>
+			<real>28.27</real>
+		</dict>
+	</array>
+</dict>
+</plist>
