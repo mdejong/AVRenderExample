@@ -48,7 +48,7 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
   NSAssert(self.slowButton, @"slowButton not set in NIB");
-  NSAssert(self.fastButton, @"fastButton not set in NIB");
+  //NSAssert(self.fastButton, @"fastButton not set in NIB");
 }
 
 - (void) loadAnimatorView:(BOOL)isSlow
