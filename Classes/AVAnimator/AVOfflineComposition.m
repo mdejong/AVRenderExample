@@ -170,7 +170,11 @@ typedef enum
   worked = [self parseToplevelProperties:compDict];
   
   if (worked) {
+    NSLog(@"begin composeFrames");
+    
     worked = [self composeFrames];
+    
+    NSLog(@"done composeFrames");
   }
 
   if (worked) {
@@ -750,7 +754,11 @@ typedef enum
   [AVFileUtil renameFile:phonyOutPath toPath:self.destination];
   
 #ifdef LOGGING
-  NSLog(@"Wrote comp file %@", self.destination);
+  if (worked) {
+    NSLog(@"Wrote comp file %@", self.destination);
+  } else {
+    NSLog(@"Failed to write comp file %@", self.destination);    
+  }
 #endif // LOGGING
   
   return retcode;
