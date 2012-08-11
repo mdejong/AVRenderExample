@@ -8,15 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
-@class AVSyncViewController;
+@class AVRenderExampleViewController;
 
-@interface AVSyncAppDelegate : NSObject <UIApplicationDelegate> {
+@interface AVRenderExampleAppDelegate : NSObject <UIApplicationDelegate> {
     UIWindow *window;
-    AVSyncViewController *viewController;
+    AVRenderExampleViewController *viewController;
 }
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
-@property (nonatomic, retain) IBOutlet AVSyncViewController *viewController;
+@property (nonatomic, retain) IBOutlet AVRenderExampleViewController *viewController;
 
 @end
 

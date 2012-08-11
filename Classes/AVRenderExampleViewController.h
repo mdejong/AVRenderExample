@@ -1,6 +1,6 @@
 //
-//  AVSyncViewController.h
-//  AVSync
+//  AVRenderExampleViewController.h
+//  AVRenderExample
 //
 //  Created by Moses DeJong on 5/16/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
@@ -13,7 +13,7 @@
 @class MovieControlsAdaptor;
 @class AVOfflineComposition;
 
-@interface AVSyncViewController : UIViewController {
+@interface AVRenderExampleViewController : UIViewController {
   UIWindow *m_window;
   UIButton *m_slowButton;
   UIButton *m_fastButton;

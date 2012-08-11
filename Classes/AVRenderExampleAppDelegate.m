@@ -6,10 +6,10 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "AVSyncAppDelegate.h"
-#import "AVSyncViewController.h"
+#import "AVRenderExampleAppDelegate.h"
+#import "AVRenderExampleViewController.h"
 
-@implementation AVSyncAppDelegate
+@implementation AVRenderExampleAppDelegate
 
 @synthesize window;
 @synthesize viewController;

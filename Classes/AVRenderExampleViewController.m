@@ -1,12 +1,12 @@
 //
-//  AVSyncViewController.m
-//  AVSync
+//  AVRenderExampleViewController.m
+//  AVRenderExample
 //
 //  Created by Moses DeJong on 5/16/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "AVSyncViewController.h"
+#import "AVRenderExampleViewController.h"
 
 #import "AVAnimatorView.h"
 
@@ -23,7 +23,7 @@
 
 #import "AVOfflineComposition.h"
 
-@implementation AVSyncViewController
+@implementation AVRenderExampleViewController
 
 @synthesize window = m_window;
 @synthesize slowButton = m_slowButton;
