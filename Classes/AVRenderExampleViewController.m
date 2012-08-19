@@ -3,8 +3,8 @@
 //  AVRenderExample
 //
 //  Created by Moses DeJong on 5/16/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
+//  See AVRenderExampleViewController.h for description of this example app.
 
 #import "AVRenderExampleViewController.h"
 
@@ -26,8 +26,7 @@
 @implementation AVRenderExampleViewController
 
 @synthesize window = m_window;
-@synthesize slowButton = m_slowButton;
-@synthesize fastButton = m_fastButton;
+@synthesize renderButton = m_renderButton;
 @synthesize animatorView = m_animatorView;
 @synthesize movieControlsViewController = m_movieControlsViewController;
 @synthesize movieControlsAdaptor = m_movieControlsAdaptor;
@@ -35,8 +34,7 @@
 
 - (void)dealloc {
   self.window = nil;
-  self.slowButton = nil;
-  self.fastButton = nil;
+  self.renderButton = nil;
   self.animatorView = nil;
   self.movieControlsViewController = nil;
   self.movieControlsAdaptor = nil;
@@ -47,11 +45,10 @@
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
   [super viewDidLoad];
-  NSAssert(self.slowButton, @"slowButton not set in NIB");
-  //NSAssert(self.fastButton, @"fastButton not set in NIB");
+  NSAssert(self.renderButton, @"renderButton not set in NIB");
 }
 
-- (void) loadAnimatorView:(BOOL)isSlow
+- (void) loadAnimatorView
 {
   // The UIWindow the movie controls will be loaded into can't be null at this point
   UIWindow *window = self.view.window;
@@ -109,15 +106,9 @@
 	[self stopAnimator];  
 }
 
-- (IBAction) doSlowButton:(id)target
+- (IBAction) renderButton:(id)target
 {
-  [self loadAnimatorView:TRUE];
-  return;
-}
-
-- (IBAction) doFastButton:(id)target
-{
-  [self loadAnimatorView:FALSE];
+  [self loadAnimatorView];
   return;
 }
 

@@ -1,10 +1,10 @@
 //
-//  AVSyncAppDelegate.m
-//  AVSync
+//  AVRenderExampleAppDelegate.m
+//  AVRenderExample
 //
 //  Created by Moses DeJong on 5/16/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
+//  See AVRenderExampleViewController.h for description of this example app.
 
 #import "AVRenderExampleAppDelegate.h"
 #import "AVRenderExampleViewController.h"
