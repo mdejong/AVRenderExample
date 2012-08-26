@@ -12,7 +12,7 @@
 
 #import "maxvid_file.h"
 
-#if defined(HAS_AVASSET_READER_CONVERT_MAXVID)
+#if defined(HAS_AVASSET_CONVERT_MAXVID)
 
 #import <AVFoundation/AVFoundation.h>
 
@@ -25,6 +25,8 @@
 #import "CGFrameBuffer.h"
 
 #define LOGGING
+
+NSString * const AVAssetReaderConvertMaxvidCompletedNotification = @"AVAssetReaderConvertMaxvidCompletedNotification";
 
 // Private API
 
@@ -43,6 +45,7 @@
 @synthesize assetURL = m_assetURL;
 @synthesize aVAssetReader = m_aVAssetReader;
 @synthesize aVAssetReaderOutput = m_aVAssetReaderOutput;
+@synthesize wasSuccessful = m_wasSuccessful;
 
 - (void) dealloc
 {  
@@ -121,18 +124,19 @@
   float duration = (float)CMTimeGetSeconds(timeRange.duration);
   
   float nominalFrameRate = videoTrack.nominalFrameRate;
-    
-  self.frameDuration = 1.0 / nominalFrameRate;
+  
+  float frameDuration = 1.0 / nominalFrameRate;
+  self.frameDuration = frameDuration;
 
-  float numFramesFloat = duration / self.frameDuration;
+  float numFramesFloat = duration / frameDuration;
   int numFrames = round( numFramesFloat );
-  float durationForNumFrames = numFrames * self.frameDuration;
+  float durationForNumFrames = numFrames * frameDuration;
   float durationRemainder = duration - durationForNumFrames;
-  float durationTenPercent = self.frameDuration * 0.10;
+  float durationTenPercent = frameDuration * 0.10;
   
 #ifdef LOGGING
   NSLog(@"frame rate = %0.2f FPS", nominalFrameRate);
-  NSLog(@"frame duration = %0.4f FPS", self.frameDuration);
+  NSLog(@"frame duration = %0.4f FPS", frameDuration);
   NSLog(@"duration = %0.2f S", duration);
   NSLog(@"numFrames = %0.4f -> %d", numFramesFloat, numFrames);
   NSLog(@"durationRemainder = %0.4f", durationRemainder);
@@ -162,11 +166,13 @@
 
 // Read video data from a single track (only one video track is supported anyway)
 
-- (BOOL) decodeAssetURL
+- (BOOL) blockingDecode
 {
   BOOL worked;
   BOOL retstatus = FALSE;
-    
+  
+  self.wasSuccessful = FALSE;
+  
   AVAssetReader *aVAssetReader = nil;
   
   worked = [self setupAsset];
@@ -211,6 +217,8 @@
   
   float prevFrameDisplayTime = 0.0;
   
+  float frameDurationTooEarly = (self.frameDuration * 0.90);
+  
   while ((writeFailed == FALSE) && ([aVAssetReader status] == AVAssetReaderStatusReading))
   {
     NSAutoreleasePool *inner_pool = [[NSAutoreleasePool alloc] init];
@@ -236,11 +244,47 @@
       
       float frameDisplayTime = (float) CMTimeGetSeconds(presentationTimeStamp);
       
+      float expectedFrameDisplayTime = self.frameNum * self.frameDuration;
+      
 #ifdef LOGGING
       NSLog(@"frame presentation time = %0.4f", frameDisplayTime);
+      NSLog(@"expected frame presentation time = %0.4f", expectedFrameDisplayTime);
       NSLog(@"prev frame presentation time = %0.4f", prevFrameDisplayTime);
 #endif // LOGGING
       
+      // Check for display time clock drift. This is caused by a frame that has
+      // a frame display time that is so early that it is almost a whole frame
+      // early. The decoder can't deal with this case because we have to maintain
+      // an absolute display delta between frames. To fix the problem, we have
+      // to drop a frame to let actual display time catch up to the expected
+      // frame display time. We have already calculated the total number of frames
+      // based on the reported duration of the whole movie, so this logic has the
+      // effect of keeping the total duration consistent once the data is stored
+      // in equally spaced frames.
+      
+      float frameDisplayEarly = 0.0;
+      if (frameDisplayTime < expectedFrameDisplayTime) {
+        frameDisplayEarly = expectedFrameDisplayTime - frameDisplayTime;
+      }
+      if (frameDisplayEarly > frameDurationTooEarly) {
+        // The actual presentation time has drifted from the expected presentation time
+        
+#ifdef LOGGING
+        NSLog(@"frame presentation drifted too early = %0.4f", frameDisplayEarly);
+#endif // LOGGING
+        
+        // Drop the frame, meaning we do not write it to the .mvid file. Instead, let
+        // processing continue with the next frame which will display at about the
+        // right expected time. The frame number stays the same since no output
+        // buffer was written. Note that we need to reset the prevFrameDisplayTime so
+        // that no trailing nop frame is emitted in the normal case.
+        
+        prevFrameDisplayTime = expectedFrameDisplayTime;
+        CFRelease(sampleBuffer);
+        [inner_pool drain];
+        continue;
+      }
+            
       float delta = frameDisplayTime - prevFrameDisplayTime;
       
       prevFrameDisplayTime = frameDisplayTime;
@@ -300,6 +344,10 @@
     [inner_pool drain];
   }
 
+  // Double check that we did not write too few frames.
+  
+  NSAssert(self.frameNum == self.totalNumFrames, @"frameNum == totalNumFrames");
+  
   // Explicitly release the retained frameBuffer
   
   [frameBuffer release];
@@ -328,6 +376,11 @@ retcode:
 #endif // LOGGING
   }
   
+  if (retstatus) {
+    self.wasSuccessful = TRUE;
+  } else {
+    self.wasSuccessful = FALSE;
+  }
   return retstatus;
 }
 
@@ -358,11 +411,18 @@ retcode:
   
   size_t bufferSize = CVPixelBufferGetDataSize(imageBuffer);
   
+  if (FALSE) {
+    size_t left, right, top, bottom;
+    CVPixelBufferGetExtendedPixels(imageBuffer, &left, &right, &top, &bottom);
+    NSLog(@"extended pixels : left %d right %d top %d bottom %d", (int)left, (int)right, (int)top, (int)bottom);
+
+    NSLog(@"buffer size = %d (bpr %d), row bytes (%d) * height (%d) = %d", (int)bufferSize, (int)(bufferSize/height), (int)bytesPerRow, (int)height, (int)(bytesPerRow * height));
+  }
+  
   // Create a Quartz direct-access data provider that uses data we supply.
   
   CGDataProviderRef dataProvider =
-  
-  CGDataProviderCreateWithData(NULL, baseAddress, bufferSize, NULL);
+    CGDataProviderCreateWithData(NULL, baseAddress, bufferSize, NULL);
   
   CGImageRef cgImageRef = CGImageCreate(width, height, 8, 32, bytesPerRow,
                 colorSpace, kCGBitmapByteOrder32Host | kCGImageAlphaNoneSkipFirst,
@@ -389,6 +449,48 @@ retcode:
   return TRUE;
 }
 
+// This method will send a notification to indicate that op has completed successfully.
+
+- (void) notifyDecodingDoneInMainThread
+{
+  NSAssert([NSThread isMainThread] == TRUE, @"isMainThread");
+  
+  NSString *notificationName = AVAssetReaderConvertMaxvidCompletedNotification;
+  
+  [[NSNotificationCenter defaultCenter] postNotificationName:notificationName
+                                                      object:self];	
+}
+
+// Secondary thread entry point for non blocking operation
+
+- (void) nonblockingDecodeEntryPoint {  
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  
+  [self blockingDecode];
+  
+  if (FALSE) {
+    [self notifyDecodingDoneInMainThread];
+  }
+  
+  [self performSelectorOnMainThread:@selector(notifyDecodingDoneInMainThread) withObject:nil waitUntilDone:TRUE];
+  
+  [pool drain];
+  return;
+}
+
+// Kick off an async (non-blocking call) decode operation in a secondary
+// thread. This method will deliver a Completed notification
+// in the main thread when complete.
+
+- (void) nonblockingDecode
+{
+  if (FALSE) {
+    [self nonblockingDecodeEntryPoint];
+  }
+  [NSThread detachNewThreadSelector:@selector(nonblockingDecodeEntryPoint) toTarget:self withObject:nil];
+  return;
+}
+
 @end
 
-#endif // HAS_AVASSET_READER_CONVERT_MAXVID
+#endif // HAS_AVASSET_CONVERT_MAXVID

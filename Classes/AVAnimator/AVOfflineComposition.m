@@ -170,11 +170,7 @@ typedef enum
   worked = [self parseToplevelProperties:compDict];
   
   if (worked) {
-    NSLog(@"begin composeFrames");
-    
     worked = [self composeFrames];
-    
-    NSLog(@"done composeFrames");
   }
 
   if (worked) {
@@ -566,19 +562,19 @@ typedef enum
       if ([[NSFileManager defaultManager] fileExistsAtPath:mvidPath] == FALSE) {
         // tmp/XYZ.mvid does not exist, decode from H264 now
         
-#ifdef HAS_AVASSET_READER_CONVERT_MAXVID
+#if defined(HAS_AVASSET_CONVERT_MAXVID)
         AVAssetReaderConvertMaxvid *converter = [AVAssetReaderConvertMaxvid aVAssetReaderConvertMaxvid];
         converter.assetURL = [NSURL fileURLWithPath:movPath];
         converter.mvidPath = mvidPath;
         
         //converter.genAdler = TRUE;
         
-        worked = [converter decodeAssetURL];
+        worked = [converter blockingDecode];
         
         // FIXME: Write to tmp file, then rename to final output file to avoid invalid file due to crash
 #else
         worked = FALSE;
-#endif // HAS_AVASSET_READER_CONVERT_MAXVID
+#endif // HAS_AVASSET_CONVERT_MAXVID
         
         if (worked == FALSE) {
           return FALSE;
@@ -754,11 +750,7 @@ typedef enum
   [AVFileUtil renameFile:phonyOutPath toPath:self.destination];
   
 #ifdef LOGGING
-  if (worked) {
-    NSLog(@"Wrote comp file %@", self.destination);
-  } else {
-    NSLog(@"Failed to write comp file %@", self.destination);    
-  }
+  NSLog(@"Wrote comp file %@", self.destination);
 #endif // LOGGING
   
   return retcode;

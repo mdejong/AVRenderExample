@@ -71,6 +71,7 @@
 		CD143E0B1382577800963BBE /* VolumeRightTall.png in Resources */ = {isa = PBXBuildFile; fileRef = CD143E021382577800963BBE /* VolumeRightTall.png */; };
 		CD143E1D138257E100963BBE /* MovieControlsAdaptor.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143E1C138257E100963BBE /* MovieControlsAdaptor.m */; };
 		CD2637D81390254400E18F0C /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = CD2637D71390254400E18F0C /* Icon.png */; };
+		CD6E7F7015EA481F004CD625 /* AVAssetWriterConvertFromMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6E7F6F15EA481F004CD625 /* AVAssetWriterConvertFromMaxvid.m */; };
 		CDA6EE5915411A0600B60E2E /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDA6EE5815411A0600B60E2E /* CoreMedia.framework */; };
 		CDA6EE5B15411A3F00B60E2E /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDA6EE5A15411A3F00B60E2E /* CoreVideo.framework */; };
 		CDD324341538C4E800B8E213 /* ApngConvertMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = CDD324271538C4E800B8E213 /* ApngConvertMaxvid.m */; };
@@ -201,6 +202,9 @@
 		CD143E1B138257E100963BBE /* MovieControlsAdaptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MovieControlsAdaptor.h; sourceTree = "<group>"; };
 		CD143E1C138257E100963BBE /* MovieControlsAdaptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MovieControlsAdaptor.m; sourceTree = "<group>"; };
 		CD2637D71390254400E18F0C /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		CD6E7F6D15EA481F004CD625 /* AVAssetConvertCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVAssetConvertCommon.h; sourceTree = "<group>"; };
+		CD6E7F6E15EA481F004CD625 /* AVAssetWriterConvertFromMaxvid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVAssetWriterConvertFromMaxvid.h; sourceTree = "<group>"; };
+		CD6E7F6F15EA481F004CD625 /* AVAssetWriterConvertFromMaxvid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVAssetWriterConvertFromMaxvid.m; sourceTree = "<group>"; };
 		CDA6EE5815411A0600B60E2E /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		CDA6EE5A15411A3F00B60E2E /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		CDD324261538C4E800B8E213 /* ApngConvertMaxvid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApngConvertMaxvid.h; sourceTree = "<group>"; };
@@ -373,10 +377,13 @@
 				CD143BE2138235F100963BBE /* movdata.h */,
 				CDD324261538C4E800B8E213 /* ApngConvertMaxvid.h */,
 				CDD324271538C4E800B8E213 /* ApngConvertMaxvid.m */,
+				CD6E7F6D15EA481F004CD625 /* AVAssetConvertCommon.h */,
 				CDD324281538C4E800B8E213 /* AVAsset2MvidResourceLoader.h */,
 				CDD324291538C4E800B8E213 /* AVAsset2MvidResourceLoader.m */,
 				CDD3242A1538C4E800B8E213 /* AVAssetReaderConvertMaxvid.h */,
 				CDD3242B1538C4E800B8E213 /* AVAssetReaderConvertMaxvid.m */,
+				CD6E7F6E15EA481F004CD625 /* AVAssetWriterConvertFromMaxvid.h */,
+				CD6E7F6F15EA481F004CD625 /* AVAssetWriterConvertFromMaxvid.m */,
 				CDD3242C1538C4E800B8E213 /* AVMvidFileWriter.h */,
 				CDD3242D1538C4E800B8E213 /* AVMvidFileWriter.m */,
 				CDD3242E1538C4E800B8E213 /* AVOfflineComposition.h */,
@@ -594,6 +601,7 @@
 				CDD324381538C4E800B8E213 /* AVOfflineComposition.m in Sources */,
 				CDD324391538C4E800B8E213 /* MovdataConvertMaxvid.m in Sources */,
 				CDD3243A1538C4E800B8E213 /* SegmentedMappedData.m in Sources */,
+				CD6E7F7015EA481F004CD625 /* AVAssetWriterConvertFromMaxvid.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
