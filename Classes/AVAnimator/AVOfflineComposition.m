@@ -1,5 +1,5 @@
 //
-//  AVOfflineComposition.h
+//  AVOfflineComposition.m
 //  Created by Moses DeJong on 3/31/12.
 //
 //  License terms defined in License.txt.
@@ -40,7 +40,6 @@ typedef enum
 {
   NSString   *m_clipSource;
   AVMvidFrameDecoder *m_mvidFrameDecoder;
-  UIImage *m_lastFrameImage;
 @public
   AVOfflineCompositionClipType clipType;
   NSInteger clipX;
@@ -56,8 +55,6 @@ typedef enum
 @property (nonatomic, copy) NSString *clipSource;
 
 @property (nonatomic, retain) AVMvidFrameDecoder *mvidFrameDecoder;
-
-@property (nonatomic, retain) UIImage *lastFrameImage;
 
 + (AVOfflineCompositionClip*) aVOfflineCompositionClip;
 
@@ -204,6 +201,7 @@ typedef enum
 
 - (CGColorRef) createCGColor:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha
 {
+  // FIXME: should this be RGB or sRGB colorspace?
   CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
   CGFloat components[4] = {red, green, blue, alpha};
   CGColorRef cgColor = CGColorCreate(colorSpace, components);
@@ -592,6 +590,9 @@ typedef enum
       return FALSE;
     }
     
+    // FIXME: print a log message saying that non-SRGB .mvid was found?
+    //NSAssert([mvidFrameDecoder isSRGB] == TRUE, @"isSRGB");
+  
     compClip.mvidFrameDecoder = mvidFrameDecoder;
     
     // Grab the clip's frame duration out of the mvid header. This frame duration may
@@ -827,20 +828,11 @@ typedef enum
         
         // While this advanceToFrame returns a UIImage, we are not actually using
         // and UI layer rendering functions, so it should be thread safe to just
-        // hold on to a UIImage and the CGImageRef it contains.
+        // hold on to a UIImage and the CGImageRef it contains. Note that we don't
+        // care if the frame returned is a duplicate since we just render it.
         
-        UIImage *image = [mvidFrameDecoder advanceToFrame:clipFrame];
-        
-        // In the case where a frame is a no-op or is the same as the previous
-        // frame, nill is returned. Deal with this case by saving the image
-        // object into the lastFrameImage property.
-        
-        if (image) {
-          compClip.lastFrameImage = image;
-        } else {
-          image = compClip.lastFrameImage;
-        }
-        
+        AVFrame *frame = [mvidFrameDecoder advanceToFrame:clipFrame];
+        UIImage *image = frame.image;
         NSAssert(image, @"image");
         cgImageRef = image.CGImage;
       } else {
@@ -882,8 +874,6 @@ typedef enum
 
 @synthesize mvidFrameDecoder = m_mvidFrameDecoder;
 
-@synthesize lastFrameImage = m_lastFrameImage;
-
 + (AVOfflineCompositionClip*) aVOfflineCompositionClip
 {
   AVOfflineCompositionClip *obj = [[AVOfflineCompositionClip alloc] init];
@@ -892,8 +882,6 @@ typedef enum
 
 - (void) dealloc
 {
-  // Make sure all UIImage refs to memory are dropped before mapped memory is dropped
-  self.lastFrameImage = nil;
   [AutoPropertyRelease releaseProperties:self thisClass:AVOfflineCompositionClip.class];
   [super dealloc];
 }

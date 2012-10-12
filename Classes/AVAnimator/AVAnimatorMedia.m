@@ -655,7 +655,7 @@
 	OSStatus result =
 	AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(sessionCategory), &sessionCategory);
 	if (result != 0) {
-		NSLog(@"%@", [NSString stringWithFormat:@"AudioSessionSetProperty(kAudioSessionProperty_AudioCategory,kAudioSessionCategory_MediaPlayback) error : %d", result]);
+		NSLog(@"%@", [NSString stringWithFormat:@"AudioSessionSetProperty(kAudioSessionProperty_AudioCategory,kAudioSessionCategory_MediaPlayback) error : %d", (int)result]);
 	}
 }
 
@@ -1415,19 +1415,25 @@
     //		}
 	}
   
-	// Advance the "current frame" in the movie. In the case where
+  // Advance the "current frame" in the movie. In the case where
   // the next frame is exactly the same as the previous frame,
-  // nil will be returned. Note that nextFrame is left the same
-  // in the case where the frame is not changed.
-    
-	UIImage *img = [self.frameDecoder advanceToFrame:nextFrameNum];
+  // then the isDuplicate flag is TRUE.
   
-	if (img == nil) {
-		return FALSE;
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  BOOL wasChanged;
+  
+  AVFrame *frame = [self.frameDecoder advanceToFrame:nextFrameNum];
+  
+  if (frame.isDuplicate == TRUE) {
+    wasChanged = FALSE;
   } else {
+    UIImage *img = frame.image;
     self.nextFrame = img;
-    return TRUE;
+    wasChanged = TRUE;
   }
+  
+  [pool drain];
+  return wasChanged;
 }
 
 - (BOOL) hasAudio
@@ -1500,7 +1506,8 @@
   // Note that duplicateCurrentFrame could return nil.
 
   if (copyFinalFrame) {
-    UIImage *finalFrameCopy = [self.frameDecoder duplicateCurrentFrame];
+    AVFrame *frame = [self.frameDecoder duplicateCurrentFrame];
+    UIImage *finalFrameCopy = frame.image;
     self.renderer.image = finalFrameCopy;
   } else {
     self.renderer.image = nil;

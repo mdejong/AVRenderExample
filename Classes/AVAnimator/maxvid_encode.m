@@ -7,7 +7,18 @@
 // Note that EXTRA_CHECKS is conditionally define and then undefined in this header, so it
 // must appear before the EXTRA_CHECKS logic below.
 
-#include "maxvid_encode.h"
+#import "maxvid_encode.h"
+
+#import "maxvid_file.h"
+
+#import "AVMvidFileWriter.h"
+
+static
+BOOL
+maxvid_calculate_delta_pixels(NSArray *deltaPixels,
+                              int bpp,
+                              NSMutableData *mData,
+                              NSUInteger frameBufferNumPixels);
 
 // Testing indicates that there is no performance improvement in emitting ARM code for this
 // encode module.
@@ -86,6 +97,31 @@ uint32_t num_words_16bpp(uint32_t numPixels) {
   // the given number of pixels.
   return (numPixels >> 1) + (numPixels & 0x1);
 }
+
+// Query open file size, then rewind to start
+
+static
+int fpsize(FILE *fp, uint32_t *filesize) {
+  int retcode;
+  retcode = fseek(fp, 0, SEEK_END);
+  assert(retcode == 0);
+  uint32_t size = ftell(fp);
+  *filesize = size;
+  fseek(fp, 0, SEEK_SET);
+  return 0;
+}
+
+// Util struct/object used only in this module
+
+@interface DeltaPixel : NSObject {
+@public
+	uint32_t x;
+	uint32_t y;
+	uint32_t offset;
+	uint32_t oldValue;
+	uint32_t newValue;  
+}
+@end
 
 // Scan for next generic op code, one of (SKIP, DUP, COPY, DONE)
 //
@@ -1624,5 +1660,604 @@ done:
     fclose(file);
   }
 
-  return retcode;  
+  return retcode;
 }
+
+// --------------------------------------------------------------------------------------------------------
+
+@implementation DeltaPixel
+
+- (NSString*) description
+{
+  return [NSString stringWithFormat:@"x,y %d,%d at offset %d = 0x%X", self->x, self->y, self->offset, self->newValue];
+}
+
+@end // DeltaPixel
+
+// Calculate deltas between this frame and the indicated other frame.
+// The return value is an array of DeltaPixel values that store
+// the location of the pixel, the old value (the one in this frame)
+// and the new value (the one in the new frame).
+
+static
+NSArray* calculateDeltaPixels16(
+                                const uint16_t * restrict prevInputBuffer16,
+                                const uint16_t * restrict currentInputBuffer16,
+                                const uint32_t inputBufferNumWords,
+                                int width,
+                                int height)
+{
+  NSMutableArray *deltaPixels = [NSMutableArray arrayWithCapacity:1024];
+  
+  //NSAssert(prevFrame.width == currentFrame.width, @"frame widths don't match");
+  //NSAssert(prevFrame.height == currentFrame.height, @"frame heights don't match");
+  
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      uint32_t offset = (width * y) + x;
+      uint16_t old_pixel = prevInputBuffer16[offset];
+      uint16_t new_pixel = currentInputBuffer16[offset];
+      
+      if (old_pixel != new_pixel) {
+        DeltaPixel *deltaPixel = [[DeltaPixel alloc] init];
+        deltaPixel->x = x;
+        deltaPixel->y = y;
+        deltaPixel->offset = offset;
+        deltaPixel->oldValue = old_pixel;
+        deltaPixel->newValue = new_pixel;
+        
+        [deltaPixels addObject:deltaPixel];
+        [deltaPixel release];
+      }
+    }
+  }
+  
+  return deltaPixels;
+}
+
+// Calculate deltas between this frame and the indicated other frame.
+// The return value is an array of DeltaPixel values that store
+// the location of the pixel, the old value (the one in this frame)
+// and the new value (the one in the new frame).
+
+static
+NSArray* calculateDeltaPixels32(
+                                const uint32_t * restrict prevInputBuffer32,
+                                const uint32_t * restrict currentInputBuffer32,
+                                const uint32_t inputBufferNumWords,
+                                int width,
+                                int height)
+{
+  NSMutableArray *deltaPixels = [NSMutableArray arrayWithCapacity:1024];
+  
+  //NSAssert(prevFrame.width == currentFrame.width, @"frame widths don't match");
+  //NSAssert(prevFrame.height == currentFrame.height, @"frame heights don't match");
+  
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      uint32_t offset = (width * y) + x;
+      uint32_t old_pixel = prevInputBuffer32[offset];
+      uint32_t new_pixel = currentInputBuffer32[offset];
+      
+      if (old_pixel != new_pixel) {
+        DeltaPixel *deltaPixel = [[DeltaPixel alloc] init];
+        deltaPixel->x = x;
+        deltaPixel->y = y;
+        deltaPixel->offset = offset;
+        deltaPixel->oldValue = old_pixel;
+        deltaPixel->newValue = new_pixel;
+        
+        [deltaPixels addObject:deltaPixel];
+        [deltaPixel release];
+      }
+    }
+  }
+  
+  return deltaPixels;
+}
+
+// Calculate delta between previous framebuffer and the current one. If there is
+// no change, then nil is returned.
+
+NSData*
+maxvid_encode_generic_delta_pixels16(const uint16_t * restrict prevInputBuffer16,
+                                     const uint16_t * restrict currentInputBuffer16,
+                                     const uint32_t inputBufferNumWords,
+                                     uint32_t width,
+                                     uint32_t height)
+{
+  // Calculate delta between previous framebuffer and the current one
+  
+  NSMutableData *mData = [NSMutableData data];
+  
+  NSArray *deltaPixels = calculateDeltaPixels16(prevInputBuffer16,
+                                                currentInputBuffer16,
+                                                inputBufferNumWords,
+                                                width, height);
+  
+  if ([deltaPixels count] == 0) {
+    return nil;
+  } else {
+    // FIXME: what if this method fails? What would we return?
+    BOOL worked = maxvid_calculate_delta_pixels(deltaPixels,
+                                                16,
+                                                mData,
+                                                width * height);
+    
+    assert(worked);
+  }
+  
+  return [NSData dataWithData:mData];
+}
+
+// Calculate delta between previous framebuffer and the current one. If there is
+// no change, then nil is returned. This method returns a buffer of mvid generic
+// code elements.
+
+NSData*
+maxvid_encode_generic_delta_pixels32(const uint32_t * restrict prevInputBuffer32,
+                                     const uint32_t * restrict currentInputBuffer32,
+                                     const uint32_t inputBufferNumWords,
+                                     uint32_t width,
+                                     uint32_t height)
+{
+  // Calculate delta between previous framebuffer and the current one
+  
+  NSMutableData *mData = [NSMutableData data];
+  
+  NSArray *deltaPixels = calculateDeltaPixels32(prevInputBuffer32,
+                                                currentInputBuffer32,
+                                                inputBufferNumWords,
+                                                width, height);
+  
+  if ([deltaPixels count] == 0) {
+    return nil;
+  } else {
+    // FIXME: what if this method fails? What would we return?
+    BOOL worked = maxvid_calculate_delta_pixels(deltaPixels,
+                                                32,
+                                                mData,
+                                                width * height);
+    
+    assert(worked);
+  }
+  
+  return [NSData dataWithData:mData];
+}
+
+// Emit a DUP code for a specific run of pixels with all the same value
+
+static
+void emit_dup_run(NSMutableData *mvidWordCodes,
+                  uint32_t dupCount,
+                  uint32_t pixelValue,
+                  int bpp)
+
+{
+  // Maximum number of pixels that can be duplicated in one 16 bit code is
+  // 0xFFFF, so don't emit a DUP larger than that. No specific reason to
+  // use a different constant for 16 vs 32 bit values since the encoding
+  // logic will recombine DUP values later for a specific encoding.
+  
+  while (dupCount != 0) {
+    uint32_t dupCode;
+    uint32_t pixel32;
+    uint32_t numToDupThisLoop;
+    
+    if (dupCount > MV_MAX_16_BITS) {
+      numToDupThisLoop = MV_MAX_16_BITS;
+    } else {
+      numToDupThisLoop = dupCount;
+    }
+    
+    if (bpp == 16) {
+      dupCode = maxvid16_code(DUP, numToDupThisLoop);
+      uint16_t pixel = (uint16_t) pixelValue;
+      pixel32 = (pixel << 16) | pixel;
+    } else {
+      dupCode = maxvid32_code(DUP, numToDupThisLoop);
+      pixel32 = pixelValue;
+    }
+    
+    [mvidWordCodes appendBytes:&dupCode length:sizeof(uint32_t)];
+    [mvidWordCodes appendBytes:&pixel32 length:sizeof(uint32_t)];
+    
+    dupCount -= numToDupThisLoop;
+  }
+}
+
+// Emit a COPY code for a run of pixels with different values
+
+static
+void emit_copy_run(NSMutableData *mvidWordCodes,
+                   NSMutableArray *copyPixels,
+                   int bpp)
+
+{
+  uint32_t copyCount = [copyPixels count];
+  uint32_t numToCopyThisLoop;
+
+  while (copyCount != 0) {
+    if (copyCount > MV_MAX_16_BITS) {
+      numToCopyThisLoop = MV_MAX_16_BITS;
+    } else {
+      numToCopyThisLoop = copyCount;
+    }
+    
+    if (bpp == 16) {
+      // Write COPY code followed by pairs of 16 bit pixels
+      
+      uint32_t copyCode = maxvid16_code(COPY, numToCopyThisLoop);
+      [mvidWordCodes appendBytes:&copyCode length:sizeof(uint32_t)];
+
+      // Copy N pixels (not N words) by creating a new array that is a
+      // subset of the existing number of pixels in copyPixels.
+      
+      uint32_t numPixelsLeftThisLoop = numToCopyThisLoop;
+      NSRange firstN;
+      firstN.location = 0;
+      firstN.length = numPixelsLeftThisLoop;
+      
+      assert([copyPixels count] >= numPixelsLeftThisLoop);
+      NSMutableArray *copyPixelsThisLoop = [NSMutableArray arrayWithArray:[copyPixels subarrayWithRange:firstN]];
+      [copyPixels removeObjectsInRange:firstN];
+      
+      for ( ; numPixelsLeftThisLoop > 0; ) {
+        DeltaPixel *copyDeltaPixel;
+        uint32_t pixel32 = 0;
+        
+        if (numPixelsLeftThisLoop == 1) {
+          // Only 1 16 bit pixel left
+          
+          copyDeltaPixel = [copyPixelsThisLoop objectAtIndex:0];
+          uint16_t pixel1 = (uint16_t) copyDeltaPixel->newValue;
+          [copyPixelsThisLoop removeObjectAtIndex:0];
+          
+          // Note that the high half word is zero
+          pixel32 = pixel1;
+          
+          numPixelsLeftThisLoop--;
+        } else {
+          // Emit 2 pixels as 1 word
+          
+          // FIXME: more optimal to only remove 1 entries from the array.
+          
+          copyDeltaPixel = [copyPixelsThisLoop objectAtIndex:0];
+          uint16_t pixel1 = (uint16_t) copyDeltaPixel->newValue;
+          [copyPixelsThisLoop removeObjectAtIndex:0];
+          
+          copyDeltaPixel = [copyPixelsThisLoop objectAtIndex:0];
+          uint16_t pixel2 = (uint16_t) copyDeltaPixel->newValue;
+          [copyPixelsThisLoop removeObjectAtIndex:0];        
+          
+          pixel32 = (pixel2 << 16) | pixel1;
+          
+          assert(numPixelsLeftThisLoop >= 2);
+          numPixelsLeftThisLoop -= 2;
+        }
+        
+        [mvidWordCodes appendBytes:&pixel32 length:sizeof(uint32_t)];
+      }
+    } else {
+      // Write COPY code followed by 32 bit pixels
+      
+      uint32_t copyCode = maxvid32_code(COPY, numToCopyThisLoop);
+      [mvidWordCodes appendBytes:&copyCode length:sizeof(uint32_t)];
+
+      uint32_t numPixelsLeftThisLoop = numToCopyThisLoop;
+      assert([copyPixels count] >= numPixelsLeftThisLoop);
+      
+      for ( ; numPixelsLeftThisLoop > 0; numPixelsLeftThisLoop-- ) {
+        DeltaPixel *copyDeltaPixel = [copyPixels objectAtIndex:0];
+        uint32_t copyPixelValue = copyDeltaPixel->newValue;
+        [copyPixels removeObjectAtIndex:0];
+        
+        [mvidWordCodes appendBytes:&copyPixelValue length:sizeof(uint32_t)];
+      }
+    }
+    
+    copyCount -= numToCopyThisLoop;
+  } // end of while loop
+  
+  // All copyPixels have to have been removed by pixel loop
+  assert([copyPixels count] == 0);
+}
+
+static
+void emit_skip_run(NSMutableData *mvidWordCodes,
+                   uint32_t numPixelsToSkip,
+                   int bpp)
+
+{
+  // Maximum number of pixels that can be skipped over in one 16 bit code is
+  // 0xFFFF, so don't emit a skip larger than that. No specific reason to
+  // use a different constant for 16 vs 32 bit values since the encoding
+  // logic will recombine SKIP values later for a specific encoding.
+
+  while (numPixelsToSkip != 0) {
+    uint32_t skipCode;
+    uint32_t numToSkipThisLoop;
+    
+    if (numPixelsToSkip > MV_MAX_16_BITS) {
+      numToSkipThisLoop = MV_MAX_16_BITS;
+    } else {
+      numToSkipThisLoop = numPixelsToSkip;
+    }
+    
+    if (bpp == 16) {
+      skipCode = maxvid16_code(SKIP, numToSkipThisLoop);
+    } else {
+      skipCode = maxvid32_code(SKIP, numToSkipThisLoop);
+    }
+    NSData *wordCode = [NSData dataWithBytes:&skipCode length:sizeof(uint32_t)];
+    [mvidWordCodes appendData:wordCode];
+    
+    numPixelsToSkip -= numToSkipThisLoop;
+  }
+}
+
+// Given a buffer of modified pixels, figure out how to write the pixels
+// into mvidWordCodes. Pixels are emitted as COPY unless there is a run
+// of 2 or more of the same value. Use a DUP in the case of a run.
+
+static
+void process_pixel_run(NSMutableData *mvidWordCodes,
+                       NSMutableArray *mPixelRun,
+                       int prevPixelOffset,
+                       int nextPixelOffset,
+                       int bpp)
+{
+  if ([mPixelRun count] > 0) {
+    // Emit codes for this run of pixels
+    
+    int runLength = 0;
+    int firstPixelOffset = -1;
+    int lastPixelOffset = -1;
+    
+    runLength = [mPixelRun count];
+      
+    firstPixelOffset = ((DeltaPixel*)[mPixelRun objectAtIndex:0])->offset;
+    lastPixelOffset = ((DeltaPixel*)[mPixelRun lastObject])->offset;
+    
+    assert((lastPixelOffset - firstPixelOffset + 1) == runLength);
+    
+    // Scan over the pixels in a run looking for a DUP pattern,
+    // meaning a run of delta pixels where each value is the same
+    // as the previous one.
+    
+    uint32_t dupCount = 0;
+    NSMutableArray *copyPixels = [NSMutableArray array];
+    
+    uint32_t prevPixelValue;
+    BOOL isFirstPixelInRun = TRUE;
+    
+    for (DeltaPixel *deltaPixel in mPixelRun) {
+      uint32_t value = deltaPixel->newValue;
+      
+      if ((isFirstPixelInRun == FALSE) && (value == prevPixelValue)) {
+        // This delta pixel is the same value as the previous one
+        
+        if ((dupCount == 0) && ([copyPixels count] > 0)) {
+          // This pixel is the second pixel in a DUP series, but the
+          // previous loop appended the previous pixel to copyPixels.
+          // Undo that addition so that the COPY emit can be completed.
+          
+          [copyPixels removeLastObject];
+        }
+        
+        if ([copyPixels count] > 0) {
+          // Emit previous run of COPY pixels and empty copyPixels array
+          
+          emit_copy_run(mvidWordCodes, copyPixels, bpp);
+        }
+
+        if (dupCount == 0) {
+          dupCount = 2;
+        } else {
+          dupCount++;          
+        }
+      } else {
+        // This pixel is not the same value as the previous one, or it is the first pixel
+        
+        if (dupCount != 0) {
+          // Emit a previous DUP pattern when durrent pixel does not match previous
+          
+          emit_dup_run(mvidWordCodes, dupCount, prevPixelValue, bpp);
+          dupCount = 0;
+        }
+        
+        // FIXME: max COPY count that can be emitted is 0xFFFF
+        
+        [copyPixels addObject:deltaPixel];
+      }
+      
+      isFirstPixelInRun = FALSE;
+      prevPixelValue = value;
+    }
+        
+    // After loop, check for pending COPY or DUP op
+    
+    if (dupCount != 0) {
+      assert([copyPixels count] == 0);
+      
+      emit_dup_run(mvidWordCodes, dupCount, prevPixelValue, bpp);
+    } else if ([copyPixels count] > 0) {
+      assert(dupCount == 0);
+      
+      // Emit previous run of COPY pixels and empty copyPixels array
+      
+      emit_copy_run(mvidWordCodes, copyPixels, bpp);
+    }
+    
+    // Update prevPixelOffset so that it contains the offset that the pixel run just
+    // wrote up to. This is needed to determine if we need to SKIP pixels up to the
+    // nextPixelOffset value.
+    
+    prevPixelOffset = lastPixelOffset;
+    prevPixelOffset++;
+  }
+  
+  // Emit SKIP pixels to advance from the last offset written as part of
+  // the pixel run up to the index indicated by pixelOffset.
+  
+  int numToSkip = nextPixelOffset - prevPixelOffset;
+  
+  // Emit SKIP pixels to advance up to the offset for this pixel
+  
+  if (numToSkip > 0)
+  {
+    emit_skip_run(mvidWordCodes, numToSkip, bpp);
+  }
+  
+  [mPixelRun removeAllObjects];
+}
+
+// Given an array of delta pixel values, generate maxvid codes that describe
+// the delta pixels and encode the information as a delta frame in the
+// mvid file.
+
+static
+BOOL
+maxvid_calculate_delta_pixels(NSArray *deltaPixels,
+                              int bpp,
+                              NSMutableData *mData,
+                              NSUInteger frameBufferNumPixels)
+{
+  NSMutableData *mvidWordCodes = [NSMutableData dataWithCapacity:1024];
+  
+  int prevPixelOffset = 0;
+  BOOL isFirstPixel = TRUE;
+  
+  NSMutableArray *mPixelRun = [NSMutableArray array];
+  
+  for (DeltaPixel *deltaPixel in deltaPixels) {
+    int nextPixelOffset = deltaPixel->offset;
+    
+    if ((isFirstPixel == FALSE) && (nextPixelOffset == (prevPixelOffset + 1))) {
+      // Processing a pixel other than the first one, and this pixel appears
+      // directly after the last pixel. This means that the modified pixel is
+      // the next pixel in a pixel run.
+      
+      [mPixelRun addObject:deltaPixel];
+    } else {
+      // This is the first pixel in a new pixel run. It might be the first pixel
+      // and in that case the existing run is of zero length. Otherwise, emit
+      // the previous run of pixels so that we can start a new run.
+      
+      process_pixel_run(mvidWordCodes, mPixelRun, prevPixelOffset, nextPixelOffset, bpp);
+      
+      [mPixelRun addObject:deltaPixel];
+    }
+    
+    isFirstPixel = FALSE;    
+    prevPixelOffset = nextPixelOffset;
+  }
+  
+  // At the end of the delta pixels, we could have a run of pixels that still need to
+  // be processed. In addition, we might need to SKIP to the end of the framebuffer.
+  
+  process_pixel_run(mvidWordCodes, mPixelRun, prevPixelOffset, frameBufferNumPixels, bpp);
+  
+  // Emit DONE code to indicate that all codes have been emitted
+  {
+    uint32_t doneCode;
+    if (bpp == 16) {
+      doneCode = maxvid16_code(DONE, 0x0);
+    } else {
+      doneCode = maxvid32_code(DONE, 0x0);    
+    }
+    
+    NSData *wordCode = [NSData dataWithBytes:&doneCode length:sizeof(uint32_t)];
+    [mvidWordCodes appendData:wordCode];
+  }
+  
+  // App end all word codes specific to this run of pixels
+  
+  [mData appendData:mvidWordCodes];
+  
+  return TRUE;
+}
+
+// Write generic maxvid codes to output AVMvidFileWriter.
+// Returns TRUE if successful, FALSE otherwise.
+
+BOOL
+maxvid_write_delta_pixels(AVMvidFileWriter *mvidWriter,
+                          NSData *maxvidData,
+                          void *inputBuffer,
+                          uint32_t inputBufferNumBytes,
+                          NSUInteger frameBufferNumPixels)
+{
+  int retcode;
+  
+  int bpp = mvidWriter.bpp;
+  
+  // Calculate adlre32 checksum on original frame data
+  
+  uint32_t adler = 0;
+  adler = maxvid_adler32(0, (unsigned char *)inputBuffer, inputBufferNumBytes);
+  assert(adler != 0);
+  
+  // Convert the generic maxvid codes to the optimized c4 encoding and append to the output file
+  
+  FILE *tmpfp = tmpfile();
+  if (tmpfp == NULL) {
+    assert(0);
+  }
+  
+  uint32_t *maxvidCodeBuffer = (uint32_t*)maxvidData.bytes;
+  uint32_t numMaxvidCodeWords = maxvidData.length / sizeof(uint32_t);
+  
+  if (bpp == 16) {
+    retcode = maxvid_encode_c4_sample16(maxvidCodeBuffer, numMaxvidCodeWords, frameBufferNumPixels, NULL, tmpfp, 0);
+  } else if (bpp == 24 || bpp == 32) {
+    retcode = maxvid_encode_c4_sample32(maxvidCodeBuffer, numMaxvidCodeWords, frameBufferNumPixels, NULL, tmpfp, 0);
+  }
+  
+  // Read tmp file contents into buffer.
+  
+  if (retcode == 0) {
+    // Read file contents into a buffer, then write that buffer into .mvid file
+    
+    uint32_t filesize;
+    
+    fpsize(tmpfp, &filesize);
+    
+    assert(filesize > 0);
+    
+    char *buffer = malloc(filesize);
+    
+    if (buffer == NULL) {
+      // Malloc failed
+      
+      retcode = MV_ERROR_CODE_WRITE_FAILED;
+    } else {
+      size_t result = fread(buffer, filesize, 1, tmpfp);
+      
+      if (result != 1) {
+        retcode = MV_ERROR_CODE_READ_FAILED;
+      } else {        
+        // Write codes to mvid file
+        
+        BOOL worked = [mvidWriter writeDeltaframe:buffer bufferSize:filesize adler:adler];
+        
+        if (worked == FALSE) {
+          retcode = MV_ERROR_CODE_WRITE_FAILED;
+        }
+      }
+      
+      free(buffer);
+    }
+  }
+  
+  if (tmpfp != NULL) {
+    fclose(tmpfp);
+  }
+  
+  if (retcode == 0) {
+    return TRUE;
+  } else {
+    return FALSE;
+  }
+}
+

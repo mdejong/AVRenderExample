@@ -1,5 +1,5 @@
 //
-//  AVMvidFrameDecoder.h
+//  AVMvidFrameDecoder.m
 //
 //  Created by Moses DeJong on 1/4/11.
 //
@@ -22,13 +22,24 @@
 
 //#define ALWAYS_CHECK_ADLER
 
+// private properties declaration for class
+
+@interface AVMvidFrameDecoder ()
+
+// This is the last AVFrame object returned via a call to advanceToFrame
+
+@property (nonatomic, retain) AVFrame *lastFrame;
+
+@end
+
+
 @implementation AVMvidFrameDecoder
 
 @synthesize filePath = m_filePath;
 @synthesize mappedData = m_mappedData;
 @synthesize currentFrameBuffer = m_currentFrameBuffer;
 @synthesize cgFrameBuffers = m_cgFrameBuffers;
-
+@synthesize lastFrame = m_lastFrame;
 
 #if defined(REGRESSION_TESTS)
 @synthesize simulateMemoryMapFailure = m_simulateMemoryMapFailure;
@@ -45,6 +56,7 @@
   self.filePath = nil;
   self.mappedData = nil;
   self.currentFrameBuffer = nil;
+  self.lastFrame = nil;
   
   /*
    for (CGFrameBuffer *aBuffer in self.cgFrameBuffers) {
@@ -88,7 +100,7 @@
   return [[[AVMvidFrameDecoder alloc] init] autorelease];
 }
 
-- (MVFileHeader*) _getHeader
+- (MVFileHeader*) header
 {
   NSAssert(self->m_isOpen == TRUE, @"isOpen");
   return &self->m_mvHeader;
@@ -108,7 +120,7 @@
   
   NSAssert(renderWidth > 0 && renderHeight > 0, @"renderWidth or renderHeight is zero");
 
-  uint32_t bitsPerPixel = [self _getHeader]->bpp;
+  uint32_t bitsPerPixel = [self header]->bpp;
   
   CGFrameBuffer *cgFrameBuffer1 = [CGFrameBuffer cGFrameBufferWithBppDimensions:bitsPerPixel width:renderWidth height:renderHeight];
   CGFrameBuffer *cgFrameBuffer2 = [CGFrameBuffer cGFrameBufferWithBppDimensions:bitsPerPixel width:renderWidth height:renderHeight];
@@ -126,6 +138,25 @@
     NSAssert(FALSE, @"invalid bitsPerPixel");
   }
   
+  // If the input frames are in sRGB colorspace, then mark each frame so that RGB data is interpreted
+  // as sRGB instead of generic RGB.
+  // http://www.pupuweb.com/blog/wwdc-2012-session-523-practices-color-management-ken-greenebaum-luke-wallis/
+
+#if TARGET_OS_IPHONE
+  // No-op
+#else
+  // MacOSX
+  if ([self isSRGB]) {
+    CGColorSpaceRef colorSpace = NULL;
+    colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+    NSAssert(colorSpace, @"colorSpace");
+    for (CGFrameBuffer *cgFrameBuffer in self.cgFrameBuffers) {
+      cgFrameBuffer.colorspace = colorSpace;
+    }
+    CGColorSpaceRelease(colorSpace);
+  }
+#endif // TARGET_OS_IPHONE
+  
   self->m_resourceUsageLimit = FALSE;
 }
 
@@ -133,6 +164,8 @@
 {
   self.currentFrameBuffer = nil;
   self.cgFrameBuffers = nil;
+  // Drop AVFrame since it holds on to the image which holds on to a framebuffer
+  self.lastFrame = nil;
 }
 
 - (CGFrameBuffer*) _getNextFramebuffer
@@ -360,6 +393,7 @@
   
   frameIndex = -1;
   self.currentFrameBuffer = nil;
+  self.lastFrame = nil;
   
   self->m_isOpen = FALSE;  
 }
@@ -372,9 +406,10 @@
   
   frameIndex = -1;
   self.currentFrameBuffer = nil;
+  self.lastFrame = nil;
 }
 
-- (UIImage*) advanceToFrame:(NSUInteger)newFrameIndex
+- (AVFrame*) advanceToFrame:(NSUInteger)newFrameIndex
 {
   // The movie data must have been mapped into memory by the time advanceToFrame is invoked
   
@@ -389,10 +424,11 @@
   
   NSAssert(nextFrameBuffer != self.currentFrameBuffer, @"current and next frame buffers can't be the same object");  
   
-  // Advance to same frame is a no-op
+  // Advance to same frame a 2nd time, this should return the exact same frame object
   
   if ((frameIndex != -1) && (newFrameIndex == frameIndex)) {
-    return nil;
+    NSAssert(self.lastFrame != nil, @"lastFrame");
+    return self.lastFrame;
   } else if ((frameIndex != -1) && (newFrameIndex < frameIndex)) {
     // movie frame index can only go forward via advanceToFrame
     NSString *msg = [NSString stringWithFormat:@"%@: %d -> %d",
@@ -425,7 +461,7 @@
 
   void *frameBuffer = (void*)nextFrameBuffer.pixels;
   uint32_t frameBufferSize = [self width] * [self height];
-  uint32_t bpp = [self _getHeader]->bpp;
+  uint32_t bpp = [self header]->bpp;
   uint32_t frameBufferNumBytes;
   if (bpp == 16) {
     frameBufferNumBytes = frameBufferSize * sizeof(uint16_t);
@@ -503,7 +539,7 @@
         // explicitly copy the data from the zero copy buffer to the framebuffer so that we
         // have a writable memory region that a delta can be applied over.
         
-        if (isDeltaFrame && (self.currentFrameBuffer.zeroCopyPixels != NULL)) {
+        if (isDeltaFrame) {
           [self.currentFrameBuffer zeroCopyToPixels];
         }
       }
@@ -613,25 +649,48 @@
   }
   
   if (!changeFrameData) {
-    return nil;
-  } else {
-    // Return a CGImage wrapped in a UIImage
+    // When no change from previous frame is found, return a new AVFrame object
+    // but make sure to return the same image object as was returned in the last frame.
+    
+    AVFrame *frame = [AVFrame aVFrame];
+    NSAssert(frame, @"AVFrame is nil");
+    
+    // The image from the previous rendered frame is returned. Note that it is possible
+    // that memory resources could not be mapped and in that case the previous frame
+    // could be nil. Return either the last image or nil in this case.
+    
+    id lastFrameImage = self.lastFrame.image;
+    frame.image = lastFrameImage;
     
     CGFrameBuffer *cgFrameBuffer = self.currentFrameBuffer;
-    CGImageRef imgRef = [cgFrameBuffer createCGImageRef];
-    NSAssert(imgRef, @"CGImageRef returned by createCGImageRef is NULL");
+    frame.cgFrameBuffer = cgFrameBuffer;
     
-    UIImage *uiImage = [UIImage imageWithCGImage:imgRef];
-    CGImageRelease(imgRef);
+    frame.isDuplicate = TRUE;
     
-    NSAssert(cgFrameBuffer.isLockedByDataProvider, @"image buffer should be locked by frame UIImage");
+    return frame;
+  } else {
+    // Delete ref to previous frame to be sure that image ref to framebuffer
+    // is dropped before a new one is created.
     
-    NSAssert(uiImage, @"uiImage is nil");
-    return uiImage;    
+    self.lastFrame = nil;
+    
+    // Return a CGImage wrapped in a AVFrame
+
+    AVFrame *frame = [AVFrame aVFrame];
+    NSAssert(frame, @"AVFrame is nil");
+    
+    CGFrameBuffer *cgFrameBuffer = self.currentFrameBuffer;
+    frame.cgFrameBuffer = cgFrameBuffer;
+    
+    [frame makeImageFromFramebuffer];
+    
+    self.lastFrame = frame;
+    
+    return frame;
   }
 }
 
-- (UIImage*) duplicateCurrentFrame
+- (AVFrame*) duplicateCurrentFrame
 {
   if (self.currentFrameBuffer == nil) {
     return nil;
@@ -642,6 +701,11 @@
   CGFrameBuffer *cgFrameBuffer = [CGFrameBuffer cGFrameBufferWithBppDimensions:self.currentFrameBuffer.bitsPerPixel
                                                                          width:self.currentFrameBuffer.width
                                                                         height:self.currentFrameBuffer.height];
+  // If a specific non-default colorspace is being used, then copy it
+  
+  if (self.currentFrameBuffer.colorspace != NULL) {
+    cgFrameBuffer.colorspace = self.currentFrameBuffer.colorspace;
+  }
   
   // Using the OS level copy means that a small portion of the mapped memory will stay around, only the copied part.
   // Might be more efficient, unknown.
@@ -649,16 +713,16 @@
   //[cgFrameBuffer copyPixels:self.currentFrameBuffer];
   [cgFrameBuffer memcopyPixels:self.currentFrameBuffer];
   
-  CGImageRef imgRef = [cgFrameBuffer createCGImageRef];
-  NSAssert(imgRef, @"CGImageRef returned by createCGImageRef is NULL");
+  // Return a CGImage wrapped in a AVFrame
   
-  UIImage *uiImage = [UIImage imageWithCGImage:imgRef];
-  CGImageRelease(imgRef);
+  AVFrame *frame = [AVFrame aVFrame];
+  NSAssert(frame, @"AVFrame is nil");
   
-  NSAssert(cgFrameBuffer.isLockedByDataProvider, @"image buffer should be locked by frame UIImage");
+  frame.cgFrameBuffer = cgFrameBuffer;
   
-  NSAssert(uiImage, @"uiImage is nil");
-  return uiImage;  
+  [frame makeImageFromFramebuffer];
+  
+  return frame;
 }
 
 - (void) resourceUsageLimit:(BOOL)enabled
@@ -706,12 +770,12 @@
 
 - (NSUInteger) width
 {
-  return [self _getHeader]->width;
+  return [self header]->width;
 }
 
 - (NSUInteger) height
 {
-  return [self _getHeader]->height;
+  return [self header]->height;
 }
 
 - (BOOL) isOpen
@@ -721,10 +785,10 @@
 
 - (NSUInteger) numFrames
 {
-  return [self _getHeader]->numFrames;
+  return [self header]->numFrames;
 }
 
-- (int) frameIndex
+- (NSInteger) frameIndex
 {
   // FIXME: What is the initial value of frameIndex, seems to be zero in MV impl, is it -1 in MOV reader?
   
@@ -733,7 +797,7 @@
 
 - (NSTimeInterval) frameDuration
 {
-  float frameDuration = [self _getHeader]->frameDuration;
+  float frameDuration = [self header]->frameDuration;
   return frameDuration;
 }
 
@@ -741,13 +805,24 @@
 
 - (BOOL) hasAlphaChannel
 {
-  uint32_t bpp = [self _getHeader]->bpp;
+  uint32_t bpp = [self header]->bpp;
   if (bpp == 16 || bpp == 24) {
     return FALSE;
   } else if (bpp == 32) {
     return TRUE;
   } else {
     assert(0);
+  }
+}
+
+// Return TRUE if RGB values are calibrated in the SRGB colorspace.
+
+- (BOOL) isSRGB
+{
+  if (maxvid_file_colorspace_is_srgb([self header])) {
+    return TRUE;
+  } else {
+    return FALSE;
   }
 }
 

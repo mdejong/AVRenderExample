@@ -34,6 +34,8 @@ typedef struct MovData *MovDataPtr;
   CGFrameBuffer *m_currentFrameBuffer;  
 	NSArray *m_cgFrameBuffers;
   
+  AVFrame *m_lastFrame;
+  
 	int frameIndex;
   
   BOOL m_resourceUsageLimit;
@@ -68,7 +70,7 @@ typedef struct MovData *MovDataPtr;
 
 // Advance the current frame index to the indicated frame index and store result in nextFrameBuffer
 
-- (UIImage*) advanceToFrame:(NSUInteger)newFrameIndex;
+- (AVFrame*) advanceToFrame:(NSUInteger)newFrameIndex;
 
 // Decoding frames may require additional resources that are not required
 // to open the file and examine the header contents. This method will
