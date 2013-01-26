@@ -81,8 +81,8 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
 @synthesize frameNum = frameNum;
 @synthesize bpp = m_bpp;
 @synthesize genAdler = m_genAdler;
-@synthesize isSRGB = m_isSRGB;
 @synthesize movieSize = m_movieSize;
+@synthesize isAllKeyframes = m_isAllKeyframes;
 
 - (void) close
 {
@@ -90,6 +90,7 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
     fclose(maxvidOutFile);
     maxvidOutFile = NULL;
   }
+  isOpen = FALSE;
 }
 
 - (void) dealloc
@@ -114,7 +115,8 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
 
 + (AVMvidFileWriter*) aVMvidFileWriter
 {
-  return [[[AVMvidFileWriter alloc] init] autorelease];
+  AVMvidFileWriter *obj = [[[AVMvidFileWriter alloc] init] autorelease];
+  return obj;
 }
 
 - (BOOL) open
@@ -176,7 +178,9 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   
   [self saveOffset];
   
-  isOpen = TRUE;
+  self->isOpen = TRUE;
+  self.isAllKeyframes = TRUE;
+  
   return TRUE;
 }
 
@@ -210,13 +214,25 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   frameNum++;
 }
 
-- (void) writeTrailingNopFrames:(float)currentFrameDuration
++ (int) countTrailingNopFrames:(float)currentFrameDuration
+                 frameDuration:(float)frameDuration
 {
-  int numFramesDelay = round(currentFrameDuration / self.frameDuration);
+  int numFramesDelay = round(currentFrameDuration / frameDuration);
   
   if (numFramesDelay > 1) {
-    for (int count = numFramesDelay; count > 1; count--) {
-      [self writeNopFrame];      
+    return numFramesDelay - 1;
+  } else {
+    return 0;
+  }
+}
+
+- (void) writeTrailingNopFrames:(float)currentFrameDuration
+{
+  int count = [self.class countTrailingNopFrames:currentFrameDuration frameDuration:self.frameDuration];
+  
+  if (count > 0) {
+    for (; count; count--) {
+      [self writeNopFrame];
     }
   }
 }
@@ -304,10 +320,22 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   mvHeader->frameDuration = self.frameDuration;
   assert(mvHeader->frameDuration > 0.0);
   
+  // The number of frames must always be at least 2 frames.
+  
+  NSAssert(self.totalNumFrames > 1, @"animation must have at least 2 frames, not %d", self.totalNumFrames);  
   mvHeader->numFrames = self.totalNumFrames;
   
-  if (self.isSRGB) {
-    maxvid_file_colorspace_set_srgb(mvHeader);
+  // This file writer always emits a file with version set to 1, since
+  // the adler checksum change required a binary compatibility change
+  // from the initial version 0.
+  
+  maxvid_file_set_version(mvHeader, MV_FILE_VERSION_ONE);
+  
+  // If all frames written were keyframes (or nop frames)
+  // then set a flag to indicate this special case.
+  
+  if (self.isAllKeyframes) {
+    maxvid_file_set_all_keyframes(mvHeader);
   }
   
   (void)fseek(maxvidOutFile, 0L, SEEK_SET);
@@ -346,6 +374,8 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   NSLog(@"writeDeltaframe %d : bufferSize %d", frameNum, bufferSize);
 #endif // LOGGING
 
+  self.isAllKeyframes = FALSE;
+  
   [self saveOffset];
   
   int numWritten = fwrite(ptr, bufferSize, 1, maxvidOutFile);

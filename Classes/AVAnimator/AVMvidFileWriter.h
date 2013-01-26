@@ -36,7 +36,7 @@
 
   BOOL  isOpen;
   BOOL  m_genAdler;
-  BOOL  m_isSRGB;
+  BOOL  m_isAllKeyframes;
 }
 
 @property (nonatomic, copy)   NSString      *mvidPath;
@@ -44,9 +44,13 @@
 @property (nonatomic, readonly) int         frameNum;
 @property (nonatomic, assign) int           totalNumFrames;
 @property (nonatomic, assign) BOOL          genAdler;
-@property (nonatomic, assign) BOOL          isSRGB;
 @property (nonatomic, assign) uint32_t      bpp;
 @property (nonatomic, assign) CGSize        movieSize;
+
+// TRUE by default, if writeDeltaframe is invoked then this
+// property is set to FALSE.
+
+@property (nonatomic, assign) BOOL          isAllKeyframes;
 
 + (AVMvidFileWriter*) aVMvidFileWriter;
 
@@ -58,13 +62,23 @@
 
 - (void) writeNopFrame;
 
+// Count up the number of nop frames that would appear after the indicated
+// frame display time. The currentFrameDuration is the duration that
+// a frame would be displayed, it could be longer than the expected FPS
+// duration indicated by the frameDuration argument.
+
++ (int) countTrailingNopFrames:(float)currentFrameDuration
+                 frameDuration:(float)frameDuration;
+
 // Write 0 to N trailing nop frames, pass in total frame display time
 
 - (void) writeTrailingNopFrames:(float)frameDuration;
 
 - (void) skipToNextPageBound;
 
-// Write a self contained key frame
+// Write a self contained key frame. Note that the bufferSize argument
+// here should contain all the pixels and any zero pading in the case
+// of an odd number of pixels.
 
 - (BOOL) writeKeyframe:(char*)ptr bufferSize:(int)bufferSize;
 

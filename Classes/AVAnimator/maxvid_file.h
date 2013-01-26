@@ -8,14 +8,26 @@
 
 #define MV_FILE_MAGIC 0xCAFEBABE
 
-// Note that the RGB and SRGB colorsspaces use the same bit flag. So, if
-// SRGB colorspace bit is not set then it means that the RGB colorspace
-// was used.
+// This flag is set for a .mvid file that contains no delta frames. It is possible
+// to significantly optimize reading logic using shared memory when we know that
+// there are no delta frames that need to be applied. When running on the device
+// the decode logic typically emits mvid files that contain only keyframes because
+// of the CPU associated with recalculating frame deltas.
 
-#define MV_FILE_COLORSPACE_SRGB 0x1
+// Note that 0x1 is currently unused, it could be used in the future but keep in
+// mind that already generated .mvids might have it set as it was used for sRGB flag.
+
+#define MV_FILE_ALL_KEYFRAMES 0x2
 
 #define MV_FRAME_IS_KEYFRAME 0x1
 #define MV_FRAME_IS_NOPFRAME 0x2
+
+// These constants define .mvid file revision constants. For example, AVAnimator 1.0
+// versions made use of the value 0, while AVAnimator 2.0 now emits files with the
+// version set to 1.
+
+#define MV_FILE_VERSION_ZERO 0
+#define MV_FILE_VERSION_ONE 1
 
 // A maxvid file is an "in memory" representation of video data that has been
 // written to a file. The data is always in the native endian format.
@@ -34,10 +46,10 @@ typedef struct {
   // FIXME: is float 32 bit on 64 bit systems ?
   float frameDuration;
   uint32_t numFrames;
-  // revision is the MVID file format revision, in cases where an earlier
+  // version is the MVID file format version number, in cases where an earlier
   // version of the file needs to be read by a later version of the library.
-  // The revision portion is the first 8 bits while the rest are bit flags.
-  uint32_t revisionAndFlags;
+  // The version portion is the first 8 bits while the rest are bit flags.
+  uint32_t versionAndFlags;
   // Padding out to 16 words, so that there is room to add additional fields later
   uint32_t padding[16-7];
 } MVFileHeader;
@@ -149,48 +161,41 @@ uint32_t maxvid_file_is_valid(FILE *inFile) {
   }
 }
 
-// Query the file "revision", meaning a integer number that would get incremented
+// Query the file "version", meaning a integer number that would get incremented
 // when an incompatible change to the file format is made. This is only useful
 // for library internals that might need to do something slightly different
 // depending on the binary layout of older versions of the file.
 
 static inline
-uint8_t maxvid_file_revision(MVFileHeader *fileHeaderPtr) {
-  uint8_t revision = fileHeaderPtr->revisionAndFlags & 0xFF;
-  return revision;
+uint8_t maxvid_file_version(MVFileHeader *fileHeaderPtr) {
+  uint8_t version = fileHeaderPtr->versionAndFlags & 0xFF;
+  return version;
 }
 
-// Explicitly set the maxvid file revision. The initial revision used is zero.
+// Explicitly set the maxvid file version. The initial version used is zero.
 
 static inline
-void maxvid_file_set_revision(MVFileHeader *fileHeaderPtr, uint8_t revision) {
-  uint32_t flags = fileHeaderPtr->revisionAndFlags >> 8;
-  fileHeaderPtr->revisionAndFlags = (flags << 8) | revision;  
+void maxvid_file_set_version(MVFileHeader *fileHeaderPtr, uint8_t revision) {
+  uint32_t flags = fileHeaderPtr->versionAndFlags >> 8;
+  fileHeaderPtr->versionAndFlags = (flags << 8) | revision;  
 }
 
-// Return TRUE if the colorspace indicated in the file is the RGB generic colorspace.
+// Return TRUE if each frame in the file is a keyframe. A keyframe indicates
+// that all frame data is contained in one place, so the frame does not
+// depend on the previous framebuffer state like in the delta frame case.
 
 static inline
-uint32_t maxvid_file_colorspace_is_rgb(MVFileHeader *fileHeaderPtr) {
-  uint32_t flags = fileHeaderPtr->revisionAndFlags >> 8;
-  uint32_t isSRGB = flags & MV_FILE_COLORSPACE_SRGB;
-  return (isSRGB == 0);
+uint32_t maxvid_file_is_all_keyframes(MVFileHeader *fileHeaderPtr) {
+  uint32_t flags = fileHeaderPtr->versionAndFlags >> 8;
+  uint32_t isAllKeyframes = flags & MV_FILE_ALL_KEYFRAMES;
+  return isAllKeyframes;
 }
 
-// Return TRUE if the colorspace indicated in the file is the SRGB calibrated colorspace.
+// Explicitly set the all keyframes flag.
 
 static inline
-uint32_t maxvid_file_colorspace_is_srgb(MVFileHeader *fileHeaderPtr) {
-  uint32_t flags = fileHeaderPtr->revisionAndFlags >> 8;
-  uint32_t isSRGB = flags & MV_FILE_COLORSPACE_SRGB;
-  return isSRGB;
-}
-
-// Explicitly set the colorspace flag to indicate SRGB is used.
-
-static inline
-void maxvid_file_colorspace_set_srgb(MVFileHeader *fileHeaderPtr) {  
-  fileHeaderPtr->revisionAndFlags |= (MV_FILE_COLORSPACE_SRGB << 8);
+void maxvid_file_set_all_keyframes(MVFileHeader *fileHeaderPtr) {
+  fileHeaderPtr->versionAndFlags |= (MV_FILE_ALL_KEYFRAMES << 8);
 }
 
 // adler32 calculation method

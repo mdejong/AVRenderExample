@@ -27,12 +27,29 @@
 
 void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size);
 
+// Private API
+
+@interface CGFrameBuffer ()
+
+// This property indicates the actual size of the allocated buffer pointed to
+// by the pixels property. It is possible that the actual allocated size
+// is larger than the value returned by the numBytes property, but this
+// is an implementation detail of this class and would not need to be known
+// outside this module.
+
+@property (readonly) size_t numBytesAllocated;
+
+@end
+
+// class CGFrameBuffer
+
 @implementation CGFrameBuffer
 
 @synthesize pixels = m_pixels;
 @synthesize zeroCopyPixels = m_zeroCopyPixels;
 @synthesize zeroCopyMappedData = m_zeroCopyMappedData;
 @synthesize numBytes = m_numBytes;
+@synthesize numBytesAllocated = m_numBytesAllocated;
 @synthesize width = m_width;
 @synthesize height = m_height;
 @synthesize bitsPerPixel = m_bitsPerPixel;
@@ -136,7 +153,8 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
     self->m_bitsPerPixel = bitsPerPixel;
     self->m_bytesPerPixel = bytesPerPixel;
     self->m_pixels = buffer;
-    self->m_numBytes = allocNumBytes;
+    self->m_numBytes = inNumBytes;
+    self->m_numBytesAllocated = allocNumBytes;
     self->m_width = width;
     self->m_height = height;
   } else {
@@ -144,6 +162,26 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
   }
 
 	return self;
+}
+
+// Getter for the self.pixels property. Normally, this
+// just returns what self.pixels was set to, but in
+// the case of the "zero copy mode", this method
+// returns the pointer to the read only mapped zero
+// copy memory.
+
+- (char*) pixels
+{
+  char *ptr;
+  
+  ptr = self.zeroCopyPixels;
+  
+  if (ptr != NULL) {
+    // The framebuffer is in zero copy mode
+    return ptr;
+  }
+  
+  return self->m_pixels;
 }
 
 - (BOOL) renderView:(UIView*)view
@@ -242,15 +280,13 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 	size_t h = CGImageGetHeight(cgImageRef);
 	
 	BOOL isRotated = FALSE;
-	
-	if ((self.width == w) && (self.height == h)) {
-		// pixels will render as expected
-	} else if ((self.width == h) || (self.height != w)) {
-		// image should be rotated before rendering
+
+	if ((w != h) && (h == self.width) && (w == self.height)) {
+    // Assume image is rotated to portrait, so rotate and then render
 		isRotated = TRUE;
-	} else {
-		return FALSE;
-	}
+  } else {
+    // If sizes do not match, then resize input image to fit into this framebuffer
+  }
 	
   size_t bitsPerComponent;
   size_t numComponents;
@@ -385,10 +421,7 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 
 	CGDataProviderReleaseDataCallback releaseData = CGFrameBufferProviderReleaseData;
 
-  void *pixelsPtr = self.pixels;
-  if (self.zeroCopyPixels) {
-    pixelsPtr = self.zeroCopyPixels;
-  }
+  void *pixelsPtr = self.pixels; // Will return zero copy pointer in zero copy mode. Otherwise self.pixels
   
 	CGDataProviderRef dataProviderRef = CGDataProviderCreateWithData(self,
 																	 pixelsPtr,
@@ -492,18 +525,28 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 	}
 }
 
+// Set all pixels to 0x0
+
+- (void) clear
+{
+  [self doneZeroCopyPixels];
+  bzero(self.pixels, self.numBytes);
+}
+
 - (void) osCopyImpl:(void*)srcPtr
 {  
 #if defined(USE_MACH_VM_ALLOCATE)
   kern_return_t ret;
   vm_address_t src = (vm_address_t) srcPtr;
-  vm_address_t dst = (vm_address_t) self.pixels;
-  ret = vm_copy((vm_map_t) mach_task_self(), src, (vm_size_t) self.numBytes, dst);
+  vm_address_t dst = (vm_address_t) self->m_pixels;
+  ret = vm_copy((vm_map_t) mach_task_self(), src, (vm_size_t) self.numBytesAllocated, dst);
   if (ret != KERN_SUCCESS) {
     assert(0);
   }
 #else
-  memcpy(self.pixels, anotherFrameBufferPixelsPtr, anotherFrameBuffer.numBytes);
+  // FIXME: add assert here to check num bytes
+  // FIXME: this code will not compile if USE_MACH_VM_ALLOCATE is not defined
+  memcpy(self->m_pixels, anotherFrameBufferPixelsPtr, anotherFrameBuffer.numBytes);
 #endif  
 }
 
@@ -534,8 +577,10 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 
 - (void) memcopyPixels:(CGFrameBuffer *)anotherFrameBuffer
 {
-  assert(self.numBytes == anotherFrameBuffer.numBytes);
+  [self doneZeroCopyPixels];
   assert(self.zeroCopyMappedData == nil);
+  assert(self.zeroCopyPixels == NULL);
+  assert(self.numBytes == anotherFrameBuffer.numBytes);
   
   void *anotherFrameBufferPixelsPtr = anotherFrameBuffer.zeroCopyPixels;
   
@@ -572,13 +617,14 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 
 - (void)dealloc {
 	NSAssert(self.isLockedByDataProvider == FALSE, @"dealloc: buffer still locked by data provider");
+  [self doneZeroCopyPixels];
 
 	self.colorspace = NULL;
   
 #if defined(USE_MACH_VM_ALLOCATE)
 	if (self.pixels != NULL) {
     kern_return_t ret;
-    ret = vm_deallocate((vm_map_t) mach_task_self(), (vm_address_t) self.pixels, (vm_size_t) self.numBytes);
+    ret = vm_deallocate((vm_map_t) mach_task_self(), (vm_address_t) self.pixels, (vm_size_t) self.numBytesAllocated);
     if (ret != KERN_SUCCESS) {
       assert(0);
     }
@@ -598,12 +644,18 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
   [super dealloc];
 }
 
+// Save a "zero copy" pointer and a ref to the mapped data. Invoking this function
+// means that the self.pixels getter will return the value of the self.zeroCopyPixels
+// and the data in the frame buffer will be ignored until doneZeroCopyPixels is invoked.
+
 - (void) zeroCopyPixels:(void*)zeroCopyPtr
              mappedData:(NSData*)mappedData
 {
   self->m_zeroCopyPixels = zeroCopyPtr;
   self.zeroCopyMappedData = mappedData;
 }
+
+// Exit zero copy mode.
 
 - (void) doneZeroCopyPixels
 {

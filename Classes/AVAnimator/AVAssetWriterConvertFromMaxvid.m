@@ -43,7 +43,7 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
                            buffer:(CVPixelBufferRef)buffer
                              size:(CGSize)size;
 
-- (AVMvidFrameDecoder*) initMvidDecoder;
+- (AVMvidFrameDecoder*) makeMvidDecoder;
 
 @end
 
@@ -74,14 +74,14 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
 }
 
 // ------------------------------------------------------------------------------------
-// initMvidDecoder
+// makeMvidDecoder
 // 
 // In the normal case where a .mvid file will be read from, this method will open
 // the file and return a frame decoder. If the file can't be opened, then nil
 // will be returned.
 // ------------------------------------------------------------------------------------
 
-- (AVMvidFrameDecoder*) initMvidDecoder
+- (AVMvidFrameDecoder*) makeMvidDecoder
 {
   BOOL worked;
  
@@ -117,13 +117,13 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
   
 #if defined(REGRESSION_TESTS)
   if (self.frameDecoder == nil) {
-    frameDecoder = [self initMvidDecoder];
+    frameDecoder = [self makeMvidDecoder];
   } else {
     // Optionally use a custom frame decoder in test mode
     frameDecoder = self.frameDecoder;
   }
 #else  // REGRESSION_TESTS
-  frameDecoder = [self initMvidDecoder];
+  frameDecoder = [self makeMvidDecoder];
 #endif // REGRESSION_TESTS
   
   if (frameDecoder == nil) {
@@ -328,7 +328,14 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
   
   [videoWriterInput markAsFinished];
   
+  // Bug in finishWriting in iOS 6 simulator:
+  // http://stackoverflow.com/questions/12517760/avassetwriter-finishwriting-fails-on-ios-6-simulator
+  
+#if TARGET_IPHONE_SIMULATOR
+  [videoWriter performSelectorOnMainThread:@selector(finishWriting) withObject:nil waitUntilDone:TRUE];
+#else
   [videoWriter finishWriting];
+#endif
   
   // Note that [frameDecoder close] is implicitly invoked when the autorelease pool is drained.
   

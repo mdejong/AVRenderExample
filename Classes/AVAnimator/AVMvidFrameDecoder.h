@@ -62,10 +62,6 @@
 @property (nonatomic, assign) BOOL simulateMemoryMapFailure;
 #endif // REGRESSION_TESTS
 
-// Return TRUE if RGB values are calibrated in the SRGB colorspace.
-
-@property (nonatomic, readonly) BOOL isSRGB;
-
 + (AVMvidFrameDecoder*) aVMvidFrameDecoder;
 
 // Open resource identified by path
@@ -122,5 +118,11 @@
 // Return direct access to the header info, caller might want to inspect the header without decoding
 
 - (MVFileHeader*) header;
+
+// True when all mvid frames are keyframes. This means that none of
+// the frames are delta frames that require a previous state in order
+// to apply a delta.
+
+- (BOOL) isAllKeyframes;
 
 @end

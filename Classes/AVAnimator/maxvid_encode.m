@@ -1764,7 +1764,8 @@ maxvid_encode_generic_delta_pixels16(const uint16_t * restrict prevInputBuffer16
                                      const uint16_t * restrict currentInputBuffer16,
                                      const uint32_t inputBufferNumWords,
                                      uint32_t width,
-                                     uint32_t height)
+                                     uint32_t height,
+                                     BOOL *emitKeyframeAnyway)
 {
   // Calculate delta between previous framebuffer and the current one
   
@@ -1776,6 +1777,9 @@ maxvid_encode_generic_delta_pixels16(const uint16_t * restrict prevInputBuffer16
                                                 width, height);
   
   if ([deltaPixels count] == 0) {
+    return nil;
+  } else if ((emitKeyframeAnyway != NULL) && ([deltaPixels count] == (width * height))) {
+    *emitKeyframeAnyway = TRUE;
     return nil;
   } else {
     // FIXME: what if this method fails? What would we return?
@@ -1799,7 +1803,8 @@ maxvid_encode_generic_delta_pixels32(const uint32_t * restrict prevInputBuffer32
                                      const uint32_t * restrict currentInputBuffer32,
                                      const uint32_t inputBufferNumWords,
                                      uint32_t width,
-                                     uint32_t height)
+                                     uint32_t height,
+                                     BOOL *emitKeyframeAnyway)
 {
   // Calculate delta between previous framebuffer and the current one
   
@@ -1811,6 +1816,9 @@ maxvid_encode_generic_delta_pixels32(const uint32_t * restrict prevInputBuffer32
                                                 width, height);
   
   if ([deltaPixels count] == 0) {
+    return nil;
+  } else if ((emitKeyframeAnyway != NULL) && ([deltaPixels count] == (width * height))) {
+    *emitKeyframeAnyway = TRUE;
     return nil;
   } else {
     // FIXME: what if this method fails? What would we return?
@@ -2192,7 +2200,9 @@ maxvid_write_delta_pixels(AVMvidFileWriter *mvidWriter,
   
   int bpp = mvidWriter.bpp;
   
-  // Calculate adlre32 checksum on original frame data
+  // Calculate adler32 checksum on original frame data. Note that this
+  // adler will include any zero padding pixels in the event that the
+  // framebuffer has an odd number of pixels.
   
   uint32_t adler = 0;
   adler = maxvid_adler32(0, (unsigned char *)inputBuffer, inputBufferNumBytes);
@@ -2212,6 +2222,8 @@ maxvid_write_delta_pixels(AVMvidFileWriter *mvidWriter,
     retcode = maxvid_encode_c4_sample16(maxvidCodeBuffer, numMaxvidCodeWords, frameBufferNumPixels, NULL, tmpfp, 0);
   } else if (bpp == 24 || bpp == 32) {
     retcode = maxvid_encode_c4_sample32(maxvidCodeBuffer, numMaxvidCodeWords, frameBufferNumPixels, NULL, tmpfp, 0);
+  } else {
+    assert(FALSE);
   }
   
   // Read tmp file contents into buffer.

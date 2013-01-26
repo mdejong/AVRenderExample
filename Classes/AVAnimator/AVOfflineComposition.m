@@ -199,7 +199,11 @@ typedef enum
   return plist;  
 }
 
-- (CGColorRef) createCGColor:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha
+- (CGColorRef) createCGColor:(CGFloat)red
+                       green:(CGFloat)green
+                        blue:(CGFloat)blue
+                       alpha:(CGFloat)alpha
+CF_RETURNS_RETAINED
 {
   // FIXME: should this be RGB or sRGB colorspace?
   CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
@@ -210,6 +214,7 @@ typedef enum
 }
 
 - (CGColorRef) createColorWithHexString:(NSString*)stringToConvert
+CF_RETURNS_RETAINED
 {
   NSScanner *scanner = [NSScanner scannerWithString:stringToConvert];
   unsigned hex;
@@ -246,6 +251,7 @@ typedef enum
 // Parse color from a string specification, must be "#RRGGBB" or "#RRGGBBAA"
 
 - (CGColorRef) createParsedCGColor:(NSString*)colorSpec
+CF_RETURNS_RETAINED
 {
   int len = [colorSpec length];
   if (len != 7 && len != 9) {
@@ -669,9 +675,7 @@ typedef enum
 
   NSUInteger width = self.compSize.width;
   NSUInteger height = self.compSize.height;
-  
-  const uint32_t framebufferNumBytes = width * height * sizeof(uint32_t);
-  
+    
   // Allocate buffer that will contain the rendered frame for each time step
   
   CGFrameBuffer *cgFrameBuffer = [CGFrameBuffer cGFrameBufferWithBppDimensions:24
@@ -725,7 +729,7 @@ typedef enum
     
     // Write frame buffer out to .mvid container
     
-    worked = [fileWriter writeKeyframe:(char*)cgFrameBuffer.pixels bufferSize:framebufferNumBytes];
+    worked = [fileWriter writeKeyframe:(char*)cgFrameBuffer.pixels bufferSize:cgFrameBuffer.numBytes];
     
     if (worked == FALSE) {
       retcode = FALSE;
