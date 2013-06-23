@@ -6,7 +6,10 @@
 
 #import "AVOfflineComposition.h"
 
+#if __has_feature(objc_arc)
+#else
 #import "AutoPropertyRelease.h"
+#endif // objc_arc
 
 #import "CGFrameBuffer.h"
 
@@ -20,6 +23,8 @@
 
 #import "AVFileUtil.h"
 
+#import "MutableAttrString.h"
+
 #define LOGGING
 
 // Notification name constants
@@ -31,7 +36,9 @@ NSString * const AVOfflineCompositionFailedNotification = @"AVOfflineComposition
 typedef enum
 {
   AVOfflineCompositionClipTypeMvid = 0,
-  AVOfflineCompositionClipTypeH264  
+  AVOfflineCompositionClipTypeH264,
+  AVOfflineCompositionClipTypeImage,
+  AVOfflineCompositionClipTypeText,
 } AVOfflineCompositionClipType;
 
 // Util object, one is created for each clip to be rendered in the composition
@@ -39,6 +46,7 @@ typedef enum
 @interface AVOfflineCompositionClip : NSObject
 {
   NSString   *m_clipSource;
+  UIImage    *m_image;
   AVMvidFrameDecoder *m_mvidFrameDecoder;
 @public
   AVOfflineCompositionClipType clipType;
@@ -50,11 +58,19 @@ typedef enum
   float     clipEndSeconds;
   float     clipFrameDuration;
   NSInteger clipNumFrames;
+  
+  NSString   *m_font;
+  NSUInteger m_fontSize;
+  CGColorRef m_fontColor;
 }
 
 @property (nonatomic, copy) NSString *clipSource;
 
+@property (nonatomic, retain) UIImage *image;
+
 @property (nonatomic, retain) AVMvidFrameDecoder *mvidFrameDecoder;
+
+@property (nonatomic, copy) NSString *font;
 
 + (AVOfflineCompositionClip*) aVOfflineCompositionClip;
 
@@ -101,6 +117,10 @@ typedef enum
 
 @property (nonatomic, assign) CGSize compSize;
 
+@property (nonatomic, copy) NSString *defaultFont;
+
+@property (nonatomic, assign) NSUInteger defaultFontSize;
+
 @end
 
 // Implementation of AVOfflineComposition
@@ -125,12 +145,20 @@ typedef enum
 
 @synthesize compSize = m_compSize;
 
+@synthesize defaultFont = m_defaultFont;
+
+@synthesize defaultFontSize = m_defaultFontSize;
+
 // Constructor
 
 + (AVOfflineComposition*) aVOfflineComposition
 {
-  AVOfflineComposition *obj = [[[AVOfflineComposition alloc] init] autorelease];
+  AVOfflineComposition *obj = [[AVOfflineComposition alloc] init];
+#if __has_feature(objc_arc)
   return obj;
+#else
+  return [obj autorelease];
+#endif // objc_arc
 }
 
 - (void) dealloc
@@ -138,8 +166,14 @@ typedef enum
   if (self->m_backgroundColor) {
     CGColorRelease(self->m_backgroundColor);
   }
+  if (self->m_defaultFontColor) {
+    CGColorRelease(self->m_defaultFontColor);
+  }
+#if __has_feature(objc_arc)
+#else
   [AutoPropertyRelease releaseProperties:self thisClass:AVOfflineComposition.class];
   [super dealloc];
+#endif // objc_arc
 }
 
 // Initiate a composition operation given info about the composition
@@ -156,7 +190,7 @@ typedef enum
 
 - (void) composeInSecondaryThread:(NSDictionary*)compDict
 {
-  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  @autoreleasepool {
   
   BOOL worked;
   
@@ -164,7 +198,9 @@ typedef enum
 
   NSAssert([NSThread isMainThread] == FALSE, @"isMainThread");
   
-  worked = [self parseToplevelProperties:compDict];
+  @autoreleasepool {
+    worked = [self parseToplevelProperties:compDict];
+  }
   
   if (worked) {
     worked = [self composeFrames];
@@ -177,7 +213,7 @@ typedef enum
     [self notifyCompositionFailed];
   }
   
-  [pool drain];
+  }
   return;
 }
 
@@ -389,6 +425,62 @@ CF_RETURNS_RETAINED
   
   self.compSize = CGSizeMake(compWidth, compHeight);
 
+  // font specific options, these default settings apply to any clips
+  // in the comp with the "text" type.
+
+  // "Font"
+  
+  NSString *defaultFontName = [compDict objectForKey:@"Font"];
+  NSUInteger defaultFontSize = 14.0;
+  
+  if (defaultFontName == nil) {
+    UIFont *font = [UIFont systemFontOfSize:defaultFontSize];
+    defaultFontName = font.fontName;
+  } else {
+    // Double check that font can be loaded by name
+    
+    UIFont *font = [UIFont fontWithName:defaultFontName size:defaultFontSize];
+    
+    if (font == nil) {
+      self.errorString = @"default Font invalid";
+      return FALSE;
+    }
+    
+    // Use the system font name returned for user supplied name
+    
+    defaultFontName = font.fontName;
+  }
+  
+  // "FontSize"
+  
+  NSNumber *defaultFontSizeNum = [compDict objectForKey:@"FontSize"];
+  
+  if (defaultFontSizeNum != nil) {
+    defaultFontSize = [defaultFontSizeNum intValue];
+    if (defaultFontSize <= 0) {
+      self.errorString = @"FontSize invalid";
+      return FALSE;
+    }
+  }
+  
+  // "FontColor"
+  
+  NSString *defaultFontColorStr = [compDict objectForKey:@"FontColor"];
+  
+  if (defaultFontColorStr == nil) {
+    defaultFontColorStr = @"#000000";
+  }
+  
+  self->m_defaultFontColor = [self createParsedCGColor:defaultFontColorStr];
+  
+  if (self->m_defaultFontColor == NULL) {
+    self.errorString = @"FontColor invalid";
+    return FALSE;
+  }
+  
+  self.defaultFont = defaultFontName;
+  self.defaultFontSize = defaultFontSize;
+  
   // Parse CompClips, this array of dicttionary property is optional
 
   if ([self parseClipProperties:compDict] == FALSE) {
@@ -416,31 +508,6 @@ CF_RETURNS_RETAINED
     
     AVOfflineCompositionClip *compClip = [AVOfflineCompositionClip aVOfflineCompositionClip];
     
-    // ClipSource is a mvid or H264 movie that frames are loaded from
-    
-    NSString *clipSource = [clipDict objectForKey:@"ClipSource"];
-    
-    if (clipSource == nil) {
-      self.errorString = @"ClipSource not found";
-      return FALSE;
-    }
-    
-    // ClipSource could indicate a resource file (the assumed default).
-    
-    NSString *resPath = [[NSBundle mainBundle] pathForResource:clipSource ofType:@""];
-    
-    if (resPath != nil) {
-      // ClipSource is the name of a resource file
-      clipSource = resPath;
-    } else {
-      // If ClipSource is not a resource file, check for a file with that name in the tmp dir
-      NSString *tmpDir = NSTemporaryDirectory();
-      NSString *tmpPath = [tmpDir stringByAppendingPathComponent:clipSource];
-      if ([[NSFileManager defaultManager] fileExistsAtPath:tmpPath]) {
-        clipSource = tmpPath;
-      }
-    }
-    
     // ClipType is a string to indicate the type of movie clip
     
     NSString *clipTypeStr = [clipDict objectForKey:@"ClipType"];
@@ -450,14 +517,68 @@ CF_RETURNS_RETAINED
     }
     
     AVOfflineCompositionClipType clipType;
-
+    UIImage *staticImage = nil;
+    
     if ([clipTypeStr isEqualToString:@"mvid"]) {
       clipType = AVOfflineCompositionClipTypeMvid;
     } else if ([clipTypeStr isEqualToString:@"h264"]) {
       clipType = AVOfflineCompositionClipTypeH264;
+    } else if ([clipTypeStr isEqualToString:@"image"]) {
+      clipType = AVOfflineCompositionClipTypeImage;
+    } else if ([clipTypeStr isEqualToString:@"text"]) {
+      clipType = AVOfflineCompositionClipTypeText;
     } else {
       self.errorString = @"ClipType unsupported";
       return FALSE;
+    }
+    
+    // ClipSource is a mvid or H264 movie that frames are loaded from, it could also be an image.
+    // Note that for a "text" type, there is no source.
+    
+    NSString *clipSource = nil;
+    
+    if (clipType == AVOfflineCompositionClipTypeText) {
+      // Store literal text in "clip source"
+      
+      clipSource = [clipDict objectForKey:@"ClipText"];
+      
+      if (clipSource == nil) {
+        self.errorString = @"ClipText not found";
+        return FALSE;
+      }
+    } else {
+      // Movie or static image clip
+      
+      clipSource = [clipDict objectForKey:@"ClipSource"];
+      
+      if (clipSource == nil) {
+        self.errorString = @"ClipSource not found";
+        return FALSE;
+      }
+      
+      // ClipSource could indicate a resource file (the assumed default).
+      
+      NSString *resPath = [[NSBundle mainBundle] pathForResource:clipSource ofType:@""];
+      
+      if (resPath != nil) {
+        // ClipSource is the name of a resource file
+        clipSource = resPath;
+        staticImage = [UIImage imageWithContentsOfFile:clipSource];
+      } else {
+        // If ClipSource is not a resource file, check for a file with that name in the tmp dir
+        NSString *tmpDir = NSTemporaryDirectory();
+        NSString *tmpPath = [tmpDir stringByAppendingPathComponent:clipSource];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:tmpPath]) {
+          clipSource = tmpPath;
+          staticImage = [UIImage imageWithContentsOfFile:clipSource];
+        } else if (clipType == AVOfflineCompositionClipTypeImage) {
+          // If the image is not a filename found in the app resources or in the tmp dir, then
+          // try to load as a named image. For example, "Foo" could map to "Foo@2x.png" for
+          // example, it might also map to "Foo.jpg".
+          
+          staticImage = [UIImage imageNamed:clipSource];
+        }
+      }      
     }
     
     // ClipX, ClipY : signed int
@@ -585,40 +706,98 @@ CF_RETURNS_RETAINED
         }
       }
     }
-    
-    // Decode frames from input .mvid
-    
-    AVMvidFrameDecoder *mvidFrameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
-    
-    worked = [mvidFrameDecoder openForReading:mvidPath];
-    if (worked == FALSE) {
-      self.errorString = [NSString stringWithFormat:@"open of ClipSource file failed: %@", compClip.clipSource];
-      return FALSE;
-    }
-    
-    // FIXME: print a log message saying that non-SRGB .mvid was found?
-    //NSAssert([mvidFrameDecoder isSRGB] == TRUE, @"isSRGB");
   
-    compClip.mvidFrameDecoder = mvidFrameDecoder;
-    
-    // Grab the clip's frame duration out of the mvid header. This frame duration may
-    // not match the frame rate of the whole comp.
-    
-    compClip->clipFrameDuration = mvidFrameDecoder.frameDuration;
-    compClip->clipNumFrames = mvidFrameDecoder.numFrames;
-    
-    if (clipScaleFramePerSecond) {
-      // Calculate a new clipFrameDuration based on duration that this clip will
-      // be rendered for on the global timeline.
-
-      float totalClipTime = (compClip->clipEndSeconds - compClip->clipStartSeconds);
-      float clipFrameDuration = totalClipTime / compClip->clipNumFrames;
+    if (clipType == AVOfflineCompositionClipTypeText) {
+      // clip specific font options
       
-      compClip->clipFrameDuration = clipFrameDuration;
+      // "Font"
+      
+      NSString *fontName = [clipDict objectForKey:@"Font"];
+      NSUInteger fontSize = 0.0;
+      
+      if (fontName != nil) {
+        // Double check that font can be loaded by name
+        
+        UIFont *font = [UIFont fontWithName:fontName size:14];
+        
+        if (font == nil) {
+          self.errorString = @"clip Font invalid";
+          return FALSE;
+        }
+        
+        // Use the system font name returned for user supplied name
+        
+        fontName = font.fontName;
+        
+        compClip.font = fontName;
+      }
+      
+      // "FontSize"
+      
+      NSNumber *fontSizeNum = [clipDict objectForKey:@"FontSize"];
+      
+      if (fontSizeNum != nil) {
+        fontSize = [fontSizeNum intValue];
+        if (fontSize <= 0) {
+          self.errorString = @"clip FontSize invalid";
+          return FALSE;
+        }
+        
+        compClip->m_fontSize = fontSize;
+      }
+      
+      // "FontColor"
+      
+      NSString *fontColorStr = [clipDict objectForKey:@"FontColor"];
+      
+      if (fontColorStr != nil) {
+        compClip->m_fontColor = [self createParsedCGColor:fontColorStr];
+        
+        if (compClip->m_fontColor == NULL) {
+          self.errorString = @"clip FontColor invalid";
+          return FALSE;
+        }
+      }
+    } else if (clipType == AVOfflineCompositionClipTypeImage) {
+      if (staticImage == nil) {
+        self.errorString = @"ClipSource does not correspond to a file in app resources, the tmp dir, or a named image";
+        return FALSE;
+      }
+      
+      compClip.image = staticImage;
+    } else if (clipType == AVOfflineCompositionClipTypeMvid || clipType == AVOfflineCompositionClipTypeH264) {
+      // Decode frames from input .mvid
+      
+      AVMvidFrameDecoder *mvidFrameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
+      
+      worked = [mvidFrameDecoder openForReading:mvidPath];
+      if (worked == FALSE) {
+        self.errorString = [NSString stringWithFormat:@"open of ClipSource file failed: %@", compClip.clipSource];
+        return FALSE;
+      }
+      
+      compClip.mvidFrameDecoder = mvidFrameDecoder;
+      
+      // Grab the clip's frame duration out of the mvid header. This frame duration may
+      // not match the frame rate of the whole comp.
+      
+      compClip->clipFrameDuration = mvidFrameDecoder.frameDuration;
+      compClip->clipNumFrames = mvidFrameDecoder.numFrames;
+      
+      if (clipScaleFramePerSecond) {
+        // Calculate a new clipFrameDuration based on duration that this clip will
+        // be rendered for on the global timeline.
+        
+        float totalClipTime = (compClip->clipEndSeconds - compClip->clipStartSeconds);
+        float clipFrameDuration = totalClipTime / compClip->clipNumFrames;
+        
+        compClip->clipFrameDuration = clipFrameDuration;
+      }
+    } else {
+      assert(0);
     }
     
     [mArr addObject:compClip];
-    
     clipOffset++;
   }
   
@@ -721,7 +900,12 @@ CF_RETURNS_RETAINED
     CGContextSetFillColorWithColor(bitmapContext, self->m_backgroundColor);
     CGContextFillRect(bitmapContext, CGRectMake(0, 0, width, height));
     
+    CGContextSaveGState(bitmapContext);
+    
     worked = [self composeClips:frame bitmapContext:bitmapContext];
+    
+    CGContextRestoreGState(bitmapContext);
+    
     if (worked == FALSE) {
       retcode = FALSE;
       break;
@@ -775,8 +959,8 @@ CF_RETURNS_RETAINED
   }
   
   int clipOffset = 0;
-  for (AVOfflineCompositionClip *compClip in self.compClips) {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  for (AVOfflineCompositionClip *compClip in self.compClips)
+  @autoreleasepool {
     
     // ClipSource is a mvid or H264 movie that frames are loaded from
 
@@ -798,24 +982,29 @@ CF_RETURNS_RETAINED
       float clipTime = frameTime - clipStartSeconds;
       
       // chop to integer : for example a clip duration of 2.0 and a time offset of 1.0
-      // would chop to frame 0.
+      // would chop to frame 0. Note that clipFrame is not used for an "image" or "text" clip.
       
-      NSUInteger clipFrame = (NSUInteger) (clipTime / compClip->clipFrameDuration);
+      NSUInteger clipFrame = 0;
       
-#ifdef LOGGING
-      NSLog(@"clip time %0.2f maps to clip frame %d (duration %0.2f)", clipTime, clipFrame, compClip->clipFrameDuration);
-#endif // LOGGING
-      
-      if (clipFrame >= compClip->clipNumFrames) {
-        // If the calculate frame is larger than the last frame in the clip, continue
-        // to display the last frame. This can happen when a clip is shorter than
-        // the display lenght, so the final frame continues to display.
-        
-        clipFrame = (compClip->clipNumFrames - 1);
+      if (compClip->clipType == AVOfflineCompositionClipTypeMvid || compClip->clipType == AVOfflineCompositionClipTypeH264) {
+        float clipFrameDuration = compClip->clipFrameDuration;
+        clipFrame = (NSUInteger) (clipTime / clipFrameDuration);
         
 #ifdef LOGGING
-        NSLog(@"clip frame bound to the final frame %d", clipFrame);
+        NSLog(@"clip time %0.2f maps to clip frame %d (duration %0.2f)", clipTime, clipFrame, compClip->clipFrameDuration);
 #endif // LOGGING
+        
+        if (clipFrame >= compClip->clipNumFrames) {
+          // If the calculate frame is larger than the last frame in the clip, continue
+          // to display the last frame. This can happen when a clip is shorter than
+          // the display lenght, so the final frame continues to display.
+          
+          clipFrame = (compClip->clipNumFrames - 1);
+          
+#ifdef LOGGING
+          NSLog(@"clip frame bound to the final frame %d", clipFrame);
+#endif // LOGGING
+        }
       }
       
       CGImageRef cgImageRef = NULL;
@@ -839,24 +1028,75 @@ CF_RETURNS_RETAINED
         UIImage *image = frame.image;
         NSAssert(image, @"image");
         cgImageRef = image.CGImage;
+      } else if (compClip->clipType == AVOfflineCompositionClipTypeImage) {
+        UIImage *image = compClip.image;
+        NSAssert(image, @"compClip.image is nil");
+        cgImageRef = image.CGImage;
+      } else if (compClip->clipType == AVOfflineCompositionClipTypeText) {
+        // Render text directly into bitmapContext in a secondary thread.
+        // The simplified NSString render methods like drawInRect cannot
+        // be used here because of thread safety issues.
+        
+        MutableAttrString *mAttrString = [MutableAttrString mutableAttrString];
+        
+        NSString *fontName = self.defaultFont;
+        NSUInteger fontSize = self.defaultFontSize;
+        CGColorRef fontColorRef = self->m_defaultFontColor;
+        
+        if (compClip.font != nil) {
+          fontName = compClip.font;
+        }
+        if (compClip->m_fontSize > 0) {
+          fontSize = compClip->m_fontSize;
+        }
+        if (compClip->m_fontColor != NULL) {
+          fontColorRef = compClip->m_fontColor;
+        }
+        
+        [mAttrString setDefaults:fontColorRef
+                  fontSize:fontSize
+             plainFontName:fontName
+              boldFontName:fontName];
+        
+        NSString *text = compClip.clipSource;
+        if ([text length] > 0) {
+          [mAttrString appendText:text];
+          [mAttrString doneAppendingText];
+          
+          CGRect bounds = CGRectMake(compClip->clipX, compClip->clipY, compClip->clipWidth, compClip->clipHeight);
+          bounds = [self flipRect:bounds];
+          
+          if (FALSE) {
+            // Debug fill text bounds with red so that bounds can be checked.
+            // Note that these bounds have already been flipped by the time
+            // this method is invoked.
+            
+            CGContextSetFillColorWithColor(bitmapContext, [UIColor redColor].CGColor);
+            CGContextFillRect(bitmapContext, bounds);
+          }
+          
+          [mAttrString render:bitmapContext bounds:bounds];
+        }
       } else {
         assert(0);
       }
-        
+      
       // Render frame by painting frame image into a specific rectangle in the framebuffer
       
-      CGRect bounds = CGRectMake(compClip->clipX, compClip->clipY, compClip->clipWidth, compClip->clipHeight);
-      
-      CGContextDrawImage(bitmapContext, bounds, cgImageRef);
+      if (cgImageRef) {
+        CGRect bounds = CGRectMake(compClip->clipX, compClip->clipY, compClip->clipWidth, compClip->clipHeight);
+        bounds = [self flipRect:bounds];
+        CGContextDrawImage(bitmapContext, bounds, cgImageRef);
+      }
     }
     
     clipOffset++;
-    
-    [pool drain];
   }
   
   return TRUE;
 }
+
+// This method will render into the given 
 
 // Close resources associated with each open clip
 
@@ -865,6 +1105,19 @@ CF_RETURNS_RETAINED
   // Clips are automatically cleaned up when last ref is dropped
   
   self.compClips = nil;
+}
+
+// This utility method will translate a bounding box so that coordinates given in
+// terms of the upper left corner of the bounding box are flipped into offset
+// of the lower left corner from the bottom of the screen.
+
+- (CGRect) flipRect:(CGRect)rect
+{
+  CGRect flipped = rect;
+  float lowerLeftCornerYBelowZero = rect.origin.y + rect.size.height;
+  float lowerLeftCornerYAboveBottom = self.compSize.height - lowerLeftCornerYBelowZero;
+  flipped.origin.y = lowerLeftCornerYAboveBottom;
+  return flipped;
 }
 
 @end // AVOfflineComposition
@@ -876,18 +1129,33 @@ CF_RETURNS_RETAINED
 
 @synthesize clipSource = m_clipSource;
 
+@synthesize image = m_image;
+
 @synthesize mvidFrameDecoder = m_mvidFrameDecoder;
+
+@synthesize font = m_font;
 
 + (AVOfflineCompositionClip*) aVOfflineCompositionClip
 {
   AVOfflineCompositionClip *obj = [[AVOfflineCompositionClip alloc] init];
+#if __has_feature(objc_arc)
+  return obj;
+#else
   return [obj autorelease];
+#endif // objc_arc
 }
 
 - (void) dealloc
 {
+  if (self->m_fontColor) {
+    CGColorRelease(self->m_fontColor);
+  }
+  
+#if __has_feature(objc_arc)
+#else
   [AutoPropertyRelease releaseProperties:self thisClass:AVOfflineCompositionClip.class];
   [super dealloc];
+#endif // objc_arc
 }
 
 @end

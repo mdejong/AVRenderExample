@@ -580,10 +580,17 @@
 		return;
 	}
   
+  // Media object must be attached to a renderer otherwise it is not possible to
+  // start animating
+  
+  if (self.renderer == nil) {
+    NSAssert(FALSE, @"renderer not defined for media object, attachMedia must be invoked before startAnimator");
+  }
+  
   // Implicitly rewind before playing, this basically just deallocates any previous
   // play resources in the frame decoder.
   
-  [self rewind];  
+  [self rewind];
   
 	// Can only transition from PAUSED to ANIMATING via unpause
   
@@ -669,11 +676,16 @@
 	}
 #endif
 
+	BOOL wasNeverStarted = FALSE;
+  
 	if (self.state == STOPPED) {
 		// When already stopped, don't generate another AVAnimatorDidStopNotification
 		return;
 	} else if (self.state == FAILED) {
 		return;
+	} else if (self.state <= READY) {
+		// Play was never started successfully
+		wasNeverStarted = TRUE;
 	}
   
 	// stopAnimator can be invoked in any state, it needs to cleanup
@@ -702,15 +714,21 @@
 	self.prevFrame = nil;
 	self.nextFrame = nil;
   
-	// Reset idle timer
-	
-	UIApplication *thisApplication = [UIApplication sharedApplication];	
-  thisApplication.idleTimerDisabled = NO;
-  
-	// Send notification to object(s) that regestered interest in the stop action
-  
-	[[NSNotificationCenter defaultCenter] postNotificationName:AVAnimatorDidStopNotification
-                                                      object:self];
+  if (wasNeverStarted == FALSE) {
+    // Reset idle timer and delivering the stop notification should only
+    // be done if the player was actually started previously.
+    
+    UIApplication *thisApplication = [UIApplication sharedApplication];
+    thisApplication.idleTimerDisabled = NO;
+    
+    // Send notification to object(s) that regestered interest in the stop action.
+    // Note that this stop callback could attach a renderer and call startAnimator,
+    // so it is important that this stop notification is only delivered when the
+    // media is actually playing.
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:AVAnimatorDidStopNotification
+                                                        object:self];
+  }
   
   // Note that invoking stopAnimator leaves the current frame at the same value,
   // the frame and frame decoder do not automatically rewind.
@@ -1321,7 +1339,11 @@
   
 	if (nextImage != currentImage) {
 		self.prevFrame = currentImage;
+#if defined(__GNUC__) && !defined(__clang__)
+		[self.renderer setImage:nextImage];
+#else
 		self.renderer.image = nextImage;
+#endif
 	}
   
   // Test release of frame now, instead of in next decode callback. Seems
@@ -1505,13 +1527,18 @@
   // will be released while the app is in the background.
   // Note that duplicateCurrentFrame could return nil.
 
+  UIImage *resultImage = nil;
+  
   if (copyFinalFrame) {
     AVFrame *frame = [self.frameDecoder duplicateCurrentFrame];
     UIImage *finalFrameCopy = frame.image;
-    self.renderer.image = finalFrameCopy;
-  } else {
-    self.renderer.image = nil;
+    resultImage = finalFrameCopy;
   }
+#if defined(__GNUC__) && !defined(__clang__)
+  [self.renderer setImage:resultImage];
+#else
+  self.renderer.image = resultImage;
+#endif
   
   self.renderer = nil;
   
@@ -1525,6 +1552,46 @@
   // The view and the media objects should have dropped all references to frame buffer objects now.
   
   [self.frameDecoder releaseDecodeResources];
+}
+
+- (NSString*) description
+{
+  NSString *stateStr;
+  
+  AVAnimatorPlayerState state = self.state;
+  switch (state) {
+    case ALLOCATED:
+      stateStr = @"ALLOCATED";
+      break;
+    case LOADED:
+      stateStr = @"LOADED";
+      break;
+    case FAILED:
+      stateStr = @"FAILED";
+      break;
+    case PREPPING:
+      stateStr = @"PREPPING";
+      break;
+    case READY:
+      stateStr = @"READY";
+      break;
+    case ANIMATING:
+      stateStr = @"ANIMATING";
+      break;
+    case STOPPED:
+      stateStr = @"STOPPED";
+      break;
+    case PAUSED:
+      stateStr = @"PAUSED";
+      break;
+    default:
+      NSAssert(FALSE, @"unmatched state %d", state);
+  }
+  
+  return [NSString stringWithFormat:@"AVAnimatorMedia %p, state %@, loader %@, decoder %@",
+          self,
+          stateStr,
+          self.resourceLoader, self.frameDecoder];
 }
 
 @end

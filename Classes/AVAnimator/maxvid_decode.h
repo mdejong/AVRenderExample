@@ -26,7 +26,7 @@ typedef enum {
 // Error codes returned by encode functions
 
 #define MV_ERROR_CODE_INVALID_INPUT 1
-#define MV_ERROR_CODE_INVALID_FILENAME 2
+#define MV_ERROR_CODE_INVALID_OUTPUT 2
 #define MV_ERROR_CODE_WRITE_FAILED 3
 #define MV_ERROR_CODE_READ_FAILED 4
 
@@ -47,6 +47,7 @@ typedef enum {
 #define MV_MAX_24_BITS 0xFFFFFF
 #define MV_MAX_27_BITS 0x7FFFFFF
 #define MV_MAX_30_BITS 0x3FFFFFFF
+#define MV_MAX_32_BITS 0xFFFFFFFF
 
 #define MV_PAGESIZE 4096
 #define MV16_NUM_PIXELS_ONE_PAGE (MV_PAGESIZE / sizeof(uint16_t))

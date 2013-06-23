@@ -20,7 +20,18 @@
 # define EXTRA_CHECKS
 #endif // DEBUG
 
+#if TARGET_OS_IPHONE
+// Adler checking not always enabled on iOS since it can slow down the decompression
+// process. Specifically, when keyframe memory has been mapped but it has not yet
+// been accessed, then we do not want to have to wait for all page faults by forcing
+// an adler check every time.
+
 //#define ALWAYS_CHECK_ADLER
+#else
+// Always check adler when executing in mvidmoviemaker on the desktop
+
+#define ALWAYS_CHECK_ADLER
+#endif // TARGET_OS_IPHONE
 
 // private properties declaration for class
 
@@ -442,7 +453,9 @@
 {
   // The movie data must have been mapped into memory by the time advanceToFrame is invoked
   
-  NSAssert(self.mappedData, @"file not mapped");
+  if (self.mappedData == nil) {
+    NSAssert(FALSE, @"file not mapped");
+  }
   
   // Get from queue of frame buffers!
   
@@ -460,11 +473,10 @@
     return self.lastFrame;
   } else if ((frameIndex != -1) && (newFrameIndex < frameIndex)) {
     // movie frame index can only go forward via advanceToFrame
-    NSString *msg = [NSString stringWithFormat:@"%@: %d -> %d",
-                     @"can't advance to frame before current frameIndex",
-                     frameIndex,
-                     newFrameIndex];
-    NSAssert(FALSE, msg);
+    NSAssert(FALSE, @"%@: %d -> %d",
+             @"can't advance to frame before current frameIndex",
+             frameIndex,
+             newFrameIndex);
   }
   
   // Get the number of frames directly from the header
@@ -473,10 +485,7 @@
   int numFrames = [self numFrames];
   
   if (newFrameIndex >= numFrames) {
-    NSString *msg = [NSString stringWithFormat:@"%@: %d",
-                     @"can't advance past last frame",
-                     newFrameIndex];
-    NSAssert(FALSE, msg);
+    NSAssert(FALSE, @"%@: %d", @"can't advance past last frame", newFrameIndex);
   }
   
   BOOL changeFrameData = FALSE;
@@ -675,7 +684,7 @@
         }
 
         [self assertSameAdler:frame->adler frameBuffer:frameBuffer frameBufferNumBytes:numBytesToIncludeInAdler];
-#endif // EXTRA_CHECKS
+#endif // EXTRA_CHECKS || ALWAYS_CHECK_ADLER
       } else {
         // Input buffer contains a complete keyframe, use zero copy optimization
         
@@ -889,6 +898,17 @@
   } else {
     return FALSE;
   }
+}
+
+- (NSString*) description
+{
+  return [NSString stringWithFormat:@"AVMvidFrameDecoder %p, file %@, isOpen %d, isMapped %d, w/h %d x %d, numFrames %d",
+          self,
+          [self.filePath lastPathComponent],
+          self.isOpen,
+          (self.mappedData == nil ? 0 : 1),
+          self.width, self.height,
+          self.numFrames];
 }
 
 @end
