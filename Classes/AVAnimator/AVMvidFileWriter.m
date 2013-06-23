@@ -46,7 +46,9 @@ uint32_t maxvid_file_padding_before_keyframe(FILE *outFile, uint32_t offset) {
     wordsToBound--;
   }
   
-  uint32_t offsetAfter = ftell(outFile);
+  long offsetAfterLong = ftell(outFile);
+  assert(offsetAfterLong != -1);
+  uint32_t offsetAfter = (uint32_t)offsetAfterLong;
   
   assert(UINTMOD(offsetAfter, boundSize) == 0);
   
@@ -242,6 +244,7 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
 - (void) saveOffset
 {
   offset = ftell(maxvidOutFile);
+  NSAssert(offset != -1, @"ftell returned -1");
 }
 
 // Advance the file offset to the start of the next page in memory.
@@ -413,9 +416,10 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
 {
   uint32_t offsetBefore = (uint32_t)self->offset;
   offset = ftell(maxvidOutFile);
+  NSAssert(offset != -1, @"ftell returned -1");
   uint32_t length = ((uint32_t)offset) - offsetBefore;
   NSAssert(length > 0, @"length must be larger than");
-    
+  
   // Typically, the framebuffer is an even number of pixels.
   // There is an odd case though, when emitting 16 bit pixels
   // is is possible that the total number of pixels written
@@ -423,7 +427,7 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
   // number of words.
   
   if (isKeyFrame) {
-    NSAssert((length % 2) == 0, @"offset length must be even");
+    NSAssert((length % 2) == 0, @"offset length must be even, not %d", length);
   }
   
   if (isKeyFrame && (self.bpp == 16)) {
@@ -433,6 +437,7 @@ uint32_t maxvid_file_padding_after_keyframe(FILE *outFile, uint32_t offset) {
       size_t size = fwrite(&zeroHalfword, sizeof(zeroHalfword), 1, maxvidOutFile);
       assert(size == 1);
       offset = ftell(maxvidOutFile);
+      NSAssert(offset != -1, @"ftell returned -1");
       // Note that length is not recalculated. If a delta frame appears after this
       // one, it must begin on a word bound. The frame length ignores the halfword padding.
       //length = ((uint32_t)offset) - offsetBefore;

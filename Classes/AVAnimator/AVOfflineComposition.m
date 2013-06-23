@@ -943,12 +943,21 @@ CF_RETURNS_RETAINED
   
   [fileWriter close];
   
-  // Rename tmp file to actual output filename
-  
-  [AVFileUtil renameFile:phonyOutPath toPath:self.destination];
+  // Rename tmp file to actual output filename on success, otherwise
+  // nuke output since writing was unsuccessful and the tmp file
+  // for the comp could be quite large.
+
+  if (worked) {
+    [AVFileUtil renameFile:phonyOutPath toPath:self.destination];
+  } else {
+    worked = [[NSFileManager defaultManager] removeItemAtPath:phonyOutPath error:nil];
+    NSAssert(worked, @"could not remove output file");
+  }
   
 #ifdef LOGGING
-  NSLog(@"Wrote comp file %@", self.destination);
+  if (worked) {
+    NSLog(@"Wrote comp file %@", self.destination);
+  }
 #endif // LOGGING
   
   return retcode;
