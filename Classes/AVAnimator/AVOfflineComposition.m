@@ -873,6 +873,15 @@ CF_RETURNS_RETAINED
     return FALSE;
   }
   
+  // Before starting to write a new tmp file, make sure the previous output file is deleted.
+  // If the system is low on disk space and a render is very large then this would
+  // reclaim a bunch of hard drive space from a previous render of this same comp.
+  
+  if ([AVFileUtil fileExists:self.destination]) {
+    worked = [[NSFileManager defaultManager] removeItemAtPath:self.destination error:nil];
+    NSAssert(worked, @"could not remove output file");
+  }
+  
   // Create phony output file, this file will be renamed to XYZ.mvid when done writing
   
   NSString *phonyOutPath = [AVFileUtil generateUniqueTmpPath];

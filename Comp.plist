@@ -53,6 +53,8 @@
 			<integer>18</integer>
 			<key>ClipEndSeconds</key>
 			<real>28.27</real>
+			<key>ClipScaleFramePerSecond</key>
+			<true/>
 		</dict>
 	</array>
 </dict>
