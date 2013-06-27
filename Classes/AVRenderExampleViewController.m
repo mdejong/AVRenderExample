@@ -86,6 +86,26 @@
     self.movieControlsViewController.mainWindow = nil;
   }
   
+  {
+    // Remove the very large comp file rendered to disk. The
+    // next time a render was done the logic would remove
+    // the previous output comp anyway, but since this file is so
+    // very large (more than 2 gigabytes) it is better to remove
+    // it right away to avoid leaving it on disk on accident.
+    
+    AVAnimatorMedia *media = self.animatorView.media;
+    
+    AVMvidFrameDecoder *frameDecoder = (AVMvidFrameDecoder*) media.frameDecoder;
+    
+    NSString *tmpCompPath = frameDecoder.filePath;
+    
+    {
+      BOOL worked;
+      worked = [[NSFileManager defaultManager] removeItemAtPath:tmpCompPath error:nil];
+      NSAssert(worked, @"could not remove tmp file");
+    }
+  }
+  
   [self.animatorView removeFromSuperview];    
 	self.animatorView = nil;
   
