@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>ABOUT</key>
-	<string>H264 video, 640x480, 2 frames at 30FPS</string>
+	<string>Comp 2 videos text at full screen 2x size</string>
 	<key>Source</key>
 	<string>Comp.plist</string>
 	<key>Destination</key>
@@ -13,9 +13,9 @@
 	<key>CompFramesPerSecond</key>
 	<integer>30</integer>
 	<key>CompWidth</key>
-	<integer>640</integer>
+	<integer>960</integer>
 	<key>CompHeight</key>
-	<integer>480</integer>
+	<integer>640</integer>
 	<key>CompClips</key>
 	<array>
 		<dict>
@@ -28,9 +28,9 @@
 			<key>ClipY</key>
 			<integer>0</integer>
 			<key>ClipWidth</key>
-			<integer>640</integer>
+			<integer>960</integer>
 			<key>ClipHeight</key>
-			<integer>480</integer>
+			<integer>640</integer>
 			<key>ClipStartSeconds</key>
 			<integer>0</integer>
 			<key>ClipEndSeconds</key>
@@ -42,13 +42,13 @@
 			<key>ClipType</key>
 			<string>h264</string>
 			<key>ClipX</key>
-			<integer>330</integer>
+			<integer>514</integer>
 			<key>ClipY</key>
-			<integer>152</integer>
+			<integer>214</integer>
 			<key>ClipWidth</key>
-			<integer>280</integer>
+			<integer>384</integer>
 			<key>ClipHeight</key>
-			<integer>162</integer>
+			<integer>192</integer>
 			<key>ClipStartSeconds</key>
 			<integer>18</integer>
 			<key>ClipEndSeconds</key>

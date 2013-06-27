@@ -872,7 +872,7 @@ CF_RETURNS_RETAINED
   if (bitmapContext == NULL) {
     return FALSE;
   }
-  
+
   // Before starting to write a new tmp file, make sure the previous output file is deleted.
   // If the system is low on disk space and a render is very large then this would
   // reclaim a bunch of hard drive space from a previous render of this same comp.
@@ -946,12 +946,13 @@ CF_RETURNS_RETAINED
   // Rename tmp file to actual output filename on success, otherwise
   // nuke output since writing was unsuccessful and the tmp file
   // for the comp could be quite large.
-
+  
   if (worked) {
     [AVFileUtil renameFile:phonyOutPath toPath:self.destination];
   } else {
     worked = [[NSFileManager defaultManager] removeItemAtPath:phonyOutPath error:nil];
     NSAssert(worked, @"could not remove output file");
+    worked = FALSE;
   }
   
 #ifdef LOGGING
