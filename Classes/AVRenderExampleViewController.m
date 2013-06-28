@@ -199,7 +199,11 @@
 
 - (void) failedToLoadNotification:(NSNotification*)notification
 {
-  NSLog(@"failedToLoadNotification");
+  AVOfflineComposition *comp = (AVOfflineComposition*)notification.object;
+  
+  NSString *errorString = comp.errorString;
+  
+  NSLog(@"failedToLoadNotification: \"%@\"", errorString);
 }
 
 @end
