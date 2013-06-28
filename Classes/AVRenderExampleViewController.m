@@ -156,9 +156,10 @@
   // Create res loader
   
   AVAppResourceLoader *resLoader = [AVAppResourceLoader aVAppResourceLoader];
-  resLoader.movieFilename = filename; // Phony resource name, becomes no-op
-	media.resourceLoader = resLoader;    
+  // Phony resource name, becomes no-op since the comp file exists already
+  resLoader.movieFilename = filename;
   
+	media.resourceLoader = resLoader;
   media.frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
     
   AVMvidFrameDecoder *frameDecoder = [AVMvidFrameDecoder aVMvidFrameDecoder];
