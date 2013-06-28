@@ -16,6 +16,12 @@
 	<integer>960</integer>
 	<key>CompHeight</key>
 	<integer>640</integer>
+	<key>Font</key>
+	<string>AmericanTypewriter</string>
+	<key>FontSize</key>
+	<integer>14</integer>
+	<key>FontColor</key>
+	<string>#00FF00</string>
 	<key>CompClips</key>
 	<array>
 		<dict>
@@ -55,6 +61,24 @@
 			<real>28.27</real>
 			<key>ClipScaleFramePerSecond</key>
 			<true/>
+		</dict>
+		<dict>
+			<key>ClipText</key>
+			<string>Test!</string>
+			<key>ClipType</key>
+			<string>text</string>
+			<key>ClipX</key>
+			<integer>20</integer>
+			<key>ClipY</key>
+			<integer>574</integer>
+			<key>ClipWidth</key>
+			<integer>928</integer>
+			<key>ClipHeight</key>
+			<integer>50</integer>
+			<key>ClipStartSeconds</key>
+			<integer>18</integer>
+			<key>ClipEndSeconds</key>
+			<real>28.27</real>
 		</dict>
 	</array>
 </dict>
