@@ -71,7 +71,6 @@
 		CD21EF8817767F3D0078A9F7 /* MutableAttrString.m in Sources */ = {isa = PBXBuildFile; fileRef = CD21EF8617767F3D0078A9F7 /* MutableAttrString.m */; };
 		CD21EF8A17767F730078A9F7 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD21EF8917767F730078A9F7 /* ImageIO.framework */; };
 		CD21EF8C17767F7E0078A9F7 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD21EF8B17767F7E0078A9F7 /* CoreText.framework */; };
-		CD21EF8E177681780078A9F7 /* v1.m4v in Resources */ = {isa = PBXBuildFile; fileRef = CD21EF8D177681780078A9F7 /* v1.m4v */; };
 		CD2637D81390254400E18F0C /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = CD2637D71390254400E18F0C /* Icon.png */; };
 		CD31A62016B38A190031CF69 /* AVAssetFrameDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = CD31A61D16B38A190031CF69 /* AVAssetFrameDecoder.m */; };
 		CD31A62116B38A190031CF69 /* AVAssetJoinAlphaResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = CD31A61F16B38A190031CF69 /* AVAssetJoinAlphaResourceLoader.m */; };
@@ -89,6 +88,7 @@
 		CDD3243A1538C4E800B8E213 /* SegmentedMappedData.m in Sources */ = {isa = PBXBuildFile; fileRef = CDD324331538C4E800B8E213 /* SegmentedMappedData.m */; };
 		CDE268271541224800774B59 /* Comp.plist in Resources */ = {isa = PBXBuildFile; fileRef = CDE268261541224800774B59 /* Comp.plist */; };
 		CDE77AF014BDFFAE0012DA1A /* maxvid_decode_arm.s in Sources */ = {isa = PBXBuildFile; fileRef = CDE77AEF14BDFFAE0012DA1A /* maxvid_decode_arm.s */; settings = {COMPILER_FLAGS = "-no-integrated-as"; }; };
+		CDF21FC6177ECA6700578551 /* v1.m4v in Resources */ = {isa = PBXBuildFile; fileRef = CDF21FC5177ECA6700578551 /* v1.m4v */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -206,7 +206,6 @@
 		CD21EF8617767F3D0078A9F7 /* MutableAttrString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MutableAttrString.m; sourceTree = "<group>"; };
 		CD21EF8917767F730078A9F7 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		CD21EF8B17767F7E0078A9F7 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
-		CD21EF8D177681780078A9F7 /* v1.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = v1.m4v; sourceTree = "<group>"; };
 		CD2637D71390254400E18F0C /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		CD31A61C16B38A190031CF69 /* AVAssetFrameDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVAssetFrameDecoder.h; sourceTree = "<group>"; };
 		CD31A61D16B38A190031CF69 /* AVAssetFrameDecoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVAssetFrameDecoder.m; sourceTree = "<group>"; };
@@ -235,6 +234,7 @@
 		CDD324331538C4E800B8E213 /* SegmentedMappedData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SegmentedMappedData.m; sourceTree = "<group>"; };
 		CDE268261541224800774B59 /* Comp.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Comp.plist; sourceTree = "<group>"; };
 		CDE77AEF14BDFFAE0012DA1A /* maxvid_decode_arm.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = maxvid_decode_arm.s; sourceTree = "<group>"; };
+		CDF21FC5177ECA6700578551 /* v1.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = v1.m4v; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -313,7 +313,7 @@
 			children = (
 				CD143BAC1382351F00963BBE /* note_256.png */,
 				CD2637D71390254400E18F0C /* Icon.png */,
-				CD21EF8D177681780078A9F7 /* v1.m4v */,
+				CDF21FC5177ECA6700578551 /* v1.m4v */,
 				CD34CBA9177D220600052549 /* Girl_384_192.m4v */,
 				CDE268261541224800774B59 /* Comp.plist */,
 				2899E5210DE3E06400AC0155 /* AVRenderExampleViewController.xib */,
@@ -554,8 +554,8 @@
 				CD143E0B1382577800963BBE /* VolumeRightTall.png in Resources */,
 				CD2637D81390254400E18F0C /* Icon.png in Resources */,
 				CDE268271541224800774B59 /* Comp.plist in Resources */,
-				CD21EF8E177681780078A9F7 /* v1.m4v in Resources */,
 				CD34CBAA177D220600052549 /* Girl_384_192.m4v in Resources */,
+				CDF21FC6177ECA6700578551 /* v1.m4v in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
