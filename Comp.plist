@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>ABOUT</key>
-	<string>Comp 2 videos text at full screen 2x size</string>
+	<string>Comp 2 videos text at full screen 2x size with subtitles</string>
 	<key>Source</key>
 	<string>Comp.plist</string>
 	<key>Destination</key>
@@ -21,7 +21,7 @@
 	<key>FontSize</key>
 	<integer>14</integer>
 	<key>FontColor</key>
-	<string>#00FF00</string>
+	<string>#FF0000</string>
 	<key>CompClips</key>
 	<array>
 		<dict>
@@ -64,7 +64,7 @@
 		</dict>
 		<dict>
 			<key>ClipText</key>
-			<string>Test!</string>
+			<string>Warning! DO NOT APPROACH THIS WOMAN!</string>
 			<key>ClipType</key>
 			<string>text</string>
 			<key>ClipX</key>
