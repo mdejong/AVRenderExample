@@ -24,6 +24,8 @@
 	<integer>14</integer>
 	<key>FontColor</key>
 	<string>#FF0000</string>
+	<key>HighQualityInterpolation</key>
+	<false/>
 	<key>CompClips</key>
 	<array>
 		<dict>
