@@ -1,17 +1,17 @@
 //
 //  main.m
-//  AVSync
+//  QTFileParserApp
 //
-//  Created by Moses DeJong on 5/16/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Created by Moses DeJong on 12/17/10.
+//  Copyright 2010 __MyCompanyName__. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
 
 int main(int argc, char *argv[]) {
-    
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-    int retVal = UIApplicationMain(argc, argv, nil, nil);
-    [pool release];
+    int retVal;
+    @autoreleasepool {
+    retVal = UIApplicationMain(argc, argv, nil, nil);
+    }
     return retVal;
 }
