@@ -36,6 +36,10 @@
 	int32_t m_isLockedByDataProvider;
 	CGImageRef m_lockedByImageRef;
 	CGColorSpaceRef m_colorspace;
+
+#if __has_feature(objc_arc)
+	NSObject *m_arcRefToSelf;
+#endif // objc_arc
 }
 
 @property (readonly) char *pixels;
@@ -116,5 +120,19 @@
 - (void) zeroCopyPixels:(void*)zeroCopyPtr mappedData:(NSData*)mappedData;
 - (void) zeroCopyToPixels;
 - (void) doneZeroCopyPixels;
+
+// Optional opaque pixel writing logic to clear the alpha channel values when
+// pixels are known to be 24BPP only. This call sets the alpha channel for
+// each pixel to zero.
+
+- (void) clearAlphaChannel;
+
+// This method resets the alpha channel for each pixel to be fully opaque.
+
+- (void) resetAlphaChannel;
+
+// Convert pixels to a PNG image format that can be easily saved to disk.
+
+- (NSData*) formatAsPNG;
 
 @end

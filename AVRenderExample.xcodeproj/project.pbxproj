@@ -12,6 +12,11 @@
 		2899E5220DE3E06400AC0155 /* AVRenderExampleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* AVRenderExampleViewController.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* AVRenderExampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* AVRenderExampleViewController.m */; };
+		3C7E17201A2EA44600A8681D /* AVAnimatorOpenGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C7E171C1A2EA44600A8681D /* AVAnimatorOpenGLView.m */; };
+		3C7E17211A2EA44600A8681D /* maxvid_deltas.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C7E171F1A2EA44600A8681D /* maxvid_deltas.m */; };
+		3C7E17231A2EA4B700A8681D /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C7E17221A2EA4B700A8681D /* MobileCoreServices.framework */; };
+		3C7E17251A2EA4C300A8681D /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C7E17241A2EA4C300A8681D /* GLKit.framework */; };
+		3C7E17271A2EA4CE00A8681D /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C7E17261A2EA4CE00A8681D /* OpenGLES.framework */; };
 		CD143BAD1382351F00963BBE /* note_256.png in Resources */ = {isa = PBXBuildFile; fileRef = CD143BAC1382351F00963BBE /* note_256.png */; };
 		CD143BE6138235F100963BBE /* AV7zApng2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143BB8138235F100963BBE /* AV7zApng2MvidResourceLoader.m */; };
 		CD143BE7138235F100963BBE /* AV7zAppResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143BBA138235F100963BBE /* AV7zAppResourceLoader.m */; };
@@ -87,7 +92,7 @@
 		CDD324381538C4E800B8E213 /* AVOfflineComposition.m in Sources */ = {isa = PBXBuildFile; fileRef = CDD3242F1538C4E800B8E213 /* AVOfflineComposition.m */; };
 		CDD3243A1538C4E800B8E213 /* SegmentedMappedData.m in Sources */ = {isa = PBXBuildFile; fileRef = CDD324331538C4E800B8E213 /* SegmentedMappedData.m */; };
 		CDE268271541224800774B59 /* Comp.plist in Resources */ = {isa = PBXBuildFile; fileRef = CDE268261541224800774B59 /* Comp.plist */; };
-		CDE77AF014BDFFAE0012DA1A /* maxvid_decode_arm.s in Sources */ = {isa = PBXBuildFile; fileRef = CDE77AEF14BDFFAE0012DA1A /* maxvid_decode_arm.s */; settings = {COMPILER_FLAGS = "-no-integrated-as"; }; };
+		CDE77AF014BDFFAE0012DA1A /* maxvid_decode_arm.s in Sources */ = {isa = PBXBuildFile; fileRef = CDE77AEF14BDFFAE0012DA1A /* maxvid_decode_arm.s */; };
 		CDF21FC6177ECA6700578551 /* v1.m4v in Resources */ = {isa = PBXBuildFile; fileRef = CDF21FC5177ECA6700578551 /* v1.m4v */; };
 /* End PBXBuildFile section */
 
@@ -101,6 +106,14 @@
 		28D7ACF70DDB3853001CB0EB /* AVRenderExampleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVRenderExampleViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* AVRenderExample_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVRenderExample_Prefix.pch; sourceTree = "<group>"; };
+		3C7E171B1A2EA44600A8681D /* AVAnimatorOpenGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVAnimatorOpenGLView.h; sourceTree = "<group>"; };
+		3C7E171C1A2EA44600A8681D /* AVAnimatorOpenGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVAnimatorOpenGLView.m; sourceTree = "<group>"; };
+		3C7E171D1A2EA44600A8681D /* AVAnimatorOpenGLViewPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVAnimatorOpenGLViewPrivate.h; sourceTree = "<group>"; };
+		3C7E171E1A2EA44600A8681D /* maxvid_deltas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maxvid_deltas.h; sourceTree = "<group>"; };
+		3C7E171F1A2EA44600A8681D /* maxvid_deltas.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = maxvid_deltas.m; sourceTree = "<group>"; };
+		3C7E17221A2EA4B700A8681D /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		3C7E17241A2EA4C300A8681D /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		3C7E17261A2EA4CE00A8681D /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* AVRenderExample-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AVRenderExample-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		CD143BAC1382351F00963BBE /* note_256.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = note_256.png; sourceTree = "<group>"; };
 		CD143BB7138235F100963BBE /* AV7zApng2MvidResourceLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AV7zApng2MvidResourceLoader.h; sourceTree = "<group>"; };
@@ -242,6 +255,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C7E17271A2EA4CE00A8681D /* OpenGLES.framework in Frameworks */,
+				3C7E17251A2EA4C300A8681D /* GLKit.framework in Frameworks */,
+				3C7E17231A2EA4B700A8681D /* MobileCoreServices.framework in Frameworks */,
 				CD21EF8C17767F7E0078A9F7 /* CoreText.framework in Frameworks */,
 				CD21EF8A17767F730078A9F7 /* ImageIO.framework in Frameworks */,
 				CDA6EE5B15411A3F00B60E2E /* CoreVideo.framework in Frameworks */,
@@ -326,6 +342,9 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3C7E17261A2EA4CE00A8681D /* OpenGLES.framework */,
+				3C7E17241A2EA4C300A8681D /* GLKit.framework */,
+				3C7E17221A2EA4B700A8681D /* MobileCoreServices.framework */,
 				CD21EF8B17767F7E0078A9F7 /* CoreText.framework */,
 				CD21EF8917767F730078A9F7 /* ImageIO.framework */,
 				CDA6EE5A15411A3F00B60E2E /* CoreVideo.framework */,
@@ -344,6 +363,11 @@
 		CD143BB4138235F100963BBE /* AVAnimator */ = {
 			isa = PBXGroup;
 			children = (
+				3C7E171B1A2EA44600A8681D /* AVAnimatorOpenGLView.h */,
+				3C7E171C1A2EA44600A8681D /* AVAnimatorOpenGLView.m */,
+				3C7E171D1A2EA44600A8681D /* AVAnimatorOpenGLViewPrivate.h */,
+				3C7E171E1A2EA44600A8681D /* maxvid_deltas.h */,
+				3C7E171F1A2EA44600A8681D /* maxvid_deltas.m */,
 				CD143BB7138235F100963BBE /* AV7zApng2MvidResourceLoader.h */,
 				CD143BB8138235F100963BBE /* AV7zApng2MvidResourceLoader.m */,
 				CD143BB9138235F100963BBE /* AV7zAppResourceLoader.h */,
@@ -584,6 +608,7 @@
 				CD143BF4138235F100963BBE /* CGFrameBuffer.m in Sources */,
 				CD143BF5138235F100963BBE /* libapng.c in Sources */,
 				CD143BF6138235F100963BBE /* maxvid_decode.c in Sources */,
+				3C7E17201A2EA44600A8681D /* AVAnimatorOpenGLView.m in Sources */,
 				CD143BF8138235F100963BBE /* maxvid_file.c in Sources */,
 				CD143BF9138235F100963BBE /* movdata.c in Sources */,
 				CD143C21138235FC00963BBE /* 7zBuf.c in Sources */,
@@ -602,6 +627,7 @@
 				CD143C2E138235FC00963BBE /* Ppmd7Dec.c in Sources */,
 				CD143C2F138235FC00963BBE /* Ppmd8.c in Sources */,
 				CD143C30138235FC00963BBE /* Ppmd8Dec.c in Sources */,
+				3C7E17211A2EA44600A8681D /* maxvid_deltas.m in Sources */,
 				CD143C31138235FC00963BBE /* 7zAlloc.c in Sources */,
 				CD143C32138235FC00963BBE /* 7zMain.c in Sources */,
 				CD143D8A1382366800963BBE /* AutoPropertyRelease.m in Sources */,
@@ -663,7 +689,7 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -676,7 +702,7 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "";
 				SDKROOT = iphoneos;
 			};

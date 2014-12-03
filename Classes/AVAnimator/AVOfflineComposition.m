@@ -15,6 +15,8 @@
 
 #import "AVMvidFileWriter.h"
 
+#import "AVFrame.h"
+
 #import "AVMvidFrameDecoder.h"
 
 #import <QuartzCore/QuartzCore.h>
@@ -25,7 +27,9 @@
 
 #import "MutableAttrString.h"
 
-#define LOGGING
+#if defined(DEBUG)
+# define LOGGING
+#endif // DEBUG
 
 // Notification name constants
 
@@ -241,17 +245,20 @@ typedef enum
 + (id) readPlist:(NSString*)resFileName
 {
   NSData *plistData;  
-  NSString *error;  
+  NSString *error = nil;
   NSPropertyListFormat format;  
-  id plist;  
+  id plist;
   
   NSString *resPath = [[NSBundle mainBundle] pathForResource:resFileName ofType:@""];  
   plistData = [NSData dataWithContentsOfFile:resPath];   
   
   plist = [NSPropertyListSerialization propertyListFromData:plistData mutabilityOption:NSPropertyListImmutable format:&format errorDescription:&error];
   if (!plist) {
-    NSLog(@"Error reading plist from file '%s', error = '%s'", [resFileName UTF8String], [error UTF8String]);  
-    [error release];  
+    NSLog(@"Error reading plist from file '%s', error = '%s'", [resFileName UTF8String], [error UTF8String]);
+#if __has_feature(objc_arc)
+#else
+    [error release];
+#endif // objc_arc
   }
   return plist;  
 }
@@ -310,7 +317,7 @@ CF_RETURNS_RETAINED
 - (CGColorRef) createParsedCGColor:(NSString*)colorSpec
 CF_RETURNS_RETAINED
 {
-  int len = [colorSpec length];
+  int len = (int) [colorSpec length];
   if (len != 7 && len != 9) {
     self.errorString = @"CompBackgroundColor invalid";
     return NULL;
@@ -604,6 +611,7 @@ CF_RETURNS_RETAINED
     NSString *clipTypeStr = [clipDict objectForKey:@"ClipType"];
     
     if (clipTypeStr == nil) {
+      self.errorString = @"ClipType key missing";
       return FALSE;
     }
     
@@ -1052,7 +1060,7 @@ CF_RETURNS_RETAINED
   fileWriter.movieSize = CGSizeMake(scaledWidth, scaledHeight);
 
   fileWriter.frameDuration = self.compFrameDuration;
-  fileWriter.totalNumFrames = maxFrame;
+  fileWriter.totalNumFrames = (int) maxFrame;
 
   //fileWriter.genAdler = TRUE;
   
@@ -1080,7 +1088,7 @@ CF_RETURNS_RETAINED
     
     // Write frame buffer out to .mvid container
     
-    worked = [fileWriter writeKeyframe:(char*)cgFrameBuffer.pixels bufferSize:cgFrameBuffer.numBytes];
+    worked = [fileWriter writeKeyframe:(char*)cgFrameBuffer.pixels bufferSize:(int)cgFrameBuffer.numBytes];
     
     if (worked == FALSE) {
       retcode = FALSE;
@@ -1172,7 +1180,7 @@ CF_RETURNS_RETAINED
         clipFrame = (NSUInteger) (clipTime / clipFrameDuration);
         
 #ifdef LOGGING_CLIP_ACTIVE
-        NSLog(@"clip time %0.2f maps to clip frame %d (duration %0.2f)", clipTime, clipFrame, compClip->clipFrameDuration);
+        NSLog(@"clip time %0.2f maps to clip frame %d (duration %0.2f)", clipTime, (int)clipFrame, compClip->clipFrameDuration);
 #endif // LOGGING_CLIP_ACTIVE
         
         if (clipFrame >= compClip->clipNumFrames) {
@@ -1183,7 +1191,7 @@ CF_RETURNS_RETAINED
           clipFrame = (compClip->clipNumFrames - 1);
           
 #ifdef LOGGING_CLIP_ACTIVE
-          NSLog(@"clip frame bound to the final frame %d", clipFrame);
+          NSLog(@"clip frame bound to the final frame %d", (int)clipFrame);
 #endif // LOGGING_CLIP_ACTIVE
         }
       }

@@ -5,6 +5,10 @@
 //  Placed in the public domain.
 //
 
+#if __has_feature(objc_arc)
+// No-op
+#else
+
 #import "AutoPropertyRelease.h"
 
 #import <objc/runtime.h>
@@ -118,7 +122,7 @@
 		// are found then release the held ref count.
 
 		for (NSString *comp in typeComponents) {
-			const int len = [comp length];
+			const int len = (int) [comp length];
 			unichar c = (len == 0 ? '\0' : [comp characterAtIndex:0]);
 
 			if ((len == 1) && (c == '&' || c == 'C')) {
@@ -190,7 +194,11 @@
         }
       }
       
+            #if __LP64__
+			((void(*)(id, SEL, id))objc_msgSend)(obj, setPropertySelector, nil);
+            #else
 			objc_msgSend(obj, setPropertySelector, nil);
+            #endif // __LP64__
 
 #if defined(LOGGING)
 			NSLog(@"invoked %@%@", propSetterMethodName, @"nil");
@@ -204,3 +212,5 @@
 }
 
 @end
+
+#endif // objc_arc

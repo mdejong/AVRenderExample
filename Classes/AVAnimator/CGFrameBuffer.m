@@ -9,6 +9,15 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import <ImageIO/ImageIO.h>
+
+#import <MobileCoreServices/UTCoreTypes.h>
+
+#ifndef __OPTIMIZE__
+// Automatically define EXTRA_CHECKS when not optimizing (in debug mode)
+# define EXTRA_CHECKS
+#endif // DEBUG
+
 // Alignment is not an issue, makes no difference in performance
 //#define USE_ALIGNED_VALLOC 1
 
@@ -39,6 +48,14 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 
 @property (readonly) size_t numBytesAllocated;
 
+// This tricky ref to self is needed in ARC mode, since an object cannot invoke retain
+// to retain itself. Instead, hold a property that is set to self so that ARC will
+// do the retain.
+
+#if __has_feature(objc_arc)
+@property (nonatomic, retain) NSObject *arcRefToSelf;
+#endif // objc_arc
+
 @end
 
 // class CGFrameBuffer
@@ -58,13 +75,20 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 @synthesize lockedByImageRef = m_lockedByImageRef;
 @synthesize colorspace = m_colorspace;
 
+#if __has_feature(objc_arc)
+@synthesize arcRefToSelf = m_arcRefToSelf;
+#endif // objc_arc
+
 + (CGFrameBuffer*) cGFrameBufferWithBppDimensions:(NSInteger)bitsPerPixel
                                             width:(NSInteger)width
                                            height:(NSInteger)height
 {
   CGFrameBuffer *obj = [[CGFrameBuffer alloc] initWithBppDimensions:bitsPerPixel width:width height:height];
-  [obj autorelease];
+#if __has_feature(objc_arc)
   return obj;
+#else
+  return [obj autorelease];
+#endif // objc_arc
 }
 
 - (id) initWithBppDimensions:(NSInteger)bitsPerPixel
@@ -424,7 +448,12 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 
   void *pixelsPtr = self.pixels; // Will return zero copy pointer in zero copy mode. Otherwise self.pixels
   
-	CGDataProviderRef dataProviderRef = CGDataProviderCreateWithData(self,
+	CGDataProviderRef dataProviderRef = CGDataProviderCreateWithData(
+#if __has_feature(objc_arc)
+																	 (__bridge void *)self,
+#else
+																	 self,
+#endif // objc_arc
 																	 pixelsPtr,
 																	 self.width * self.height * (bitsPerPixel / 8),
 																	 releaseData);
@@ -490,6 +519,29 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 	return self->m_isLockedByDataProvider;
 }
 
+#if __has_feature(objc_arc)
+
+// The arc impl uses a property of type NSObject to hold a ref to itself
+// during the time that the buffer is locked by CoreGraphics.
+
+- (void) setIsLockedByDataProvider:(BOOL)newValue
+{
+	NSAssert(m_isLockedByDataProvider == !newValue,
+           @"isLockedByDataProvider property can only be switched");
+  
+	self->m_isLockedByDataProvider = newValue;
+  
+	if (self->m_isLockedByDataProvider) {
+    self.arcRefToSelf = self;
+	} else {
+    self.arcRefToSelf = nil;
+	}
+}
+
+#else
+
+// non-arc impl the explicitly invokes retain/release and does some tricky logging
+
 - (void) setIsLockedByDataProvider:(BOOL)newValue
 {
 	NSAssert(m_isLockedByDataProvider == !newValue,
@@ -526,6 +578,8 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 	}
 }
 
+#endif // objc_arc
+
 // Set all pixels to 0x0
 
 - (void) clear
@@ -540,6 +594,26 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
   kern_return_t ret;
   vm_address_t src = (vm_address_t) srcPtr;
   vm_address_t dst = (vm_address_t) self->m_pixels;
+  
+#if defined(EXTRA_CHECKS)
+  // Do extra checking to ensure that the zero copy region is
+  // properly page aligned and that the number of bytes to
+  // copy is an exact multiple of the page size.
+  
+  size_t s = getpagesize();
+
+  if ((self.numBytesAllocated % s) != 0) {
+    assert(0);
+  }
+  
+  if ((dst % s) != 0) {
+    assert(0);
+  }
+  if ((src % s) != 0) {
+    assert(0);
+  }
+#endif // EXTRA_CHECKS
+  
   ret = vm_copy((vm_map_t) mach_task_self(), src, (vm_size_t) self.numBytesAllocated, dst);
   if (ret != KERN_SUCCESS) {
     assert(0);
@@ -642,7 +716,12 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 
   self.zeroCopyMappedData = nil;
   
+#if __has_feature(objc_arc)
+  // It should not actually be possible for this method to be invoked if arcRefToSelf is non-nil
+  self.arcRefToSelf = nil;
+#else
   [super dealloc];
+#endif // objc_arc
 }
 
 // Save a "zero copy" pointer and a ref to the mapped data. Invoking this function
@@ -652,6 +731,19 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 - (void) zeroCopyPixels:(void*)zeroCopyPtr
              mappedData:(NSData*)mappedData
 {
+#if defined(EXTRA_CHECKS)
+  // Do extra checking to ensure that the zero copy region is
+  // properly page aligned and that the number of bytes to
+  // copy is an exact multiple of the page size.
+  
+  size_t ptr = zeroCopyPtr;
+  size_t s = getpagesize();
+  
+  if ((ptr % s) != 0) {
+    assert(0);
+  }
+#endif // EXTRA_CHECKS
+  
   self->m_zeroCopyPixels = zeroCopyPtr;
   self.zeroCopyMappedData = mappedData;
 }
@@ -687,6 +779,79 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
   self->m_colorspace = colorspace;
 }
 
+- (void) clearAlphaChannel
+{
+  assert(self.isLockedByDataProvider == FALSE);
+  //assert(self.bitsPerPixel == 24);
+  
+  uint32_t *pixelsPtr  = (uint32_t*) self.pixels;
+  uint32_t numPixels = (uint32_t)(self.width * self.height);
+  
+  for (int i = 0; i < numPixels; i++) {
+    uint32_t value = pixelsPtr[i];
+    assert((value >> 24) == 0xFF || (value >> 24) == 0x0);
+    // Throw out alpha values
+    value = value & 0xFFFFFF;
+    pixelsPtr[i] = value;
+  }
+}
+
+// This method resets the alpha channel for each pixel to be fully opaque.
+
+- (void) resetAlphaChannel
+{
+  assert(self.isLockedByDataProvider == FALSE);
+  //assert(self.bitsPerPixel == 24);
+  
+  uint32_t *pixelsPtr  = (uint32_t*) self.pixels;
+  uint32_t numPixels = (uint32_t)(self.width * self.height);
+  
+  for (int i = 0; i < numPixels; i++) {
+    uint32_t value = pixelsPtr[i];
+    value = (0xFF << 24) | value;
+    pixelsPtr[i] = value;
+  }
+}
+
+// Convert pixels to a PNG image format that can be easily saved to disk.
+
+- (NSData*) formatAsPNG
+{
+  NSMutableData *mData = [NSMutableData data];
+  
+  @autoreleasepool {
+    
+    // Render buffer as a PNG image
+    
+    CFStringRef type = kUTTypePNG;
+    size_t count = 1;
+    CGImageDestinationRef dataDest;
+    dataDest = CGImageDestinationCreateWithData(
+#if __has_feature(objc_arc)
+                                                (__bridge CFMutableDataRef)mData,
+#else
+                                                (CFMutableDataRef)mData,
+#endif // objc_arc
+                                                type,
+                                                count,
+                                                NULL);
+    assert(dataDest);
+    
+    CGImageRef imgRef = [self createCGImageRef];
+    
+    CGImageDestinationAddImage(dataDest, imgRef, NULL);
+    CGImageDestinationFinalize(dataDest);
+    
+    CGImageRelease(imgRef);
+    CFRelease(dataDest);
+    
+    // Return instance object that was allocated outside the scope of pool
+    
+  }
+  
+  return [NSData dataWithData:mData];
+}
+
 @end
 
 // C callback invoked by core graphics when done with a buffer, this is tricky
@@ -698,7 +863,13 @@ void CGFrameBufferProviderReleaseData (void *info, const void *data, size_t size
 	NSLog(@"CGFrameBufferProviderReleaseData() called");
 #endif
 
-	CGFrameBuffer *cgBuffer = (CGFrameBuffer *) info;
+  	CGFrameBuffer *cgBuffer;
+#if __has_feature(objc_arc)
+  cgBuffer = (__bridge CGFrameBuffer *) info;
+#else
+	cgBuffer = (CGFrameBuffer *) info;
+#endif // objc_arc
+
 	cgBuffer.isLockedByDataProvider = FALSE;
 
 	// Note that the cgBuffer just deallocated itself, so the

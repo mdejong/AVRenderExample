@@ -8,7 +8,7 @@
 
 #import "LZMAExtractor.h"
 
-int do7z_extract_entry(char *archivePath, char *archiveCachePath, char *entryName, char *entryPath);
+int do7z_extract_entry(char *archivePath, char *archiveCachePath, char *entryName, char *entryPath, int fullPaths);
 
 @implementation LZMAExtractor
 
@@ -48,19 +48,60 @@ int do7z_extract_entry(char *archivePath, char *archiveCachePath, char *entryNam
   return tmpPath;
 }
 
-// Extract all the contents of a .7z archive into the indicated temp dir
-// and return an array of the fully qualified filenames.
+// Recurse into directories to determine the full paths of elements extracted
+// from a archive.
+
++ (void) recurseIntoDirectories:(NSMutableArray*)fullPathContents
+                        dirName:(NSString*)dirName
+                    entryPrefix:(NSString*)entryPrefix
+{
+  NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:dirName error:nil];
+  NSAssert(contents, @"contentsOfDirectoryAtPath failed");
+  
+  for (NSString *path in contents) {
+    //NSLog(@"found dir path: %@", path);
+    NSString *fullPath = [dirName stringByAppendingPathComponent:path];
+    //NSLog(@"found full path: %@", fullPath);
+    
+    BOOL isDirectory = FALSE;
+    BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:fullPath isDirectory:&isDirectory];
+    assert(exists);
+
+    NSString *combinedEntryPrefix;
+    if ([entryPrefix length] == 0) {
+      combinedEntryPrefix = path;
+    } else {
+      combinedEntryPrefix = [NSString stringWithFormat:@"%@/%@", entryPrefix, path];
+    }
+    
+    //NSLog(@"found entry path: %@", combinedEntryPrefix);
+    
+    if (isDirectory) {
+      // Recurse into this directory and add the files in the directory
+      
+      [self recurseIntoDirectories:fullPathContents dirName:fullPath entryPrefix:combinedEntryPrefix];
+    } else {
+      // A plain file path, append the entry name portion of the path.
+      
+      [fullPathContents addObject:fullPath];
+    }
+  }
+  
+  return;
+}
+
+// Extract all the contents of a .7z archive directly into the indicated dir
 
 + (NSArray*) extract7zArchive:(NSString*)archivePath
-                   tmpDirName:(NSString*)tmpDirName
+                      dirName:(NSString*)dirName
+                  preserveDir:(BOOL)preserveDir
 {
   NSAssert(archivePath, @"archivePath");
-  NSAssert(tmpDirName, @"tmpDirName");
+  NSAssert(dirName, @"dirName");
   
-	NSString *tmpDir = NSTemporaryDirectory();    
   BOOL worked, isDir, existsAlready;
   
-  NSString *myTmpDir = [tmpDir stringByAppendingPathComponent:tmpDirName];
+  NSString *myTmpDir = dirName;
   existsAlready = [[NSFileManager defaultManager] fileExistsAtPath:myTmpDir isDirectory:&isDir];
   
   if (existsAlready && !isDir) {
@@ -94,22 +135,29 @@ int do7z_extract_entry(char *archivePath, char *archiveCachePath, char *entryNam
   char *entryNamePtr = NULL; // Extract all entries by passing NULL
   char *entryPathPtr = NULL;
   
-  int result = do7z_extract_entry(archivePathPtr, archiveCachePathPtr, entryNamePtr, entryPathPtr);
+  int result = do7z_extract_entry(archivePathPtr, archiveCachePathPtr, entryNamePtr, entryPathPtr, preserveDir ? 1 : 0);
   NSAssert(result == 0, @"could not extract files from 7z archive");
   
   // Examine the contents of the current directory to see what was extracted
   
   NSMutableArray *fullPathContents = [NSMutableArray array];
-  
-  NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:myTmpDir error:nil];
-  NSAssert(contents, @"contentsOfDirectoryAtPath failed");
-  for (NSString *path in contents) {
-    NSLog(@"found existing dir path: %@", path);
-    NSString *myTmpDirPath = [myTmpDir stringByAppendingPathComponent:path];
-    [fullPathContents addObject:myTmpDirPath];
-  }
+
+  [self recurseIntoDirectories:fullPathContents dirName:myTmpDir entryPrefix:@""];
   
   return [NSArray arrayWithArray:fullPathContents];
+}
+
+// Extract all the contents of a .7z archive into the indicated temp dir
+// and return an array of the fully qualified filenames.
+
++ (NSArray*) extract7zArchive:(NSString*)archivePath
+                   tmpDirName:(NSString*)tmpDirName
+{
+  NSAssert(archivePath, @"archivePath");
+  NSAssert(tmpDirName, @"tmpDirName");
+	NSString *tmpDir = NSTemporaryDirectory();
+  NSString *fullTmpDir = [tmpDir stringByAppendingPathComponent:tmpDirName];
+  return [self extract7zArchive:archivePath dirName:fullTmpDir preserveDir:FALSE];
 }
 
 // Extract just one entry from an archive and save it at the
@@ -129,7 +177,7 @@ int do7z_extract_entry(char *archivePath, char *archiveCachePath, char *entryNam
   char *archiveEntryPtr = (char*) [archiveEntry UTF8String];
   char *outPathPtr = (char*) [outPath UTF8String];
     
-  int result = do7z_extract_entry(archivePathPtr, archiveCachePathPtr, archiveEntryPtr, outPathPtr);
+  int result = do7z_extract_entry(archivePathPtr, archiveCachePathPtr, archiveEntryPtr, outPathPtr, 0);
   return (result == 0);
 }
 

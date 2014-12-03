@@ -14,6 +14,8 @@
 
 #import "AVAssetReaderConvertMaxvid.h"
 
+#import "AVFrame.h"
+
 #import "AVAssetFrameDecoder.h"
 
 #import "CGFrameBuffer.h"
@@ -46,7 +48,11 @@
 + (AVAssetJoinAlphaResourceLoader*) aVAssetJoinAlphaResourceLoader
 {
   AVAssetJoinAlphaResourceLoader *obj = [[AVAssetJoinAlphaResourceLoader alloc] init];
+#if __has_feature(objc_arc)
+  return obj;
+#else
   return [obj autorelease];
+#endif // objc_arc
 }
 
 - (void) dealloc
@@ -56,7 +62,11 @@
   self.outPath = nil;
   self.rgbLoader = nil;
   self.alphaLoader = nil;
+  
+#if __has_feature(objc_arc)
+#else
   [super dealloc];
+#endif // objc_arc
 }
 
 // Overload suerclass self.movieFilename getter so that standard loading
@@ -214,14 +224,14 @@
   NSUInteger numFrames = [frameDecoderRGB numFrames];
   NSUInteger numFramesAlpha = [frameDecoderAlpha numFrames];
   if (numFrames != numFramesAlpha) {
-    NSLog(@"error: RGB movie numFrames %d does not match alpha movie numFrames %d", numFrames, numFramesAlpha);
+    NSLog(@"error: RGB movie numFrames %d does not match alpha movie numFrames %d", (int)numFrames, (int)numFramesAlpha);
     return FALSE;
   }
   
   // width x height
   
-  int width = [frameDecoderRGB width];
-  int height = [frameDecoderRGB height];
+  int width  = (int) [frameDecoderRGB width];
+  int height = (int) [frameDecoderRGB height];
   NSAssert(width > 0, @"width");
   NSAssert(height > 0, @"height");
   CGSize size = CGSizeMake(width, height);
@@ -248,7 +258,7 @@
   // Note that we don't know the movie size until the first frame is read
   
   fileWriter.frameDuration = frameRate;
-  fileWriter.totalNumFrames = numFrames;
+  fileWriter.totalNumFrames = (int) numFrames;
   
   if (genAdler) {
     fileWriter.genAdler = TRUE;
@@ -271,9 +281,7 @@
   //FILE *fp = fopen(utf8Str, "w");
   //assert(fp);
   
-  for (NSUInteger frameIndex = 0; frameIndex < numFrames; frameIndex++) {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
+  for (NSUInteger frameIndex = 0; frameIndex < numFrames; frameIndex++) @autoreleasepool {
 #ifdef LOGGING
     NSLog(@"reading frame %d", frameIndex);
 #endif // LOGGING
@@ -291,13 +299,13 @@
       
       NSString *tmpDir = NSTemporaryDirectory();
       
-      NSString *tmpPNGPath = [tmpDir stringByAppendingFormat:@"JoinAlpha_RGB_Frame%d.png", (frameIndex + 1)];
+      NSString *tmpPNGPath = [tmpDir stringByAppendingFormat:@"JoinAlpha_RGB_Frame%d.png", (int)(frameIndex + 1)];
       
       NSData *data = [NSData dataWithData:UIImagePNGRepresentation(frameRGB.image)];
       [data writeToFile:tmpPNGPath atomically:YES];
       NSLog(@"wrote %@", tmpPNGPath);
       
-      tmpPNGPath = [tmpDir stringByAppendingFormat:@"JoinAlpha_ALPHA_Frame%d.png", (frameIndex + 1)];
+      tmpPNGPath = [tmpDir stringByAppendingFormat:@"JoinAlpha_ALPHA_Frame%d.png", (int)(frameIndex + 1)];
       
       data = [NSData dataWithData:UIImagePNGRepresentation(frameAlpha.image)];
       [data writeToFile:tmpPNGPath atomically:YES];
@@ -338,7 +346,7 @@
     // Write combined RGBA pixles as a keyframe, we do not attempt to calculate
     // frame diffs when processing on the device as that takes too long.
     
-    int numBytesInBuffer = combinedFrameBuffer.numBytes;
+    int numBytesInBuffer = (int) combinedFrameBuffer.numBytes;
         
     worked = [fileWriter writeKeyframe:(char*)combinedPixels bufferSize:numBytesInBuffer];
     
@@ -346,8 +354,6 @@
       NSLog(@"cannot write keyframe data to mvid file \"%@\"", joinedMvidPath);
       return FALSE;
     }
-    
-    [pool drain];
   }
   
   //fclose(fp);
@@ -471,7 +477,7 @@
 
 + (void) decodeThreadEntryPoint:(NSArray*)arr
 {
-  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  @autoreleasepool {
   
   NSAssert([arr count] == 6, @"arr count");
   
@@ -525,7 +531,7 @@
     [self releaseSerialResourceLoaderLock];
   }
   
-  [pool drain];
+  }
 }
 
 @end

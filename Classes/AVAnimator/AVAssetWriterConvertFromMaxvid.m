@@ -25,6 +25,8 @@
 // FIXME: remove CGFrameBuffer include later
 #import "CGFrameBuffer.h"
 
+#import "AVFrame.h"
+
 #import "AutoPropertyRelease.h"
 
 #import "AVMvidFrameDecoder.h"
@@ -64,13 +66,20 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
 + (AVAssetWriterConvertFromMaxvid*) aVAssetWriterConvertFromMaxvid
 {
   AVAssetWriterConvertFromMaxvid *obj = [[AVAssetWriterConvertFromMaxvid alloc] init];
+#if __has_feature(objc_arc)
+  return obj;
+#else
   return [obj autorelease];
+#endif // objc_arc
 }
 
 - (void) dealloc
 {
+#if __has_feature(objc_arc)
+#else
   [AutoPropertyRelease releaseProperties:self thisClass:AVAssetWriterConvertFromMaxvid.class];
   [super dealloc];
+#endif // objc_arc
 }
 
 // ------------------------------------------------------------------------------------
@@ -109,7 +118,7 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
 
 - (void) blockingEncode
 {
-  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  @autoreleasepool {
   
   BOOL worked;
   
@@ -129,7 +138,6 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
   if (frameDecoder == nil) {
     // FIXME: create specific failure flags for input vs output files
     self.state = AVAssetWriterConvertFromMaxvidStateFailed;
-    [pool drain];
     return;
   }
   
@@ -139,7 +147,6 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
     NSLog(@"frameDecoder allocateDecodeResources failed");
     // FIXME: create specific failure flags for input vs output files
     self.state = AVAssetWriterConvertFromMaxvidStateFailed;
-    [pool drain];
     return;
   }
   
@@ -163,13 +170,18 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
   // AVFileTypeQuickTimeMovie
   // AVFileTypeMPEG4 (no)
   
-  AVAssetWriter *videoWriter = [[[AVAssetWriter alloc] initWithURL:outputPathURL
+  AVAssetWriter *videoWriter = [[AVAssetWriter alloc] initWithURL:outputPathURL
                                                          fileType:AVFileTypeQuickTimeMovie
-                                                            error:&error] autorelease];
+                                                            error:&error];
+#if __has_feature(objc_arc)
+#else
+    videoWriter = [videoWriter autorelease];
+#endif // objc_arc
+
   NSAssert(videoWriter, @"videoWriter");
     
-  NSNumber *widthNum = [NSNumber numberWithUnsignedInt:width];
-  NSNumber *heightNum = [NSNumber numberWithUnsignedInt:height];
+  NSNumber *widthNum = [NSNumber numberWithUnsignedInteger:width];
+  NSNumber *heightNum = [NSNumber numberWithUnsignedInteger:height];
   
   NSDictionary *videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:
                                  AVVideoCodecH264, AVVideoCodecKey,
@@ -240,17 +252,14 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
     NSAssert(worked, @"could not remove output file");
     
     self.state = AVAssetWriterConvertFromMaxvidStateFailed;
-    [pool drain];
     return;    
   }
  
   CVPixelBufferRef buffer = NULL;
   
-  const int numFrames = [frameDecoder numFrames];
+  const int numFrames = (int) [frameDecoder numFrames];
   int frameNum;
-  for (frameNum = 0; frameNum < numFrames; frameNum++) {
-    NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
-
+  for (frameNum = 0; frameNum < numFrames; frameNum++) @autoreleasepool {
 #ifdef LOGGING
     NSLog(@"Writing frame %d", frameNum);
 #endif // LOGGING
@@ -315,8 +324,6 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
     }
     
     CVPixelBufferRelease(buffer);
-    
-    [innerPool drain];
   }
   
   NSAssert(frameNum == numFrames, @"numFrames");
@@ -335,7 +342,7 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
   
   self.state = AVAssetWriterConvertFromMaxvidStateSuccess;
   
-  [pool drain];
+  }
   return;
 }
 
@@ -478,13 +485,14 @@ NSString * const AVAssetWriterConvertFromMaxvidCompletedNotification = @"AVAsset
 // Secondary thread entry point for non blocking encode operation
 
 - (void) nonblockingEncodeEntryPoint {  
-  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  @autoreleasepool {
   
   [self blockingEncode];
   
   [self performSelectorOnMainThread:@selector(notifyEncodingDoneInMainThread) withObject:nil waitUntilDone:TRUE];
   
-  [pool drain];
+  }
+  
   return;
 }
 

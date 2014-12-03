@@ -9,7 +9,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-#define SM_PAGESIZE 4096
+#define SM_PAGESIZE ((int)getpagesize())
 
 // This private class is used to implement a ref counted
 // file descriptor container. The held file descriptor
@@ -35,7 +35,13 @@
   RefCountedFD *obj = [[RefCountedFD alloc] init];
   obj->m_fd = fd;
   obj->m_closeFileFlag = TRUE;
+#if __has_feature(objc_arc)
+  // ARC enabled
+  return obj;
+#else
+  // ARC disabled
   return [obj autorelease];
+#endif
 }
 
 + (RefCountedFD*) refCountedFDWithCloseFlag:(int)fd
@@ -52,7 +58,13 @@
     int close_result = close(m_fd);
     NSAssert(close_result == 0, @"close_result");
   }
+  
+#if __has_feature(objc_arc)
+  // ARC enabled
+#else
+  // ARC disabled
   [super dealloc];
+#endif
 }
 
 @end // RefCountedFD
@@ -127,12 +139,25 @@
   
   RefCountedFD *rcFD = [RefCountedFD refCountedFD:fd];
   
+  // FIXME: examine use case for F_NOCACHE, since it seems to avoid eviction of other data that
+  // is already cached. The F_RDAHEAD seems useful in any case.
+  
+  //fcntl(fd, F_NOCACHE, 1);
+  //fcntl(fd, F_RDAHEAD, 1);
+  
   SegmentedMappedData *obj = [[SegmentedMappedData alloc] init];
   obj.filePath = filePath;
   obj.refCountedFD = rcFD;
   obj->m_mappedLen = fileSizeT;
   obj->isContainer = TRUE;
+  
+#if __has_feature(objc_arc)
+  // ARC enabled
+  return obj;
+#else
+  // ARC disabled
   return [obj autorelease];
+#endif
 }
 
 + (SegmentedMappedData*) segmentedMappedDataWithDeferredMapping:(NSString*)filePath
@@ -170,8 +195,14 @@
   }
   
   obj->m_mappedOSLen = osLength;
-  
+ 
+#if __has_feature(objc_arc)
+  // ARC enabled
+  return obj;
+#else
+  // ARC disabled
   return [obj autorelease];
+#endif
 }
 
 // Create a writeable mapped memory segment at the given offset and with the
@@ -210,10 +241,15 @@
     [self unmapSegment];
   }
   
-  [m_filePath release];
-  [m_refCountedFD release];
+  self.filePath = nil;
+  self.refCountedFD = nil;
   
+#if __has_feature(objc_arc)
+  // ARC enabled
+#else
+  // ARC disabled
   [super dealloc];
+#endif
 }
 
 - (const void*) bytes
@@ -264,7 +300,6 @@
   
   NSAssert((offset % SM_PAGESIZE) == 0, @"offset");
   NSAssert((len % SM_PAGESIZE) == 0, @"len");
-  
   
   int protection;
   int flags;
@@ -378,7 +413,13 @@
 
 - (id) copyWithZone:(NSZone*)zone
 {
+#if __has_feature(objc_arc)
+  // ARC enabled
+  return self;
+#else
+  // ARC disabled
   return [self retain];
+#endif
 }
 
 @end

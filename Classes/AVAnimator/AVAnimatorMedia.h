@@ -6,7 +6,7 @@
 //  License terms defined in License.txt.
 //
 //  This file defines the media object that is rendered to a view
-//  via AVAnimatorView. The media object handles all the details
+//  via AVAnimatorView or AVAnimatorLayer. The media object handles all the details
 //  of frame rate, the current frame, and so on. The view provides
 //  a way to render the media in the window system.
 
@@ -68,6 +68,10 @@ typedef enum AVAnimatorPlayerState {
 @interface AVAnimatorMedia : NSObject {
 @private
 
+#if __has_feature(objc_arc)
+  __unsafe_unretained
+#else
+#endif // objc_arc
 	id<AVAnimatorMediaRendererProtocol> m_renderer;
   
 	AVResourceLoader *m_resourceLoader;
@@ -78,8 +82,8 @@ typedef enum AVAnimatorPlayerState {
 	NSUInteger m_animatorRepeatCount;
   
 	NSURL *m_animatorAudioURL;	
-	UIImage *m_prevFrame;
-	UIImage *m_nextFrame;
+	AVFrame *m_prevFrame;
+	AVFrame *m_nextFrame;
   
 	NSTimer *m_animatorPrepTimer;
 	NSTimer *m_animatorReadyTimer;
