@@ -73,6 +73,8 @@
   
   [self setupNotification];
   
+  NSLog(@"start rendering lossless movie in background");
+  
   [comp compose:plistDict];
 
   return;
@@ -147,7 +149,7 @@
 
 - (void) finishedLoadNotification:(NSNotification*)notification
 {
-  NSLog(@"finishedLoadNotification");
+  NSLog(@"finished rendering lossless movie");
   
   NSString *filename = self.composition.destination;
   
@@ -204,7 +206,7 @@
   
   NSString *errorString = comp.errorString;
   
-  NSLog(@"failedToLoadNotification: \"%@\"", errorString);
+  NSLog(@"failed rendering lossless movie: \"%@\"", errorString);
 }
 
 @end

@@ -17,7 +17,7 @@
 		3C7E17231A2EA4B700A8681D /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C7E17221A2EA4B700A8681D /* MobileCoreServices.framework */; };
 		3C7E17251A2EA4C300A8681D /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C7E17241A2EA4C300A8681D /* GLKit.framework */; };
 		3C7E17271A2EA4CE00A8681D /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C7E17261A2EA4CE00A8681D /* OpenGLES.framework */; };
-		CD143BAD1382351F00963BBE /* note_256.png in Resources */ = {isa = PBXBuildFile; fileRef = CD143BAC1382351F00963BBE /* note_256.png */; };
+		3CA014CF1A2EA86500D9A865 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CA014CE1A2EA86500D9A865 /* Icon@2x.png */; };
 		CD143BE6138235F100963BBE /* AV7zApng2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143BB8138235F100963BBE /* AV7zApng2MvidResourceLoader.m */; };
 		CD143BE7138235F100963BBE /* AV7zAppResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143BBA138235F100963BBE /* AV7zAppResourceLoader.m */; };
 		CD143BE9138235F100963BBE /* AVAnimatorLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143BBE138235F100963BBE /* AVAnimatorLayer.m */; };
@@ -114,8 +114,8 @@
 		3C7E17221A2EA4B700A8681D /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		3C7E17241A2EA4C300A8681D /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		3C7E17261A2EA4CE00A8681D /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		3CA014CE1A2EA86500D9A865 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* AVRenderExample-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AVRenderExample-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
-		CD143BAC1382351F00963BBE /* note_256.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = note_256.png; sourceTree = "<group>"; };
 		CD143BB7138235F100963BBE /* AV7zApng2MvidResourceLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AV7zApng2MvidResourceLoader.h; sourceTree = "<group>"; };
 		CD143BB8138235F100963BBE /* AV7zApng2MvidResourceLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AV7zApng2MvidResourceLoader.m; sourceTree = "<group>"; };
 		CD143BB9138235F100963BBE /* AV7zAppResourceLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AV7zAppResourceLoader.h; sourceTree = "<group>"; };
@@ -306,11 +306,10 @@
 			isa = PBXGroup;
 			children = (
 				080E96DDFE201D6D7F000001 /* Classes */,
-				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				CD143D8F1382368500963BBE /* libz.dylib */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -327,8 +326,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				CD143BAC1382351F00963BBE /* note_256.png */,
 				CD2637D71390254400E18F0C /* Icon.png */,
+				3CA014CE1A2EA86500D9A865 /* Icon@2x.png */,
 				CDF21FC5177ECA6700578551 /* v1.m4v */,
 				CD34CBA9177D220600052549 /* Girl_384_192.m4v */,
 				CDE268261541224800774B59 /* Comp.plist */,
@@ -342,6 +341,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CD143D8F1382368500963BBE /* libz.dylib */,
 				3C7E17261A2EA4CE00A8681D /* OpenGLES.framework */,
 				3C7E17241A2EA4C300A8681D /* GLKit.framework */,
 				3C7E17221A2EA4B700A8681D /* MobileCoreServices.framework */,
@@ -568,7 +568,6 @@
 			files = (
 				28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */,
 				2899E5220DE3E06400AC0155 /* AVRenderExampleViewController.xib in Resources */,
-				CD143BAD1382351F00963BBE /* note_256.png in Resources */,
 				CD143E051382577800963BBE /* MovieTransportBackground.png in Resources */,
 				CD143E061382577800963BBE /* nexttrack.png in Resources */,
 				CD143E071382577800963BBE /* pause.png in Resources */,
@@ -576,6 +575,7 @@
 				CD143E091382577800963BBE /* prevtrack.png in Resources */,
 				CD143E0A1382577800963BBE /* VolumeLeftTall.png in Resources */,
 				CD143E0B1382577800963BBE /* VolumeRightTall.png in Resources */,
+				3CA014CF1A2EA86500D9A865 /* Icon@2x.png in Resources */,
 				CD2637D81390254400E18F0C /* Icon.png in Resources */,
 				CDE268271541224800774B59 /* Comp.plist in Resources */,
 				CD34CBAA177D220600052549 /* Girl_384_192.m4v in Resources */,
