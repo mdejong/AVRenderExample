@@ -61,6 +61,8 @@
   CGRect frame = CGRectMake(0, 0, 480, 320);
   self.animatorView = [AVAnimatorView aVAnimatorViewWithFrame:frame];
   
+  self.window.backgroundColor = [UIColor redColor];
+  
   // Create Render Object
   
   NSString *resFilename = @"Comp.plist";
@@ -101,10 +103,13 @@
     
     NSString *tmpCompPath = frameDecoder.filePath;
     
+    if (1)
     {
       BOOL worked;
       worked = [[NSFileManager defaultManager] removeItemAtPath:tmpCompPath error:nil];
       NSAssert(worked, @"could not remove tmp file");
+    } else {
+      NSLog(@"did not remove rendered file: %@", tmpCompPath);
     }
   }
   
@@ -150,6 +155,8 @@
 - (void) finishedLoadNotification:(NSNotification*)notification
 {
   NSLog(@"finished rendering lossless movie");
+  
+  self.window.backgroundColor = [UIColor blackColor];
   
   NSString *filename = self.composition.destination;
   
@@ -207,6 +214,8 @@
   NSString *errorString = comp.errorString;
   
   NSLog(@"failed rendering lossless movie: \"%@\"", errorString);
+  
+  self.window.backgroundColor = [UIColor blackColor];
 }
 
 @end
