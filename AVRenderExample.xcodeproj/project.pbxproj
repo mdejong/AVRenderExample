@@ -62,7 +62,6 @@
 		CD143D741382363500963BBE /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD143D6D1382363500963BBE /* CoreGraphics.framework */; };
 		CD143D8A1382366800963BBE /* AutoPropertyRelease.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143D891382366800963BBE /* AutoPropertyRelease.m */; };
 		CD143D901382368500963BBE /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CD143D8F1382368500963BBE /* libz.dylib */; };
-		CD143E031382577800963BBE /* MovieControlsView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143DF91382577800963BBE /* MovieControlsView.m */; };
 		CD143E041382577800963BBE /* MovieControlsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD143DFB1382577800963BBE /* MovieControlsViewController.m */; };
 		CD143E051382577800963BBE /* MovieTransportBackground.png in Resources */ = {isa = PBXBuildFile; fileRef = CD143DFC1382577800963BBE /* MovieTransportBackground.png */; };
 		CD143E061382577800963BBE /* nexttrack.png in Resources */ = {isa = PBXBuildFile; fileRef = CD143DFD1382577800963BBE /* nexttrack.png */; };
@@ -200,8 +199,6 @@
 		CD143D881382366800963BBE /* AutoPropertyRelease.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AutoPropertyRelease.h; sourceTree = "<group>"; };
 		CD143D891382366800963BBE /* AutoPropertyRelease.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AutoPropertyRelease.m; sourceTree = "<group>"; };
 		CD143D8F1382368500963BBE /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
-		CD143DF81382577800963BBE /* MovieControlsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MovieControlsView.h; sourceTree = "<group>"; };
-		CD143DF91382577800963BBE /* MovieControlsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MovieControlsView.m; sourceTree = "<group>"; };
 		CD143DFA1382577800963BBE /* MovieControlsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MovieControlsViewController.h; sourceTree = "<group>"; };
 		CD143DFB1382577800963BBE /* MovieControlsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MovieControlsViewController.m; sourceTree = "<group>"; };
 		CD143DFC1382577800963BBE /* MovieTransportBackground.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MovieTransportBackground.png; sourceTree = "<group>"; };
@@ -499,8 +496,6 @@
 		CD143DF71382577800963BBE /* MovieControls */ = {
 			isa = PBXGroup;
 			children = (
-				CD143DF81382577800963BBE /* MovieControlsView.h */,
-				CD143DF91382577800963BBE /* MovieControlsView.m */,
 				CD143DFA1382577800963BBE /* MovieControlsViewController.h */,
 				CD143DFB1382577800963BBE /* MovieControlsViewController.m */,
 				CD143DFC1382577800963BBE /* MovieTransportBackground.png */,
@@ -631,7 +626,6 @@
 				CD143C31138235FC00963BBE /* 7zAlloc.c in Sources */,
 				CD143C32138235FC00963BBE /* 7zMain.c in Sources */,
 				CD143D8A1382366800963BBE /* AutoPropertyRelease.m in Sources */,
-				CD143E031382577800963BBE /* MovieControlsView.m in Sources */,
 				CD143E041382577800963BBE /* MovieControlsViewController.m in Sources */,
 				CD143E1D138257E100963BBE /* MovieControlsAdaptor.m in Sources */,
 				CDE77AF014BDFFAE0012DA1A /* maxvid_decode_arm.s in Sources */,
@@ -658,6 +652,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -672,6 +667,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = AVRenderExample_Prefix.pch;
@@ -685,6 +681,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -698,6 +695,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

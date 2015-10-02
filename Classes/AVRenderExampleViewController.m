@@ -39,7 +39,11 @@
   self.movieControlsViewController = nil;
   self.movieControlsAdaptor = nil;
   self.composition = nil;
+  
+#if __has_feature(objc_arc)
+#else
   [super dealloc];
+#endif // objc_arc
 }
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.

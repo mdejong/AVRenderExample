@@ -23,8 +23,7 @@
   
   // Override point for customization after application launch.
   
-  // Add the view controller's view to the window and display.
-  [self.window addSubview:viewController.view];
+  self.window.rootViewController = viewController;
   [self.window makeKeyAndVisible];
   
   return YES;
@@ -79,10 +78,12 @@
 
 
 - (void)dealloc {
+#if __has_feature(objc_arc)
+#else
     [viewController release];
     [window release];
     [super dealloc];
+#endif // objc_arc
 }
-
 
 @end
