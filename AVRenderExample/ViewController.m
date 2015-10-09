@@ -47,7 +47,7 @@
 - (IBAction) buttonPressed:(id)sender
 {
   self.button.hidden = TRUE;
-  
+
   [self loadAnimatorView];
 }
 
@@ -57,6 +57,8 @@
   UIWindow *window = self.view.window;
   NSAssert(window != nil, @"window is nil");
   self.window = window;
+
+  window.backgroundColor = [UIColor redColor];
   
   // Don't use this view and view controller, make the movie controllers the primary view
   [self.view removeFromSuperview];
@@ -122,6 +124,7 @@
   UIWindow *window = self.window;
   NSAssert(window != nil, @"window is nil");
   [window addSubview:self.view];
+  self.button.hidden = FALSE;
 }
 
 // Notification indicates that all animations in a loop are now finished
@@ -134,12 +137,6 @@
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   
   [self stopAnimator];
-}
-
-- (IBAction) renderButton:(id)target
-{
-  [self loadAnimatorView];
-  return;
 }
 
 - (void) setupNotification
