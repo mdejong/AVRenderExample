@@ -72,6 +72,18 @@
   
   NSDictionary *plistDict = (NSDictionary*) [AVOfflineComposition readPlist:resFilename];
   
+  // In the case of 3.0 screen scale, generate video is larger than max 2 gig size, so
+  // use 2.0 scale in this case.
+  
+  if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
+    int screenScale = (int) [UIScreen mainScreen].scale;
+    if (screenScale == 3) {
+      NSMutableDictionary *mDict = [NSMutableDictionary dictionaryWithDictionary:plistDict];
+      mDict[@"CompScale"] = @(2);
+      plistDict = [NSDictionary dictionaryWithDictionary:mDict];
+    }
+  }
+  
   AVOfflineComposition *comp = [AVOfflineComposition aVOfflineComposition];
   
   self.composition = comp;
