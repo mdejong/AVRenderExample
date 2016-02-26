@@ -7,81 +7,83 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3C221FB91BC61B4F00295114 /* Comp.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3C221FB81BC61B4F00295114 /* Comp.plist */; settings = {ASSET_TAGS = (); }; };
-		3C2220371BC624B600295114 /* AutoPropertyRelease.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FBC1BC624B600295114 /* AutoPropertyRelease.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220381BC624B600295114 /* ApngConvertMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FBF1BC624B600295114 /* ApngConvertMaxvid.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220391BC624B600295114 /* AV7zApng2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FC11BC624B600295114 /* AV7zApng2MvidResourceLoader.m */; settings = {ASSET_TAGS = (); }; };
-		3C22203A1BC624B600295114 /* AV7zAppResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FC31BC624B600295114 /* AV7zAppResourceLoader.m */; settings = {ASSET_TAGS = (); }; };
-		3C22203B1BC624B600295114 /* AVAnimatorLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FC51BC624B600295114 /* AVAnimatorLayer.m */; settings = {ASSET_TAGS = (); }; };
-		3C22203C1BC624B600295114 /* AVAnimatorMedia.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FC81BC624B600295114 /* AVAnimatorMedia.m */; settings = {ASSET_TAGS = (); }; };
-		3C22203D1BC624B600295114 /* AVAnimatorOpenGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FCC1BC624B600295114 /* AVAnimatorOpenGLView.m */; settings = {ASSET_TAGS = (); }; };
-		3C22203E1BC624B600295114 /* AVAnimatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FCF1BC624B600295114 /* AVAnimatorView.m */; settings = {ASSET_TAGS = (); }; };
-		3C22203F1BC624B600295114 /* AVApng2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FD21BC624B600295114 /* AVApng2MvidResourceLoader.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220401BC624B600295114 /* AVAppResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FD41BC624B600295114 /* AVAppResourceLoader.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220411BC624B600295114 /* AVAsset2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FD61BC624B600295114 /* AVAsset2MvidResourceLoader.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220421BC624B600295114 /* AVAssetFrameDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FD91BC624B600295114 /* AVAssetFrameDecoder.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220431BC624B600295114 /* AVAssetJoinAlphaResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FDB1BC624B600295114 /* AVAssetJoinAlphaResourceLoader.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220441BC624B600295114 /* AVAssetReaderConvertMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FDD1BC624B600295114 /* AVAssetReaderConvertMaxvid.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220451BC624B600295114 /* AVAssetWriterConvertFromMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FDF1BC624B600295114 /* AVAssetWriterConvertFromMaxvid.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220461BC624B600295114 /* AVFileUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FE11BC624B600295114 /* AVFileUtil.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220471BC624B600295114 /* AVFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FE31BC624B600295114 /* AVFrame.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220481BC624B600295114 /* AVFrameDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FE51BC624B600295114 /* AVFrameDecoder.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220491BC624B600295114 /* AVGIF89A2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FE71BC624B600295114 /* AVGIF89A2MvidResourceLoader.m */; settings = {ASSET_TAGS = (); }; };
-		3C22204A1BC624B600295114 /* AVImageFrameDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FE91BC624B600295114 /* AVImageFrameDecoder.m */; settings = {ASSET_TAGS = (); }; };
-		3C22204B1BC624B700295114 /* AVMvidFileWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FEB1BC624B600295114 /* AVMvidFileWriter.m */; settings = {ASSET_TAGS = (); }; };
-		3C22204C1BC624B700295114 /* AVMvidFrameDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FED1BC624B600295114 /* AVMvidFrameDecoder.m */; settings = {ASSET_TAGS = (); }; };
-		3C22204D1BC624B700295114 /* AVOfflineComposition.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FEF1BC624B600295114 /* AVOfflineComposition.m */; settings = {ASSET_TAGS = (); }; };
-		3C22204E1BC624B700295114 /* AVResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FF11BC624B600295114 /* AVResourceLoader.m */; settings = {ASSET_TAGS = (); }; };
-		3C22204F1BC624B700295114 /* CGFrameBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FF31BC624B600295114 /* CGFrameBuffer.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220501BC624B700295114 /* libapng.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FF41BC624B600295114 /* libapng.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220511BC624B700295114 /* maxvid_decode.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FF61BC624B600295114 /* maxvid_decode.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220521BC624B700295114 /* maxvid_decode_arm.s in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FF81BC624B600295114 /* maxvid_decode_arm.s */; settings = {ASSET_TAGS = (); }; };
-		3C2220531BC624B700295114 /* maxvid_deltas.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FFA1BC624B600295114 /* maxvid_deltas.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220541BC624B700295114 /* maxvid_encode.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FFC1BC624B600295114 /* maxvid_encode.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220551BC624B700295114 /* maxvid_file.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FFD1BC624B600295114 /* maxvid_file.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220561BC624B700295114 /* movdata.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FFF1BC624B600295114 /* movdata.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220571BC624B700295114 /* MutableAttrString.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220021BC624B600295114 /* MutableAttrString.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220581BC624B700295114 /* SegmentedMappedData.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220041BC624B600295114 /* SegmentedMappedData.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220591BC624B700295114 /* 7zBuf.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220071BC624B600295114 /* 7zBuf.c */; settings = {ASSET_TAGS = (); }; };
-		3C22205A1BC624B700295114 /* 7zBuf2.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220091BC624B600295114 /* 7zBuf2.c */; settings = {ASSET_TAGS = (); }; };
-		3C22205B1BC624B700295114 /* 7zDec.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22200A1BC624B600295114 /* 7zDec.c */; settings = {ASSET_TAGS = (); }; };
-		3C22205C1BC624B700295114 /* 7zFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22200B1BC624B600295114 /* 7zFile.c */; settings = {ASSET_TAGS = (); }; };
-		3C22205D1BC624B700295114 /* 7zIn.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22200D1BC624B600295114 /* 7zIn.c */; settings = {ASSET_TAGS = (); }; };
-		3C22205E1BC624B700295114 /* 7zStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22200E1BC624B600295114 /* 7zStream.c */; settings = {ASSET_TAGS = (); }; };
-		3C22205F1BC624B700295114 /* Alloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220101BC624B600295114 /* Alloc.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220601BC624B700295114 /* CpuArch.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220121BC624B600295114 /* CpuArch.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220611BC624B700295114 /* Delta.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220141BC624B600295114 /* Delta.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220621BC624B700295114 /* Lzma2Dec.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220171BC624B600295114 /* Lzma2Dec.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220631BC624B700295114 /* LzmaDec.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220191BC624B600295114 /* LzmaDec.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220641BC624B700295114 /* LZMAExtractor.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C22201C1BC624B600295114 /* LZMAExtractor.m */; settings = {ASSET_TAGS = (); }; };
-		3C2220651BC624B700295114 /* Ppmd7.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22201E1BC624B600295114 /* Ppmd7.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220661BC624B700295114 /* Ppmd7Dec.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220201BC624B600295114 /* Ppmd7Dec.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220671BC624B700295114 /* Ppmd8.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220211BC624B600295114 /* Ppmd8.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220681BC624B700295114 /* Ppmd8Dec.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220231BC624B600295114 /* Ppmd8Dec.c */; settings = {ASSET_TAGS = (); }; };
-		3C2220691BC624B700295114 /* 7zAlloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220281BC624B600295114 /* 7zAlloc.c */; settings = {ASSET_TAGS = (); }; };
-		3C22206A1BC624B700295114 /* 7zMain.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22202A1BC624B600295114 /* 7zMain.c */; settings = {ASSET_TAGS = (); }; };
-		3C22206B1BC624B700295114 /* MovieControlsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C22202D1BC624B600295114 /* MovieControlsViewController.m */; settings = {ASSET_TAGS = (); }; };
-		3C22206C1BC624B700295114 /* MovieTransportBackground.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C22202E1BC624B600295114 /* MovieTransportBackground.png */; settings = {ASSET_TAGS = (); }; };
-		3C22206D1BC624B700295114 /* nexttrack.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C22202F1BC624B600295114 /* nexttrack.png */; settings = {ASSET_TAGS = (); }; };
-		3C22206E1BC624B700295114 /* pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220301BC624B600295114 /* pause.png */; settings = {ASSET_TAGS = (); }; };
-		3C22206F1BC624B700295114 /* play.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220311BC624B600295114 /* play.png */; settings = {ASSET_TAGS = (); }; };
-		3C2220701BC624B700295114 /* prevtrack.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220321BC624B600295114 /* prevtrack.png */; settings = {ASSET_TAGS = (); }; };
-		3C2220711BC624B700295114 /* VolumeLeftTall.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220331BC624B600295114 /* VolumeLeftTall.png */; settings = {ASSET_TAGS = (); }; };
-		3C2220721BC624B700295114 /* VolumeRightTall.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220341BC624B600295114 /* VolumeRightTall.png */; settings = {ASSET_TAGS = (); }; };
-		3C2220731BC624B700295114 /* MovieControlsAdaptor.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220361BC624B600295114 /* MovieControlsAdaptor.m */; settings = {ASSET_TAGS = (); }; };
+		3C221FB91BC61B4F00295114 /* Comp.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3C221FB81BC61B4F00295114 /* Comp.plist */; };
+		3C2220371BC624B600295114 /* AutoPropertyRelease.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FBC1BC624B600295114 /* AutoPropertyRelease.m */; };
+		3C2220381BC624B600295114 /* ApngConvertMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FBF1BC624B600295114 /* ApngConvertMaxvid.m */; };
+		3C2220391BC624B600295114 /* AV7zApng2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FC11BC624B600295114 /* AV7zApng2MvidResourceLoader.m */; };
+		3C22203A1BC624B600295114 /* AV7zAppResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FC31BC624B600295114 /* AV7zAppResourceLoader.m */; };
+		3C22203B1BC624B600295114 /* AVAnimatorLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FC51BC624B600295114 /* AVAnimatorLayer.m */; };
+		3C22203C1BC624B600295114 /* AVAnimatorMedia.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FC81BC624B600295114 /* AVAnimatorMedia.m */; };
+		3C22203D1BC624B600295114 /* AVAnimatorOpenGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FCC1BC624B600295114 /* AVAnimatorOpenGLView.m */; };
+		3C22203E1BC624B600295114 /* AVAnimatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FCF1BC624B600295114 /* AVAnimatorView.m */; };
+		3C22203F1BC624B600295114 /* AVApng2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FD21BC624B600295114 /* AVApng2MvidResourceLoader.m */; };
+		3C2220401BC624B600295114 /* AVAppResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FD41BC624B600295114 /* AVAppResourceLoader.m */; };
+		3C2220411BC624B600295114 /* AVAsset2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FD61BC624B600295114 /* AVAsset2MvidResourceLoader.m */; };
+		3C2220421BC624B600295114 /* AVAssetFrameDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FD91BC624B600295114 /* AVAssetFrameDecoder.m */; };
+		3C2220431BC624B600295114 /* AVAssetJoinAlphaResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FDB1BC624B600295114 /* AVAssetJoinAlphaResourceLoader.m */; };
+		3C2220441BC624B600295114 /* AVAssetReaderConvertMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FDD1BC624B600295114 /* AVAssetReaderConvertMaxvid.m */; };
+		3C2220451BC624B600295114 /* AVAssetWriterConvertFromMaxvid.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FDF1BC624B600295114 /* AVAssetWriterConvertFromMaxvid.m */; };
+		3C2220461BC624B600295114 /* AVFileUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FE11BC624B600295114 /* AVFileUtil.m */; };
+		3C2220471BC624B600295114 /* AVFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FE31BC624B600295114 /* AVFrame.m */; };
+		3C2220481BC624B600295114 /* AVFrameDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FE51BC624B600295114 /* AVFrameDecoder.m */; };
+		3C2220491BC624B600295114 /* AVGIF89A2MvidResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FE71BC624B600295114 /* AVGIF89A2MvidResourceLoader.m */; };
+		3C22204A1BC624B600295114 /* AVImageFrameDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FE91BC624B600295114 /* AVImageFrameDecoder.m */; };
+		3C22204B1BC624B700295114 /* AVMvidFileWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FEB1BC624B600295114 /* AVMvidFileWriter.m */; };
+		3C22204C1BC624B700295114 /* AVMvidFrameDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FED1BC624B600295114 /* AVMvidFrameDecoder.m */; };
+		3C22204D1BC624B700295114 /* AVOfflineComposition.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FEF1BC624B600295114 /* AVOfflineComposition.m */; };
+		3C22204E1BC624B700295114 /* AVResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FF11BC624B600295114 /* AVResourceLoader.m */; };
+		3C22204F1BC624B700295114 /* CGFrameBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FF31BC624B600295114 /* CGFrameBuffer.m */; };
+		3C2220501BC624B700295114 /* libapng.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FF41BC624B600295114 /* libapng.c */; };
+		3C2220511BC624B700295114 /* maxvid_decode.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FF61BC624B600295114 /* maxvid_decode.c */; };
+		3C2220521BC624B700295114 /* maxvid_decode_arm.s in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FF81BC624B600295114 /* maxvid_decode_arm.s */; };
+		3C2220531BC624B700295114 /* maxvid_deltas.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FFA1BC624B600295114 /* maxvid_deltas.m */; };
+		3C2220541BC624B700295114 /* maxvid_encode.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FFC1BC624B600295114 /* maxvid_encode.m */; };
+		3C2220551BC624B700295114 /* maxvid_file.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FFD1BC624B600295114 /* maxvid_file.c */; };
+		3C2220561BC624B700295114 /* movdata.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C221FFF1BC624B600295114 /* movdata.c */; };
+		3C2220571BC624B700295114 /* MutableAttrString.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220021BC624B600295114 /* MutableAttrString.m */; };
+		3C2220581BC624B700295114 /* SegmentedMappedData.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220041BC624B600295114 /* SegmentedMappedData.m */; };
+		3C2220591BC624B700295114 /* 7zBuf.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220071BC624B600295114 /* 7zBuf.c */; };
+		3C22205A1BC624B700295114 /* 7zBuf2.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220091BC624B600295114 /* 7zBuf2.c */; };
+		3C22205B1BC624B700295114 /* 7zDec.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22200A1BC624B600295114 /* 7zDec.c */; };
+		3C22205C1BC624B700295114 /* 7zFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22200B1BC624B600295114 /* 7zFile.c */; };
+		3C22205D1BC624B700295114 /* 7zIn.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22200D1BC624B600295114 /* 7zIn.c */; };
+		3C22205E1BC624B700295114 /* 7zStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22200E1BC624B600295114 /* 7zStream.c */; };
+		3C22205F1BC624B700295114 /* Alloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220101BC624B600295114 /* Alloc.c */; };
+		3C2220601BC624B700295114 /* CpuArch.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220121BC624B600295114 /* CpuArch.c */; };
+		3C2220611BC624B700295114 /* Delta.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220141BC624B600295114 /* Delta.c */; };
+		3C2220621BC624B700295114 /* Lzma2Dec.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220171BC624B600295114 /* Lzma2Dec.c */; };
+		3C2220631BC624B700295114 /* LzmaDec.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220191BC624B600295114 /* LzmaDec.c */; };
+		3C2220641BC624B700295114 /* LZMAExtractor.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C22201C1BC624B600295114 /* LZMAExtractor.m */; };
+		3C2220651BC624B700295114 /* Ppmd7.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22201E1BC624B600295114 /* Ppmd7.c */; };
+		3C2220661BC624B700295114 /* Ppmd7Dec.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220201BC624B600295114 /* Ppmd7Dec.c */; };
+		3C2220671BC624B700295114 /* Ppmd8.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220211BC624B600295114 /* Ppmd8.c */; };
+		3C2220681BC624B700295114 /* Ppmd8Dec.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220231BC624B600295114 /* Ppmd8Dec.c */; };
+		3C2220691BC624B700295114 /* 7zAlloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220281BC624B600295114 /* 7zAlloc.c */; };
+		3C22206A1BC624B700295114 /* 7zMain.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C22202A1BC624B600295114 /* 7zMain.c */; };
+		3C22206B1BC624B700295114 /* MovieControlsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C22202D1BC624B600295114 /* MovieControlsViewController.m */; };
+		3C22206C1BC624B700295114 /* MovieTransportBackground.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C22202E1BC624B600295114 /* MovieTransportBackground.png */; };
+		3C22206D1BC624B700295114 /* nexttrack.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C22202F1BC624B600295114 /* nexttrack.png */; };
+		3C22206E1BC624B700295114 /* pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220301BC624B600295114 /* pause.png */; };
+		3C22206F1BC624B700295114 /* play.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220311BC624B600295114 /* play.png */; };
+		3C2220701BC624B700295114 /* prevtrack.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220321BC624B600295114 /* prevtrack.png */; };
+		3C2220711BC624B700295114 /* VolumeLeftTall.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220331BC624B600295114 /* VolumeLeftTall.png */; };
+		3C2220721BC624B700295114 /* VolumeRightTall.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220341BC624B600295114 /* VolumeRightTall.png */; };
+		3C2220731BC624B700295114 /* MovieControlsAdaptor.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220361BC624B600295114 /* MovieControlsAdaptor.m */; };
 		3C2220751BC62E9300295114 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C2220741BC62E9300295114 /* libz.tbd */; };
+		3C673BEE1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C673BEB1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m */; };
+		3C673BEF1C80F82500DCA1E7 /* AVStreamEncodeDecode.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C673BED1C80F82500DCA1E7 /* AVStreamEncodeDecode.m */; };
 		3C941EDB1BC61094008851FE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C941EDA1BC61094008851FE /* main.m */; };
 		3C941EDE1BC61094008851FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C941EDD1BC61094008851FE /* AppDelegate.m */; };
 		3C941EE11BC61094008851FE /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C941EE01BC61094008851FE /* ViewController.m */; };
 		3C941EE41BC61094008851FE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EE21BC61094008851FE /* Main.storyboard */; };
 		3C941EE61BC61094008851FE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EE51BC61094008851FE /* Assets.xcassets */; };
 		3C941EE91BC61095008851FE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EE71BC61095008851FE /* LaunchScreen.storyboard */; };
-		3C941EF61BC61374008851FE /* Girl_384_192.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF01BC61374008851FE /* Girl_384_192.m4v */; settings = {ASSET_TAGS = (); }; };
-		3C941EF71BC61374008851FE /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF11BC61374008851FE /* Icon.png */; settings = {ASSET_TAGS = (); }; };
-		3C941EF81BC61374008851FE /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF21BC61374008851FE /* Icon@2x.png */; settings = {ASSET_TAGS = (); }; };
-		3C941EF91BC61374008851FE /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF31BC61374008851FE /* License.txt */; settings = {ASSET_TAGS = (); }; };
-		3C941EFA1BC61374008851FE /* Rescaled_480_320.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF41BC61374008851FE /* Rescaled_480_320.png */; settings = {ASSET_TAGS = (); }; };
-		3C941EFB1BC61374008851FE /* v1.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF51BC61374008851FE /* v1.m4v */; settings = {ASSET_TAGS = (); }; };
+		3C941EF61BC61374008851FE /* Girl_384_192.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF01BC61374008851FE /* Girl_384_192.m4v */; };
+		3C941EF71BC61374008851FE /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF11BC61374008851FE /* Icon.png */; };
+		3C941EF81BC61374008851FE /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF21BC61374008851FE /* Icon@2x.png */; };
+		3C941EF91BC61374008851FE /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF31BC61374008851FE /* License.txt */; };
+		3C941EFA1BC61374008851FE /* Rescaled_480_320.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF41BC61374008851FE /* Rescaled_480_320.png */; };
+		3C941EFB1BC61374008851FE /* v1.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF51BC61374008851FE /* v1.m4v */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -206,6 +208,10 @@
 		3C2220351BC624B600295114 /* MovieControlsAdaptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MovieControlsAdaptor.h; sourceTree = "<group>"; };
 		3C2220361BC624B600295114 /* MovieControlsAdaptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MovieControlsAdaptor.m; sourceTree = "<group>"; };
 		3C2220741BC62E9300295114 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		3C673BEA1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVAssetMixAlphaResourceLoader.h; sourceTree = "<group>"; };
+		3C673BEB1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVAssetMixAlphaResourceLoader.m; sourceTree = "<group>"; };
+		3C673BEC1C80F82500DCA1E7 /* AVStreamEncodeDecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVStreamEncodeDecode.h; sourceTree = "<group>"; };
+		3C673BED1C80F82500DCA1E7 /* AVStreamEncodeDecode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVStreamEncodeDecode.m; sourceTree = "<group>"; };
 		3C941ED61BC61094008851FE /* AVRenderExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AVRenderExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C941EDA1BC61094008851FE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		3C941EDC1BC61094008851FE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -295,6 +301,8 @@
 				3C221FE51BC624B600295114 /* AVFrameDecoder.m */,
 				3C221FE61BC624B600295114 /* AVGIF89A2MvidResourceLoader.h */,
 				3C221FE71BC624B600295114 /* AVGIF89A2MvidResourceLoader.m */,
+				3C673BEA1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.h */,
+				3C673BEB1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m */,
 				3C221FE81BC624B600295114 /* AVImageFrameDecoder.h */,
 				3C221FE91BC624B600295114 /* AVImageFrameDecoder.m */,
 				3C221FEA1BC624B600295114 /* AVMvidFileWriter.h */,
@@ -324,6 +332,8 @@
 				3C2220021BC624B600295114 /* MutableAttrString.m */,
 				3C2220031BC624B600295114 /* SegmentedMappedData.h */,
 				3C2220041BC624B600295114 /* SegmentedMappedData.m */,
+				3C673BEC1C80F82500DCA1E7 /* AVStreamEncodeDecode.h */,
+				3C673BED1C80F82500DCA1E7 /* AVStreamEncodeDecode.m */,
 			);
 			path = AVAnimator;
 			sourceTree = "<group>";
@@ -543,11 +553,13 @@
 				3C22204C1BC624B700295114 /* AVMvidFrameDecoder.m in Sources */,
 				3C22203C1BC624B600295114 /* AVAnimatorMedia.m in Sources */,
 				3C2220501BC624B700295114 /* libapng.c in Sources */,
+				3C673BEE1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m in Sources */,
 				3C2220411BC624B600295114 /* AVAsset2MvidResourceLoader.m in Sources */,
 				3C2220641BC624B700295114 /* LZMAExtractor.m in Sources */,
 				3C22204E1BC624B700295114 /* AVResourceLoader.m in Sources */,
 				3C22203D1BC624B600295114 /* AVAnimatorOpenGLView.m in Sources */,
 				3C2220571BC624B700295114 /* MutableAttrString.m in Sources */,
+				3C673BEF1C80F82500DCA1E7 /* AVStreamEncodeDecode.m in Sources */,
 				3C2220381BC624B600295114 /* ApngConvertMaxvid.m in Sources */,
 				3C2220621BC624B700295114 /* Lzma2Dec.c in Sources */,
 				3C22205B1BC624B700295114 /* 7zDec.c in Sources */,

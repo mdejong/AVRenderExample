@@ -13,6 +13,8 @@
 
 #import "maxvid_file.h"
 
+#include "AVStreamEncodeDecode.h"
+
 #if MV_ENABLE_DELTAS
 #include "maxvid_deltas.h"
 #endif // MV_ENABLE_DELTAS
@@ -286,7 +288,23 @@
     
     if (worked) {
       uint32_t bpp = hPtr->bpp;
-      NSAssert(bpp == 16 || bpp == 24 || bpp == 32, @"bpp must be 16, 24, 32");
+      if (bpp == 16 || bpp == 24 || bpp == 32) {
+        // nop
+      } else {
+        worked = FALSE;
+        NSAssert(FALSE, @"bpp must be 16, 24, 32");
+      }
+    }
+
+    if (worked) {
+      // Verify the minimum file version, previously version 0 and 1 files
+      // were acceptable but version 2 is now required to support ARM64.
+      // The only exception is the upgrade path where older versions are allowed.
+      
+      if (self.upgradeFromV1 == FALSE && maxvid_file_version(hPtr) < MV_FILE_VERSION_TWO) {
+        worked = FALSE;
+        NSAssert(FALSE, @"only .mvid files version 2 or newer can be used, you must -upgrade this .mvid from version %d", maxvid_file_version(hPtr));
+      }
     }
   }
   
@@ -516,17 +534,6 @@
     NSAssert(FALSE, @"%@: %d", @"can't advance past last frame", (int) newFrameIndex);
   }
   
-#if defined(EXTRA_CHECKS)
-  // Verify that input file is mvid version 2. Version 0 and 1 files will not
-  // load properly on ARM64 hardware.
-  
-  MVFileHeader *header = [self header];
-  
-  if (self.upgradeFromV1 == FALSE && maxvid_file_version(header) < MV_FILE_VERSION_TWO) {
-    NSAssert(FALSE, @"only .mvid files version 2 or newer can be used, you must -upgrade this .mvid from version %d", maxvid_file_version(header));
-  }
-#endif // EXTRA_CHECKS
-  
   BOOL changeFrameData = FALSE;
   const int newFrameIndexSigned = (int) newFrameIndex;
   
@@ -681,15 +688,68 @@
       }
 # endif // TARGET_OS_IPHONE
 #endif // EXTRA_CHECKS
+      
+      int isCompressedFrame = 0;
+      
+      // Calculate offset where frame starts and length of frame
+      off_t frameStartOffset;
+      uint32_t inputBuffer32NumBytes;
+      
+      MVFileHeader *header = [self header];
+      
+      if (maxvid_file_version(header) == MV_FILE_VERSION_THREE) {
+        // File offset stored as number of MV_PAGESIZE, frame length is zero.
+        
+        frameStartOffset = maxvid_frame_offset(frame);
+        frameStartOffset *= MV_PAGESIZE;
+        
+        // The frame length must be zero with V3.
+        uint32_t numBytes = maxvid_frame_length(frame);
+        
+        if (numBytes == 0) {
+          isCompressedFrame = 0;
+        } else {
+#if defined(HAS_LIB_COMPRESSION_API)
+          isCompressedFrame = 1;
+#else
+          assert(0);
+#endif // HAS_LIB_COMPRESSION_API
+        }
+        
+        if (!isCompressedFrame) {
+          off_t actualNumBytes;
+          if (bpp == 16) {
+            actualNumBytes = header->width * header->height * sizeof(uint16_t);
+            if ((actualNumBytes % sizeof(uint32_t)) != 0) {
+              actualNumBytes += sizeof(uint16_t);
+            }
+          } else {
+            actualNumBytes = header->width * header->height * sizeof(uint32_t);
+          }
+          
+#if defined(DEBUG)
+          assert(actualNumBytes < 0xFFFFFFFF);
+#endif // DEBUG
+          
+          inputBuffer32NumBytes = (uint32_t) actualNumBytes;
+        } else {
+          // A compressed frame can be decompressed with the knowledge that the
+          // framebuffer is large enough to store the output.
+          
+          inputBuffer32NumBytes = numBytes;
+        }
+      } else {
+        frameStartOffset = maxvid_frame_offset(frame);
+        inputBuffer32NumBytes = maxvid_frame_length(frame);
+      }
 
 #if defined(USE_SEGMENTED_MMAP)
       // Create a mapped segment using the frame offset and length for this frame.
 
       uint32_t *inputBuffer32 = NULL;
-      uint32_t inputBuffer32NumBytes = maxvid_frame_length(frame);
       
       NSRange range;
-      range.location = maxvid_frame_offset(frame);
+      range.location = (NSUInteger) frameStartOffset; // 64 bit
       range.length = inputBuffer32NumBytes;
   
       SegmentedMappedData *mappedSeg = [self.mappedData subdataWithRange:range];
@@ -717,8 +777,7 @@
       
       NSData *mappedDataObj = mappedSeg;
 #else
-      uint32_t *inputBuffer32 = (uint32_t*) (mappedPtr + maxvid_frame_offset(frame));
-      uint32_t inputBuffer32NumBytes = maxvid_frame_length(frame);
+      uint32_t *inputBuffer32 = (uint32_t*) (mappedPtr + frameStartOffset);
       NSData *mappedDataObj = self.mappedData;
         
 #if defined(REGRESSION_TESTS)
@@ -826,6 +885,40 @@
 
         [self assertSameAdler:frame->adler frameBuffer:frameBuffer frameBufferNumBytes:numBytesToIncludeInAdler];
 #endif // EXTRA_CHECKS || ALWAYS_CHECK_ADLER
+        
+#if defined(HAS_LIB_COMPRESSION_API)
+      } else if (isCompressedFrame) {
+        // Input buffer is a compressed keyframe
+        
+        changeFrameData = TRUE;
+        
+        [nextFrameBuffer doneZeroCopyPixels];
+        
+        void *frameBuffer = (void*)nextFrameBuffer.pixels;
+#ifdef EXTRA_CHECKS
+        NSAssert(frameBuffer, @"frameBuffer");
+#endif // EXTRA_CHECKS
+        
+        [AVStreamEncodeDecode streamUnDeltaAndUncompress:mappedDataObj frameBuffer:frameBuffer frameBufferNumBytes:frameBufferNumBytes bpp:bpp algorithm:COMPRESSION_LZ4 expectedDecodedSize:(int)self.width*(int)self.height];
+        
+#if defined(EXTRA_CHECKS) || defined(ALWAYS_CHECK_ADLER)
+        {
+          int numBytesToIncludeInAdler;
+          
+          if (bpp == 16) {
+            numBytesToIncludeInAdler = frameBufferSize * sizeof(uint16_t);
+          } else {
+            numBytesToIncludeInAdler = frameBufferSize * sizeof(uint32_t);
+          }
+          
+          // Calculate the keyframe checksum including the pixels and and zero padding pixels.
+          NSAssert(numBytesToIncludeInAdler == frameBufferNumBytes, @"frameBufferNumBytes");
+          
+          [self assertSameAdler:frame->adler frameBuffer:frameBuffer frameBufferNumBytes:numBytesToIncludeInAdler];
+        }
+#endif // EXTRA_CHECKS
+
+#endif // HAS_LIB_COMPRESSION_API
       } else {
         // Input buffer contains a complete keyframe, use zero copy optimization
         

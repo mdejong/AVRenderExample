@@ -55,6 +55,15 @@
 
 @property (nonatomic, assign) BOOL          isAllKeyframes;
 
+// Set this property to TRUE when a generated V3 file
+// that contains compressed data blocks at known page
+// offsets should be generated. This type of file need
+// not be memory mapped and it can support much larger
+// sizes that previous versions since all frame sizes
+// are implicitly stored as page offsets.
+
+@property (nonatomic, assign) BOOL          genV3PageOffsetBlocks;
+
 #if MV_ENABLE_DELTAS
 
 // FALSE by default, if the mvid file was created with the
@@ -104,6 +113,10 @@
 // of an odd number of pixels.
 
 - (BOOL) writeKeyframe:(char*)ptr bufferSize:(int)bufferSize;
+
+// This version of writeKeyframe stores a non-zero adler passed in to the method
+
+- (BOOL) writeKeyframe:(char*)ptr bufferSize:(int)bufferSize adler:(uint32_t)adler;
 
 // Write a delta frame that depends on the previous frame. The adler needs to be
 // generated in the caller since both previous and current frames would need to be

@@ -27,9 +27,9 @@
 
 #import "MutableAttrString.h"
 
-#if defined(DEBUG)
-# define LOGGING
-#endif // DEBUG
+//#if defined(DEBUG)
+//# define LOGGING
+//#endif // DEBUG
 
 // Notification name constants
 
@@ -262,7 +262,10 @@ typedef enum
   NSString *resPath = [[NSBundle mainBundle] pathForResource:resFileName ofType:@""];  
   plistData = [NSData dataWithContentsOfFile:resPath];   
   
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   plist = [NSPropertyListSerialization propertyListFromData:plistData mutabilityOption:NSPropertyListImmutable format:&format errorDescription:&error];
+#pragma clang diagnostic pop
   if (!plist) {
     NSLog(@"Error reading plist from file '%s', error = '%s'", [resFileName UTF8String], [error UTF8String]);
 #if __has_feature(objc_arc)
@@ -1080,6 +1083,8 @@ CF_RETURNS_RETAINED
   
   AVMvidFileWriter *fileWriter = [AVMvidFileWriter aVMvidFileWriter];
   NSAssert(fileWriter, @"fileWriter");
+  
+  fileWriter.genV3PageOffsetBlocks = TRUE;
   
   fileWriter.mvidPath = phonyOutPath;
   fileWriter.bpp = 24;
