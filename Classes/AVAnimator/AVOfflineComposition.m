@@ -1113,7 +1113,9 @@ CF_RETURNS_RETAINED
     retcode = FALSE;
   }
   
+#if defined(HAS_LIB_COMPRESSION_API)
   NSMutableData *mEncodedData = nil;
+#endif // HAS_LIB_COMPRESSION_API
   
   for (NSUInteger frame = 0; retcode && (frame < maxFrame); frame++) {
     // Clear the entire frame to the background color with a simple fill
