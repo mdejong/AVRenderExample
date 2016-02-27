@@ -72,6 +72,7 @@
 		3C2220751BC62E9300295114 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C2220741BC62E9300295114 /* libz.tbd */; };
 		3C673BEE1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C673BEB1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m */; };
 		3C673BEF1C80F82500DCA1E7 /* AVStreamEncodeDecode.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C673BED1C80F82500DCA1E7 /* AVStreamEncodeDecode.m */; };
+		3C673BF11C81001300DCA1E7 /* libcompression.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C673BF01C81001200DCA1E7 /* libcompression.tbd */; };
 		3C941EDB1BC61094008851FE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C941EDA1BC61094008851FE /* main.m */; };
 		3C941EDE1BC61094008851FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C941EDD1BC61094008851FE /* AppDelegate.m */; };
 		3C941EE11BC61094008851FE /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C941EE01BC61094008851FE /* ViewController.m */; };
@@ -212,6 +213,7 @@
 		3C673BEB1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVAssetMixAlphaResourceLoader.m; sourceTree = "<group>"; };
 		3C673BEC1C80F82500DCA1E7 /* AVStreamEncodeDecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVStreamEncodeDecode.h; sourceTree = "<group>"; };
 		3C673BED1C80F82500DCA1E7 /* AVStreamEncodeDecode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVStreamEncodeDecode.m; sourceTree = "<group>"; };
+		3C673BF01C81001200DCA1E7 /* libcompression.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcompression.tbd; path = usr/lib/libcompression.tbd; sourceTree = SDKROOT; };
 		3C941ED61BC61094008851FE /* AVRenderExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AVRenderExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C941EDA1BC61094008851FE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		3C941EDC1BC61094008851FE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -235,6 +237,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C673BF11C81001300DCA1E7 /* libcompression.tbd in Frameworks */,
 				3C2220751BC62E9300295114 /* libz.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -415,6 +418,7 @@
 		3C941ECD1BC61094008851FE = {
 			isa = PBXGroup;
 			children = (
+				3C673BF01C81001200DCA1E7 /* libcompression.tbd */,
 				3C941ED81BC61094008851FE /* AVRenderExample */,
 				3C941ED71BC61094008851FE /* Products */,
 			);
@@ -716,7 +720,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = AVRenderExample/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = comp.helpurock.AVRenderExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -729,7 +733,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = AVRenderExample/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = comp.helpurock.AVRenderExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -86,6 +86,13 @@
   
   AVOfflineComposition *comp = [AVOfflineComposition aVOfflineComposition];
   
+#if defined(HAS_LIB_COMPRESSION_API)
+  if ((1)) {
+  comp.compressedIntermediate = TRUE;
+  comp.compressedOutput = TRUE;
+  }
+#endif // HAS_LIB_COMPRESSION_API
+  
   self.composition = comp;
   
   [self setupNotification];
