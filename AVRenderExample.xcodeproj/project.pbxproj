@@ -70,6 +70,7 @@
 		3C2220721BC624B700295114 /* VolumeRightTall.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C2220341BC624B600295114 /* VolumeRightTall.png */; };
 		3C2220731BC624B700295114 /* MovieControlsAdaptor.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C2220361BC624B600295114 /* MovieControlsAdaptor.m */; };
 		3C2220751BC62E9300295114 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C2220741BC62E9300295114 /* libz.tbd */; };
+		3C5DC5821DECE9AD0029A61F /* AVAnimatorH264AlphaPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5DC5811DECE9AD0029A61F /* AVAnimatorH264AlphaPlayer.m */; };
 		3C673BEE1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C673BEB1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m */; };
 		3C673BEF1C80F82500DCA1E7 /* AVStreamEncodeDecode.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C673BED1C80F82500DCA1E7 /* AVStreamEncodeDecode.m */; };
 		3C673BF11C81001300DCA1E7 /* libcompression.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C673BF01C81001200DCA1E7 /* libcompression.tbd */; };
@@ -209,6 +210,8 @@
 		3C2220351BC624B600295114 /* MovieControlsAdaptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MovieControlsAdaptor.h; sourceTree = "<group>"; };
 		3C2220361BC624B600295114 /* MovieControlsAdaptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MovieControlsAdaptor.m; sourceTree = "<group>"; };
 		3C2220741BC62E9300295114 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		3C5DC5801DECE9AD0029A61F /* AVAnimatorH264AlphaPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVAnimatorH264AlphaPlayer.h; sourceTree = "<group>"; };
+		3C5DC5811DECE9AD0029A61F /* AVAnimatorH264AlphaPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVAnimatorH264AlphaPlayer.m; sourceTree = "<group>"; };
 		3C673BEA1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVAssetMixAlphaResourceLoader.h; sourceTree = "<group>"; };
 		3C673BEB1C80F82500DCA1E7 /* AVAssetMixAlphaResourceLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVAssetMixAlphaResourceLoader.m; sourceTree = "<group>"; };
 		3C673BEC1C80F82500DCA1E7 /* AVStreamEncodeDecode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVStreamEncodeDecode.h; sourceTree = "<group>"; };
@@ -278,6 +281,8 @@
 				3C221FCB1BC624B600295114 /* AVAnimatorOpenGLView.h */,
 				3C221FCC1BC624B600295114 /* AVAnimatorOpenGLView.m */,
 				3C221FCD1BC624B600295114 /* AVAnimatorOpenGLViewPrivate.h */,
+				3C5DC5801DECE9AD0029A61F /* AVAnimatorH264AlphaPlayer.h */,
+				3C5DC5811DECE9AD0029A61F /* AVAnimatorH264AlphaPlayer.m */,
 				3C221FCE1BC624B600295114 /* AVAnimatorView.h */,
 				3C221FCF1BC624B600295114 /* AVAnimatorView.m */,
 				3C221FD01BC624B600295114 /* AVAnimatorViewPrivate.h */,
@@ -604,6 +609,7 @@
 				3C22205D1BC624B700295114 /* 7zIn.c in Sources */,
 				3C2220511BC624B700295114 /* maxvid_decode.c in Sources */,
 				3C2220431BC624B600295114 /* AVAssetJoinAlphaResourceLoader.m in Sources */,
+				3C5DC5821DECE9AD0029A61F /* AVAnimatorH264AlphaPlayer.m in Sources */,
 				3C22205C1BC624B700295114 /* 7zFile.c in Sources */,
 				3C2220441BC624B600295114 /* AVAssetReaderConvertMaxvid.m in Sources */,
 				3C2220521BC624B700295114 /* maxvid_decode_arm.s in Sources */,
