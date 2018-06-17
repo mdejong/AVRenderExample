@@ -32,7 +32,7 @@
 			<key>ClipSource</key>
 			<string>v1.m4v</string>
 			<key>ClipType</key>
-			<string>h264</string>
+			<string>h264r</string>
 			<key>ClipX</key>
 			<integer>0</integer>
 			<key>ClipY</key>
@@ -50,7 +50,7 @@
 			<key>ClipSource</key>
 			<string>Girl_384_192.m4v</string>
 			<key>ClipType</key>
-			<string>h264</string>
+			<string>h264r</string>
 			<key>ClipX</key>
 			<integer>257</integer>
 			<key>ClipY</key>
