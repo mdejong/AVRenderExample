@@ -86,6 +86,9 @@
 		3C941EF91BC61374008851FE /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF31BC61374008851FE /* License.txt */; };
 		3C941EFA1BC61374008851FE /* Rescaled_480_320.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF41BC61374008851FE /* Rescaled_480_320.png */; };
 		3C941EFB1BC61374008851FE /* v1.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 3C941EF51BC61374008851FE /* v1.m4v */; };
+		3CEC98DD20D85C8C00D78DAA /* AVAssetAlphaFrameDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CEC98DC20D85C8B00D78DAA /* AVAssetAlphaFrameDecoder.m */; };
+		3CEC98E020D892DB00D78DAA /* GlobeCroppedResized_alpha_CRF_20_24BPP.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 3CEC98DE20D892DA00D78DAA /* GlobeCroppedResized_alpha_CRF_20_24BPP.m4v */; };
+		3CEC98E120D892DB00D78DAA /* GlobeCroppedResized_rgb_CRF_20_24BPP.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 3CEC98DF20D892DA00D78DAA /* GlobeCroppedResized_rgb_CRF_20_24BPP.m4v */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -233,6 +236,10 @@
 		3C941EF31BC61374008851FE /* License.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License.txt; sourceTree = SOURCE_ROOT; };
 		3C941EF41BC61374008851FE /* Rescaled_480_320.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Rescaled_480_320.png; sourceTree = SOURCE_ROOT; };
 		3C941EF51BC61374008851FE /* v1.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = v1.m4v; sourceTree = SOURCE_ROOT; };
+		3CEC98DB20D85C8B00D78DAA /* AVAssetAlphaFrameDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVAssetAlphaFrameDecoder.h; sourceTree = "<group>"; };
+		3CEC98DC20D85C8B00D78DAA /* AVAssetAlphaFrameDecoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVAssetAlphaFrameDecoder.m; sourceTree = "<group>"; };
+		3CEC98DE20D892DA00D78DAA /* GlobeCroppedResized_alpha_CRF_20_24BPP.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = GlobeCroppedResized_alpha_CRF_20_24BPP.m4v; sourceTree = SOURCE_ROOT; };
+		3CEC98DF20D892DA00D78DAA /* GlobeCroppedResized_rgb_CRF_20_24BPP.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = GlobeCroppedResized_rgb_CRF_20_24BPP.m4v; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -295,6 +302,8 @@
 				3C221FD71BC624B600295114 /* AVAssetConvertCommon.h */,
 				3C221FD81BC624B600295114 /* AVAssetFrameDecoder.h */,
 				3C221FD91BC624B600295114 /* AVAssetFrameDecoder.m */,
+				3CEC98DB20D85C8B00D78DAA /* AVAssetAlphaFrameDecoder.h */,
+				3CEC98DC20D85C8B00D78DAA /* AVAssetAlphaFrameDecoder.m */,
 				3C221FDA1BC624B600295114 /* AVAssetJoinAlphaResourceLoader.h */,
 				3C221FDB1BC624B600295114 /* AVAssetJoinAlphaResourceLoader.m */,
 				3C221FDC1BC624B600295114 /* AVAssetReaderConvertMaxvid.h */,
@@ -464,6 +473,8 @@
 				3C941EF41BC61374008851FE /* Rescaled_480_320.png */,
 				3C941EF01BC61374008851FE /* Girl_384_192.m4v */,
 				3C941EF51BC61374008851FE /* v1.m4v */,
+				3CEC98DE20D892DA00D78DAA /* GlobeCroppedResized_alpha_CRF_20_24BPP.m4v */,
+				3CEC98DF20D892DA00D78DAA /* GlobeCroppedResized_rgb_CRF_20_24BPP.m4v */,
 				3C941EDA1BC61094008851FE /* main.m */,
 				3C2220741BC62E9300295114 /* libz.tbd */,
 			);
@@ -528,6 +539,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CEC98E020D892DB00D78DAA /* GlobeCroppedResized_alpha_CRF_20_24BPP.m4v in Resources */,
 				3C2220701BC624B700295114 /* prevtrack.png in Resources */,
 				3C941EF61BC61374008851FE /* Girl_384_192.m4v in Resources */,
 				3C22206E1BC624B700295114 /* pause.png in Resources */,
@@ -536,6 +548,7 @@
 				3C2220711BC624B700295114 /* VolumeLeftTall.png in Resources */,
 				3C2220721BC624B700295114 /* VolumeRightTall.png in Resources */,
 				3C221FB91BC61B4F00295114 /* Comp.plist in Resources */,
+				3CEC98E120D892DB00D78DAA /* GlobeCroppedResized_rgb_CRF_20_24BPP.m4v in Resources */,
 				3C941EFB1BC61374008851FE /* v1.m4v in Resources */,
 				3C941EE91BC61095008851FE /* LaunchScreen.storyboard in Resources */,
 				3C22206F1BC624B700295114 /* play.png in Resources */,
@@ -568,6 +581,7 @@
 				3C2220641BC624B700295114 /* LZMAExtractor.m in Sources */,
 				3C22204E1BC624B700295114 /* AVResourceLoader.m in Sources */,
 				3C22203D1BC624B600295114 /* AVAnimatorOpenGLView.m in Sources */,
+				3CEC98DD20D85C8C00D78DAA /* AVAssetAlphaFrameDecoder.m in Sources */,
 				3C2220571BC624B700295114 /* MutableAttrString.m in Sources */,
 				3C673BEF1C80F82500DCA1E7 /* AVStreamEncodeDecode.m in Sources */,
 				3C2220381BC624B600295114 /* ApngConvertMaxvid.m in Sources */,

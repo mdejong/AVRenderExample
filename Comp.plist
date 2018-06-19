@@ -67,6 +67,28 @@
 			<true/>
 		</dict>
 		<dict>
+			<key>ClipSource</key>
+			<string>GlobeCroppedResized_rgb_CRF_20_24BPP.m4v</string>
+			<key>ClipSourceAlpha</key>
+			<string>GlobeCroppedResized_alpha_CRF_20_24BPP.m4v</string>
+			<key>ClipType</key>
+			<string>h264ar</string>
+			<key>ClipX</key>
+			<integer>3</integer>
+			<key>ClipY</key>
+			<integer>30</integer>
+			<key>ClipWidth</key>
+			<integer>100</integer>
+			<key>ClipHeight</key>
+			<integer>100</integer>
+			<key>ClipStartSeconds</key>
+			<real>9.5</real>
+			<key>ClipEndSeconds</key>
+			<real>19.5</real>
+			<key>ClipScaleFramePerSecond</key>
+			<true/>
+		</dict>
+		<dict>
 			<key>ClipText</key>
 			<string>Welcome to Today&apos;s news!</string>
 			<key>ClipType</key>
