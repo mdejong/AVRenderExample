@@ -1057,7 +1057,7 @@ CF_RETURNS_RETAINED
       worked = [assetFrameDecoder openForReading];
       if (worked == FALSE) {
         // Opening H264 video file from app resources or tmp dir failed
-        self.errorString = [NSString stringWithFormat:@"open of h264a ClipSource file failed: %@ or %d", h264Path, h264APath];
+        self.errorString = [NSString stringWithFormat:@"open of h264a ClipSource file failed: %@ or %@", h264Path, h264APath];
         return FALSE;
       }
       
@@ -1243,6 +1243,7 @@ CF_RETURNS_RETAINED
   for (NSUInteger frame = 0; retcode && (frame < maxFrame); frame++) {
     // Clear the entire frame to the background color with a simple fill
     
+    CGContextSetBlendMode(bitmapContext, kCGBlendModeNormal);
     CGContextSetFillColorWithColor(bitmapContext, self->m_backgroundColor);
     CGContextFillRect(bitmapContext, CGRectMake(0, 0, width, height));
     
@@ -1250,6 +1251,13 @@ CF_RETURNS_RETAINED
     
     worked = [self composeClips:frame bitmapContext:bitmapContext];
     
+    // Explicitly set alpha channel values to 0xFF since drawing an alpha
+    // channel image could have blended an alpha value even though the
+    // buffer is explicitly 24 BPP. This will make sure the adler includes
+    // all 0xFF alpha values.
+    
+    [cgFrameBuffer resetAlphaChannel];
+
     CGContextRestoreGState(bitmapContext);
     
     if (worked == FALSE) {
@@ -1291,9 +1299,8 @@ CF_RETURNS_RETAINED
       worked = [fileWriter writeKeyframe:(char*)mEncodedData.bytes bufferSize:(int)dst_size adler:adler isCompressed:TRUE];
       
 #if defined(DEBUG)
-      if ((0))
       {
-        // Decode encoded data back to original and verify
+        // Decode encoded data back to original and verify adler
         
         CGFrameBuffer *decodeCgFrameBuffer = [CGFrameBuffer cGFrameBufferWithBppDimensions:24
                                                                                width:scaledWidth
@@ -1304,28 +1311,8 @@ CF_RETURNS_RETAINED
                                                            frameBuffer:decodeCgFrameBuffer.pixels
                                                    frameBufferNumBytes:(uint32_t)decodeCgFrameBuffer.numBytes
                                                                    bpp:(int)decodeCgFrameBuffer.bitsPerPixel
-                                                             algorithm:COMPRESSION_LZ4
-                                                   expectedDecodedSize:(int)cgFrameBuffer.numBytes];
+                                                             algorithm:COMPRESSION_LZ4];
         NSAssert(worked, @"streamUnDeltaAndUncompress");
-        
-        uint32_t *decodedPixelsPtr = (uint32_t *) decodeCgFrameBuffer.pixels;
-        uint32_t *originalPixelsPtr = (uint32_t *) cgFrameBuffer.pixels;
-
-        for ( int y = 0; y < decodeCgFrameBuffer.height; y++) {
-          for ( int x = 0; x < decodeCgFrameBuffer.width; x++) {
-            int offset = (y * (int)decodeCgFrameBuffer.width) + x;
-            uint32_t decodedPixel = decodedPixelsPtr[offset];
-            uint32_t originalPixel = originalPixelsPtr[offset];
-            
-            if (decodedPixel != originalPixel) {
-              printf("(x,y) (%d,%d) offset %d : 0x%08X != 0x%08X\n", x, y, offset, decodedPixel, originalPixel);
-            }
-            NSAssert(decodedPixel == originalPixel, @"0x%08X != 0x%08X\n", decodedPixel, originalPixel);
-          }
-        }
-        
-        int cmp = memcmp(decodeCgFrameBuffer.pixels, cgFrameBuffer.pixels, cgFrameBuffer.numBytes);
-        NSAssert(cmp == 0, @"decoded framebuffer contents");
         
         uint32_t decoded_adler = 0;
         if (fileWriter.genAdler) {
